@@ -1,0 +1,50 @@
+{
+  "name": "haluan-tap",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "test": "node --test --test-reporter=tap tests/*.test.mjs",
+    "smoke:catalog-source": "node scripts/smoke-catalog-source.mjs",
+    "audit:rates": "node scripts/audit-rate-source.mjs",
+    "test:e2e": "playwright test",
+    "smoke:production": "node scripts/smoke-production.mjs",
+    "sync:campaign-links": "node scripts/sync-campaign-links.mjs",
+    "sync:shopee-campaigns": "node scripts/sync-shopee-campaigns.mjs",
+    "sync:brand-metrics": "node scripts/sync-brand-metrics.mjs",
+    "migrate:email-verification": "node scripts/backfill-email-verified.mjs",
+    "qa": "npm run lint && npm test && npm audit --audit-level=moderate && npm run build && npm run test:e2e",
+    "audit:admins": "node scripts/audit-admins.mjs",
+    "gate": "node scripts/release-gate.mjs"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
+    "next": "^16.3.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "9.39.4",
+    "@next/eslint-plugin-next": "^16.3.1",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "22.19.19",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "9.39.4",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "16.4.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.59.3"
+  },
+  "type": "module"
+}

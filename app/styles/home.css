@@ -1,0 +1,520 @@
+/** Hero dan bagian naratif di beranda. */
+
+/* Hero sengaja tidak setinggi layar: statistik di bawahnya harus sudah
+   terlihat sebagian tanpa menggulir, supaya halaman langsung terbaca sebagai
+   katalog, bukan sebagai halaman iklan. */
+/* Hero dua kolom: naskah di kiri, konteks platform di kanan. Di bawah 900px
+   panelnya turun ke bawah naskah, bukan menyempit sampai tidak terbaca. */
+.hero {
+  padding-block: clamp(40px, 5vw, 72px) clamp(32px, 3vw, 56px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+.hero-inner {
+  max-width: 900px;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+}
+
+/* Di lebar ponsel naskah hero rata tengah, bukan rata kiri seperti versi
+   desktop — blok teks pendek terasa lebih setara dengan ilustrasi di
+   bawahnya yang juga tampil penuh lebar. */
+@media (max-width: 600px) {
+  .hero-inner {
+    text-align: center;
+  }
+
+  .hero h1 {
+    max-width: none;
+    margin-inline: auto;
+  }
+
+  .hero p {
+    margin-inline: auto;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+}
+
+.hero h1 {
+  font-size: clamp(38px, 5.2vw, 68px);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.02;
+  font-weight: var(--weight-display);
+  max-width: 16ch;
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.hero p {
+  margin-top: var(--space-6);
+  max-width: 52ch;
+  font-size: clamp(16px, 1.2vw, 19px);
+  color: var(--text-muted);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+/* Statistik tipis di bawah hero. Angkanya selalu dihitung dari data, bukan ditulis tangan. */
+.proof-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-6);
+  padding-block: var(--space-8);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.proof-item dt {
+  font-size: var(--text-xs);
+  color: var(--text-subtle);
+  order: 2;
+  margin-top: 4px;
+}
+
+.proof-item dd {
+  margin: 0;
+  order: 1;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 2.6vw, 34px);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.proof-item {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Langkah "cara kerja" */
+.step-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+  counter-reset: step;
+}
+
+.step {
+  position: relative;
+  padding-top: var(--space-6);
+  border-top: 2px solid var(--line-strong);
+}
+
+.step::before {
+  counter-increment: step;
+  content: "0" counter(step);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  color: var(--accent);
+}
+
+.step h3 {
+  font-size: var(--text-h3);
+  margin-top: var(--space-3);
+}
+
+.step p {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  margin-top: var(--space-2);
+}
+
+/* Kartu platform */
+.platform-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+
+.platform-card {
+  padding: var(--space-8);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: border-color var(--duration-normal) var(--ease-out);
+}
+
+.platform-card:hover {
+  border-color: var(--line-strong);
+}
+
+.platform-card h3 {
+  font-size: var(--text-h3);
+}
+
+.platform-card p {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  flex: 1;
+}
+
+.platform-count {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.platform-card a {
+  color: var(--accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  margin-top: var(--space-2);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* FAQ */
+.faq-list {
+  margin-top: var(--space-8);
+  border-top: 1px solid var(--line);
+}
+
+.faq-list details {
+  border-bottom: 1px solid var(--line);
+}
+
+.faq-list summary {
+  padding: var(--space-6) var(--space-8) var(--space-6) 0;
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+  font-family: var(--font-display);
+  font-size: var(--text-lead);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.faq-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-list summary::after {
+  content: "+";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  font-weight: var(--weight-regular);
+  color: var(--text-subtle);
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.faq-list details[open] summary::after {
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.faq-list details p {
+  padding-bottom: var(--space-6);
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
+/* Ajakan bergabung */
+.join-banner {
+  margin-top: var(--space-section);
+  padding: clamp(40px, 5vw, 72px);
+  border-radius: var(--radius-2xl);
+  background: var(--text);
+  color: var(--bg);
+  text-align: center;
+}
+
+/* Banner ini membalik warna, jadi eyebrow tidak boleh memakai --text-subtle
+   yang dirancang untuk latar halaman. */
+.join-banner .eyebrow {
+  color: inherit;
+  opacity: 0.72;
+}
+
+.join-banner h2 {
+  font-size: var(--text-h1);
+  letter-spacing: var(--tracking-display);
+}
+
+.join-banner p {
+  margin: var(--space-4) auto 0;
+  max-width: 48ch;
+  opacity: 0.76;
+}
+
+.join-banner .btn-primary {
+  margin-top: var(--space-8);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.join-banner .btn-primary:hover {
+  background: var(--surface-sunken);
+}
+
+/* Halaman sub seperti /deals dan legal */
+.subpage-hero {
+  padding-block: clamp(40px, 4vw, 64px) var(--space-6);
+}
+
+.subpage-hero h1 {
+  font-size: var(--text-h1);
+  letter-spacing: var(--tracking-display);
+}
+
+.subpage-hero p {
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+  max-width: 56ch;
+}
+
+.legal-page {
+  padding-block: var(--space-16);
+  max-width: 68ch;
+}
+
+.legal-page h1 {
+  font-size: var(--text-h1);
+  margin-bottom: var(--space-6);
+}
+
+.legal-page h2 {
+  font-size: var(--text-h3);
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-2);
+}
+
+.legal-page p {
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.system-state {
+  min-height: 62vh;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: var(--space-4);
+}
+
+.system-state h1 {
+  font-size: var(--text-h1);
+}
+
+.system-state p {
+  color: var(--text-muted);
+}
+
+/* ── Panel platform di hero ──────────────────────────────────────────── */
+
+.platform-panel {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.platform-panel-label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+.platform-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.platform-panel li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.platform-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-display);
+  letter-spacing: 0.04em;
+  color: var(--text-subtle);
+}
+
+/* Ikon yang diunggah sudah punya bidang warnanya sendiri, jadi bingkainya dilepas. */
+.platform-icon.has-icon {
+  background: none;
+  border-color: transparent;
+}
+
+.platform-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.platform-body {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.platform-body strong {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.platform-primary {
+  font-family: var(--font-display);
+  font-size: var(--text-lead);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.platform-secondary {
+  font-size: var(--text-xs);
+  color: var(--text-subtle);
+}
+
+/* ── Gambar hero ─────────────────────────────────────────────────────── */
+
+.hero-visual {
+  justify-self: end;
+  width: 100%;
+  max-width: 420px;
+}
+
+.hero-visual img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .hero-visual {
+    justify-self: center;
+    max-width: 360px;
+  }
+}
+
+/* ── Baris SKU baru ──────────────────────────────────────────────────── */
+
+.new-sku-list {
+  list-style: none;
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  display: grid;
+  /* minmax(0, …) supaya nama brand panjang menyusut, bukan melebarkan grid. */
+  /* 320px adalah lebar minimum agar "Beauty & Health · Shopee Affiliate" muat
+     utuh di samping logo dan angka rate, tanpa terpotong jadi "TikTo…". */
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: var(--space-3);
+}
+
+.new-sku-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.new-sku-card:hover {
+  border-color: var(--accent-line);
+  transform: translateY(-2px);
+}
+
+.new-sku-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.new-sku-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.new-sku-body strong {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.new-sku-meta {
+  font-size: var(--text-xs);
+  color: var(--text-subtle);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.new-sku-rate {
+  font-family: var(--font-display);
+  font-size: var(--text-lead);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .new-sku-card {
+    transition: none;
+  }
+
+  .new-sku-card:hover {
+    transform: none;
+  }
+}

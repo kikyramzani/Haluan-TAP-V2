@@ -1,0 +1,156 @@
+import Link from "next/link";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getCampaignCatalog, getTapLinks, pickPrimaryLink } from "../../../lib/campaign-links";
+import { formatCommission } from "../../../lib/commission";
+import { classifyExpiry, expiryLabel, isActionable } from "../../../lib/campaign-flags";
+import { getCurrentUser } from "../../../lib/auth";
+import AffiliateLinkField from "../../components/AffiliateLinkField";
+import BrandMark from "../../components/BrandMark";
+import SiteHeader from "../../components/SiteHeader";
+import SiteFooter from "../../components/SiteFooter";
+import ShareDealButton from "../ShareDealButton";
+
+type DealPageProps = { params: Promise<{ campaignId: string }> };
+
+export async function generateMetadata({ params }: DealPageProps): Promise<Metadata> {
+  const { campaignId } = await params;
+  try {
+    const links = await getTapLinks(campaignId);
+    if (!links.length) return {};
+    const brand = links[0].brand;
+    const platform = campaignId.startsWith("shopee-") ? "Shopee" : "TikTok";
+    const title = `${brand} · Campaign ${platform} | TAP by Haluan`;
+    const description = `Lihat campaign ${brand}, komisi creator, dan ketersediaan sample support di TAP by Haluan.`;
+    const url = `/deal/${campaignId}`;
+    return {
+      title,
+      description,
+      alternates: { canonical: url },
+      openGraph: { title, description, url, images: [{ url: "/og.jpg", width: 1200, height: 630 }] },
+      twitter: { card: "summary_large_image", title, description, images: ["/og.jpg"] },
+    };
+  } catch {
+    return {};
+  }
+}
+
+export default async function DealDetail({ params }: DealPageProps) {
+  const { campaignId } = await params;
+  const sourcePlatform = campaignId.startsWith("shopee-") ? "shopee" : "tiktok";
+
+  let links: Awaited<ReturnType<typeof getTapLinks>> = [];
+  let campaign: Awaited<ReturnType<typeof getCampaignCatalog>>[number] | undefined;
+  try {
+    [links, campaign] = await Promise.all([
+      getTapLinks(campaignId),
+      getCampaignCatalog(sourcePlatform).then((items) => items.find((item) => item.id === campaignId)),
+    ]);
+  } catch {
+    redirect("/deals?error=system_unavailable");
+  }
+  if (!links.length) redirect("/deals?error=deal_unavailable");
+
+  const brand = campaign?.brand ?? links[0].brand;
+  const hasSample = campaign?.hasSample ?? (links.some((link) => link.hasSample) ? true : null);
+  const platform = sourcePlatform === "shopee" ? "Shopee" : "TikTok";
+  const primary = pickPrimaryLink(links);
+  // Tanggal dinilai lewat aturan yang sama dengan kartu brand. Sebelumnya string
+  // mentah dicetak apa adanya, jadi tanggal yang sudah lewat pun tetap tampil
+  // seolah campaign masih berjalan.
+  const expiresAt = campaign?.expiresAt ?? links.find((link) => link.expiresAt)?.expiresAt ?? null;
+  const expiry = classifyExpiry(expiresAt);
+  const expiryNote = expiryLabel(expiry);
+  const stillRunning = isActionable(expiry);
+  const user = await getCurrentUser().catch(() => null);
+
+  return (
+    <>
+      <SiteHeader variant="subpage" viewer={user ? { name: user.name } : null} />
+
+      <main className="shell" style={{ paddingBlock: "var(--space-12) var(--space-16)" }}>
+        <Link className="btn btn-ghost" href={`/deals${platform === "Shopee" ? "?platform=shopee" : ""}`}>
+          ← Semua deal
+        </Link>
+
+        <header style={{ display: "flex", gap: "var(--space-4)", alignItems: "center", marginTop: "var(--space-6)" }}>
+          <BrandMark brand={brand} logoOverride={campaign?.image} size={64} />
+          <div>
+            <p className="eyebrow">{platform} campaign</p>
+            <h1 style={{ fontSize: "var(--text-h1)", marginTop: 4 }}>{brand}</h1>
+            <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", marginTop: 4 }}>
+              {campaign?.category ?? "Campaign affiliate"} · {campaign?.platform ?? "TikTok Shop"}
+            </p>
+          </div>
+        </header>
+
+        <dl className="sheet-metrics" style={{ maxWidth: 520, marginTop: "var(--space-8)" }}>
+          <div className="metric-tile">
+            <dt>Komisi creator</dt>
+            <dd>{formatCommission(campaign?.commission ?? null)}</dd>
+          </div>
+          <div className="metric-tile">
+            <dt>Status campaign</dt>
+            <dd style={{ fontSize: "var(--text-lead)" }}>{stillRunning ? "Masih berjalan" : "Sudah berakhir"}</dd>
+          </div>
+          {hasSample !== null ? (
+            <div className="metric-tile metric-tile-wide">
+              <dt>Sample</dt>
+              <dd style={{ fontSize: 17 }}>{hasSample ? "Sample tersedia" : "Belum tersedia"}</dd>
+            </div>
+          ) : null}
+          {expiresAt ? (
+            <div className="metric-tile metric-tile-wide">
+              <dt>Berlaku hingga</dt>
+              <dd style={{ fontSize: "var(--text-lead)" }}>
+                {expiresAt}
+                {expiryNote ? <span className="metric-note">{expiryNote}</span> : null}
+              </dd>
+            </div>
+          ) : null}
+        </dl>
+
+        {campaign && campaign.campaignCount > 1 ? (
+          <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", marginTop: "var(--space-4)", maxWidth: "60ch" }}>
+            Brand ini punya beberapa campaign dengan komisi berbeda. Yang dibagikan di sini adalah campaign dengan
+            komisi terendah, sama dengan angka di atas.
+          </p>
+        ) : null}
+
+        <section style={{ marginTop: "var(--space-12)", maxWidth: 560 }}>
+          <h2 style={{ fontSize: "var(--text-h3)" }}>Link affiliate</h2>
+          <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", margin: "var(--space-2) 0 var(--space-4)" }}>
+            Salin linknya atau buka langsung etalasenya. Link ini dapat diakses tanpa login.
+          </p>
+          {primary ? <AffiliateLinkField url={primary.url} openUrl={`/go/${campaignId}`} /> : null}
+        </section>
+
+        {hasSample ? (
+          <section className="panel" style={{ marginTop: "var(--space-12)", maxWidth: 720 }}>
+            <h2>Perlu produk untuk membuat konten?</h2>
+            <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", marginTop: "var(--space-2)" }}>
+              Login untuk mengajukan sample dan memantau statusnya.
+            </p>
+            <Link
+              className="btn btn-primary"
+              style={{ marginTop: "var(--space-4)" }}
+              href={`/request-sample?brand=${encodeURIComponent(brand)}&platform=${platform}`}
+            >
+              Request sample ↗
+            </Link>
+          </section>
+        ) : null}
+
+        <div style={{ marginTop: "var(--space-8)" }}>
+          <ShareDealButton brand={brand} />
+        </div>
+
+        <p style={{ color: "var(--text-subtle)", fontSize: "var(--text-xs)", marginTop: "var(--space-8)" }}>
+          Ketersediaan link dan benefit dapat berubah mengikuti periode campaign di platform.
+        </p>
+      </main>
+
+      <SiteFooter />
+    </>
+  );
+}

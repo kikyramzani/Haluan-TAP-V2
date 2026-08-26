@@ -1,0 +1,553 @@
+# Brand Logo Asset Gaps — TikTok + Shopee
+
+Master checklist gabungan untuk seluruh katalog TAP. Brand yang muncul di TikTok dan Shopee hanya perlu **satu logo**. Aplikasi tetap memakai fallback inisial sampai aset resmi diterima; logo reseller atau gambar hasil pencarian yang tidak terverifikasi tidak digunakan.
+
+## Yang dibutuhkan dari tim
+
+- Hanya **logo brand**; foto produk, banner campaign, dan materi promosi belum diperlukan.
+- Format pilihan: SVG, PNG transparan, atau WebP transparan.
+- Kanvas persegi disarankan, minimum 256 × 256 px.
+- Satu file per brand; nama file mengikuti nama brand, misalnya beauty-of-joseon.svg.
+- Logo yang sama dipakai lintas platform.
+- Kirim sebagai satu folder/ZIP/Drive; tim engineering akan optimasi ukuran dan mapping ke katalog.
+
+## Coverage saat ini
+
+Dihitung ulang 17 Agustus 2026 terhadap katalog live lewat resolver yang sama dengan aplikasi (`brandLogo`), bukan dari hitungan manual.
+
+- TikTok: **310 brand** — 187 ter-cover, **123 butuh logo**.
+- Shopee: **383 brand** — 273 ter-cover, **110 butuh logo**.
+- Gabungan setelah deduplikasi case-insensitive: **619 brand unik** — 397 ter-cover, **222 butuh logo** (**64%**).
+- Batch 17 Agustus 2026 (halaman komisi extra program afiliasi): **57 file WebP baru** untuk 66 nama katalog, ditambah **8 alias** ke aset yang sudah ada. Dua aset ditolak setelah diperiksa. Sembilan di antaranya berasal dari file yang tidak tercatat di manifest zip dan diperiksa satu per satu.
+
+Checklist di bawah sebelumnya menandai 239 brand sebagai belum ter-cover padahal asetnya sudah ada sejak batch-batch sebelumnya; tanda itu kini disetel ulang dari resolver, jadi `[x]` berarti aplikasi benar-benar menampilkan logo untuk nama tersebut.
+
+Tiga brand sengaja dibiarkan tanpa logo. **The Pods**: aset di halaman program adalah logo PODS, perusahaan kontainer pindahan asal Amerika — brand yang berbeda. **Aerostreet**: yang tersedia adalah kolase foto produk, bukan logo. **Advance Store**: Halaman program punya dua aset berbeda (`Advance` dan `Advance Official`) dan tidak ada cara memastikan mana yang benar tanpa konfirmasi tim, jadi lebih baik memakai inisial daripada memasang logo brand lain.
+
+Sumber dan provenance batch terbaru dicatat di `BRAND-LOGO-SOURCES.md`. Item bertanda `[x]` di bawah sudah ter-cover oleh aset lokal; item `[ ]` masih memakai inisial atau favicon dan tetap menjadi prioritas pencarian berikutnya.
+
+Label platform: TikTok, Shopee, atau TikTok + Shopee.
+
+## Beauty & Health (246)
+
+- [x] 2R & Memey Cosmetic — Shopee
+- [x] Aeris — Shopee
+- [x] Aestika Hair — Shopee
+- [ ] AHE Hair — Shopee
+- [x] Alchemy — TikTok
+- [x] All Perfect — Shopee
+- [x] Alt Perfumery — Shopee
+- [ ] Aoera Indonesia — Shopee
+- [x] Autumn — Shopee
+- [x] Avero — Shopee
+- [x] Avoskin new list — TikTok
+- [ ] AY'S ON YOU — Shopee
+- [x] Azzura — TikTok
+- [ ] Baisisi — Shopee
+- [ ] Baisisi Bulumata — TikTok
+- [ ] Baltikh — Shopee
+- [x] BARBER DAILY — TikTok + Shopee
+- [x] Barsten — Shopee
+- [ ] Bazaar Plastik — Shopee
+- [ ] Belia Cosmetic — Shopee
+- [x] Beplain — Shopee
+- [ ] Bhira Store — Shopee
+- [x] Biodef — Shopee
+- [x] Biolage — Shopee
+- [x] Biore — TikTok
+- [x] BIYU — Shopee
+- [ ] Bizarre — Shopee
+- [x] Blackmores — TikTok
+- [x] BLP — TikTok
+- [ ] Bob & Frou — Shopee
+- [x] BOJ (Beauty of jeaoson) — TikTok
+- [ ] Bold Gent — Shopee
+- [ ] Bonavie — Shopee
+- [ ] Braven — TikTok
+- [x] Brighty — TikTok
+- [ ] Buttered — TikTok + Shopee
+- [ ] Calluna — Shopee
+- [x] CARESO — Shopee
+- [ ] Cave — Shopee
+- [x] CBD Haircare — Shopee
+- [x] chalonese — TikTok
+- [x] Cleora Beauty — Shopee
+- [ ] Clorismen — Shopee
+- [ ] Coppera — Shopee
+- [x] CRUSITA — Shopee
+- [x] Crystallure — Shopee
+- [x] Dazzle me — TikTok
+- [ ] Dazzle Me (Hebe) — TikTok
+- [x] Dear Me Beauty — TikTok
+- [ ] Dentix — Shopee
+- [x] Deorex New Juni 2025 — Shopee
+- [ ] Deoxide — TikTok
+- [ ] Dermasential — Shopee
+- [x] Docare — Shopee
+- [ ] Doexide — Shopee
+- [x] Dorskin — Shopee
+- [x] Dove — TikTok
+- [x] Dr.beemed — Shopee
+- [ ] Dream Lashes — TikTok
+- [ ] DSavior — Shopee
+- [ ] DSE Dermascalp Expert — Shopee
+- [x] Earth Love Life — Shopee
+- [ ] Earth Love Life (Paragon) — TikTok
+- [x] Eloi Coco — Shopee
+- [x] Elvicto Perfume — Shopee
+- [x] Elvicto Skincare — Shopee
+- [x] ERTO'S — Shopee
+- [x] Evangeline Perfume — TikTok
+- [x] Everpure — Shopee
+- [x] Everwhite — TikTok + Shopee
+- [x] Eze Nails — Shopee
+- [x] Facerinna — TikTok
+- [ ] Ferger — TikTok
+- [x] Finally Found You — Shopee
+- [ ] Finally Found You (FFY) — TikTok
+- [x] Focalure — TikTok
+- [x] FSS For Skin Sake — Shopee
+- [x] Gendes — Shopee
+- [ ] Glam Shine Cosmetics — Shopee
+- [x] Glamazing — TikTok + Shopee
+- [ ] Glamera — TikTok
+- [x] Gloowbi — TikTok + Shopee
+- [x] Glow Better — TikTok
+- [ ] Glow FX — TikTok
+- [ ] Gogotales — TikTok
+- [x] Goute — TikTok + Shopee
+- [x] Guele — Shopee
+- [x] Hadalabo — TikTok
+- [ ] Haibuna — Shopee
+- [x] Hairmony — Shopee
+- [x] Hairnerds — TikTok + Shopee
+- [x] Hale — TikTok
+- [ ] Hale Parfume — TikTok
+- [x] Hansaplast — Shopee
+- [ ] Haocek — TikTok
+- [ ] Heasel — TikTok
+- [x] Herbloom — TikTok
+- [x] Heyxi — TikTok
+- [x] HG Men — Shopee
+- [x] Himalaya — Shopee
+- [x] Hint — TikTok
+- [ ] HINT New November — Shopee
+- [x] HNH — TikTok
+- [x] Illiyoon — TikTok
+- [x] Instaperfect — Shopee
+- [ ] Instaperfect (Paragon) — TikTok
+- [x] Iswhite — TikTok + Shopee
+- [x] Jacquelle — Shopee
+- [ ] Jiera New April 2025 — Shopee
+- [x] JJ Glow — TikTok
+- [x] JOOCYEE — Shopee
+- [x] Kay Beauty — Shopee
+- [x] Kerastase — Shopee
+- [ ] Kime — TikTok
+- [ ] Kime Skincare — Shopee
+- [ ] KOERx — Shopee
+- [ ] Kojic — TikTok
+- [x] Kojis — Shopee
+- [ ] Kojis Body Care — TikTok
+- [x] Kymm Skin — TikTok + Shopee
+- [x] Labore — Shopee
+- [x] Labore(Paragon) — TikTok
+- [ ] Lacera — TikTok
+- [x] Lanbena — Shopee
+- [x] Lancome — Shopee
+- [x] Lashboss — TikTok + Shopee
+- [x] Laushine Beauty — Shopee
+- [ ] Lauskin — TikTok
+- [x] Lavees Cosmedics — Shopee
+- [x] Lencir Indonesia — Shopee
+- [x] Lightplus — Shopee
+- [x] Lip Ice — TikTok
+- [x] Loreal Hair — TikTok
+- [x] Loreal Profesionnel Indonesia — Shopee
+- [x] LRP / La Roche Posay — TikTok
+- [ ] Lunavee — TikTok
+- [ ] Lunavee Indonesia — Shopee
+- [x] Maange — TikTok
+- [x] Mad For Makeup — Shopee
+- [x] Magister — TikTok
+- [ ] Mallia — Shopee
+- [x] Marina — Shopee
+- [x] Masami New April 2025 — Shopee
+- [x] Matrix ID — Shopee
+- [x] Melano — TikTok
+- [ ] Milittle Things — Shopee
+- [x] Mine Perfumery — Shopee
+- [x] Minimalist — TikTok
+- [x] Mirael — Shopee
+- [x] Miranda — TikTok
+- [x] Miranda Hair Care — Shopee
+- [x] Mise en scene — TikTok
+- [ ] MLAN — TikTok
+- [x] MLEN Diary — Shopee
+- [ ] MLT — TikTok
+- [ ] mnccosmetic — Shopee
+- [x] Mosseru — TikTok
+- [x] Mossèru — Shopee
+- [ ] Mystic Eyes Softlens — TikTok
+- [x] Naavagreen — Shopee
+- [ ] Naisday — Shopee
+- [ ] Naisday Parfume — TikTok
+- [x] Natasha Skincare — Shopee
+- [ ] Naturahavens — Shopee
+- [x] NCO Parfum — Shopee
+- [x] Newlab — TikTok + Shopee
+- [x] Noera — Shopee
+- [x] Noroid — Shopee
+- [x] Nuface — Shopee
+- [x] Nurilab — TikTok + Shopee
+- [x] Octarine — Shopee
+- [ ] Oilyoung — TikTok
+- [x] Onix — TikTok + Shopee
+- [ ] Onlyou — TikTok
+- [x] Opella ID — Shopee
+- [x] otwoo — TikTok
+- [x] Ovale — TikTok
+- [x] Ownskin Id — Shopee
+- [x] P&G — Shopee
+- [x] Perfect White — Shopee
+- [x] Pigeon Teens — TikTok
+- [x] Pigeon Teens 1 — Shopee
+- [x] Pinkflash — TikTok
+- [x] Plan Your Skin — Shopee
+- [x] Pramy — TikTok + Shopee
+- [ ] Premiere Beatue — Shopee
+- [x] Premiere Beaute — TikTok
+- [ ] Prepare — Shopee
+- [ ] PRETTYME — TikTok
+- [x] Purito — Shopee
+- [x] Purito Indonesia — Shopee
+- [x] Putri — Shopee
+- [ ] Putri Jaya Kosmetik — Shopee
+- [ ] Raecca Beauty Care — Shopee
+- [x] Realfood — Shopee
+- [ ] Reveline Beauty — Shopee
+- [x] Revlon — Shopee
+- [x] Roona — Shopee
+- [ ] Roona.id — TikTok
+- [x] Salsa Cosmetics — TikTok
+- [ ] SASC — Shopee
+- [x] Scentplus — TikTok + Shopee
+- [x] Scora — TikTok + Shopee
+- [x] Secret Clean — TikTok + Shopee
+- [x] Shu Uemura — Shopee
+- [ ] Sinergia Beaute — Shopee
+- [x] Skin Aqua — TikTok
+- [x] Skinfood — Shopee
+- [ ] Skinlutions — Shopee
+- [x] Slavina — TikTok + Shopee
+- [x] Softex — Shopee
+- [x] Soulyu Beauty — Shopee
+- [ ] Stacey New — TikTok
+- [ ] Supergoat — Shopee
+- [x] Swisse vitamin- Indonesia — TikTok
+- [ ] Tempo Store — Shopee
+- [x] Teratu Beauty — Shopee
+- [ ] The Fenery — TikTok
+- [x] Thipank — Shopee
+- [ ] This Is Your — TikTok + Shopee
+- [x] Timephoria — TikTok
+- [x] Tirtir — TikTok
+- [x] Torriden — TikTok
+- [x] Tresemme — TikTok
+- [x] True To Skin — Shopee
+- [x] ULTIMA II — Shopee
+- [x] Unilever (LUX) — TikTok
+- [x] Unilever (Zwitsal) — TikTok
+- [x] Unilever Beauty 1 — Shopee
+- [x] Unilever Indonesia — Shopee
+- [x] Unilever Personal Care — Shopee
+- [x] UNITARY — Shopee
+- [ ] URBANx — Shopee
+- [x] Usmile — TikTok + Shopee
+- [x] Vaseline — TikTok
+- [x] Vitalis — TikTok
+- [x] Votre — Shopee
+- [x] Watsons — Shopee
+- [x] White Story — Shopee
+- [x] Whiteinc — TikTok
+- [x] Wings — Shopee
+- [x] Wonderlux — Shopee
+- [x] WOSADO — TikTok
+- [x] YNM — TikTok
+- [ ] YNM Beauty — Shopee
+- [x] YOU (Hebe) — TikTok
+
+## Fashion (78)
+
+- [ ] Altri Kids — TikTok
+- [ ] Altri Women — TikTok
+- [x] Alunicorn — Shopee
+- [x] asheeqahijab03 — Shopee
+- [x] Asoka — Shopee
+- [ ] Baby Bombbear — TikTok
+- [x] Bagsmart — TikTok
+- [x] Bluebutton — TikTok
+- [x] BOSTANTEN Shoes — Shopee
+- [ ] Carrie Koller — TikTok
+- [ ] Casellla Apparell — TikTok
+- [ ] Cespedia — Shopee
+- [ ] Corolla (Fashion Sepatu) — TikTok
+- [x] CUIT BABYWEAR — TikTok
+- [x] Dasterbeauty — TikTok
+- [x] Erspo Official — TikTok
+- [x] For Love & Lemons — TikTok
+- [ ] G&Z Ladybags — TikTok
+- [ ] GREENEY — TikTok
+- [x] GRENEY — Shopee
+- [ ] Haji Salman Mukena Crinkle — TikTok
+- [ ] HaloFashion — TikTok + Shopee
+- [ ] Harmits Project (Waistbag) — TikTok
+- [x] House of Ease — TikTok
+- [ ] IOK Indonesia — Shopee
+- [x] JINISO — Shopee
+- [ ] Kallyoutfit (Fashion Wanita) — TikTok
+- [x] KKTOP — Shopee
+- [x] Les Catino — TikTok
+- [ ] Louis Store
+(Sama) — TikTok
+- [x] Lozy Hijab — TikTok + Shopee
+- [ ] LVK (Baju Anak) — TikTok
+- [ ] Mahkota Hijab Store — Shopee
+- [x] man shabara — Shopee
+- [x] mexshamall — Shopee
+- [ ] Mincol Koge — TikTok
+- [x] MOMELCA — TikTok
+- [ ] Momelca Fashion — Shopee
+- [ ] msyu — Shopee
+- [x] Mukena Aminah — TikTok
+- [ ] Mukenah.Aminah — Shopee
+- [x] Nabnib — Shopee
+- [ ] Najwa Fashion — Shopee
+- [x] Nalandu — TikTok
+- [x] No Void Minds — TikTok
+- [ ] Oversized Outfit Hub
+(Fashion Unisex condong Wanita) — TikTok
+- [x] Ownerjashujanraf — TikTok
+- [x] piyambak.inc — Shopee
+- [ ] Porto Footwear — TikTok
+- [ ] Porto Sendal — Shopee
+- [ ] Porto X — TikTok
+- [x] Pose — TikTok
+- [ ] POSE Shoes — Shopee
+- [x] PRINCESS KESLI — Shopee
+- [x] Real Heavy — Shopee
+- [ ] Rhei Collection — Shopee
+- [x] Rider — Shopee
+- [ ] Rider (Fashion Pria Dalaman) — TikTok
+- [x] rifanyhijab — TikTok + Shopee
+- [x] SAGI — TikTok
+- [x] Sanvanina — Shopee
+- [ ] Sanvanina (Jogger & Polo) — TikTok
+- [ ] Sculpt Fashion — Shopee
+- [ ] Sculpt Skin — Shopee
+- [ ] Sculpt.id — TikTok
+- [x] Seagloca — Shopee
+- [ ] SeaGloca.ID
+(Fashion Tas) — TikTok
+- [ ] slide & co — TikTok
+- [x] SUPEREGO — Shopee
+- [x] Sweet Sally — Shopee
+- [x] Tokolobo — Shopee
+- [ ] Tulandut (Underwear Pria) — TikTok
+- [ ] Tulandut (Underwear Wanita) — TikTok
+- [ ] Valentfashion88 — TikTok
+- [ ] Women Republic — Shopee
+- [x] XLYZ — Shopee
+- [x] Xora Hijab — TikTok + Shopee
+- [x] ZUMA Indonesia — Shopee
+
+## Food & FMCG (25)
+
+- [x] BIKA AMBON RICA RICO — Shopee
+- [ ] Charm Unicharm — TikTok
+- [x] CimolBojot.AA — TikTok
+- [ ] Conley Shop — TikTok
+- [x] DiliDili.Shop — TikTok
+- [ ] F&B NDSTOREMDN — TikTok
+- [ ] FMCG NDSTOREMDN — TikTok
+- [x] Gain Yum — TikTok
+- [x] Gehel — TikTok
+- [x] Haveltea — Shopee
+- [x] Kafamilk — Shopee
+- [x] Kikoya Snack — TikTok
+- [ ] Lifree Unicharm — TikTok
+- [ ] MAHI Bango — TikTok
+- [ ] MAHI Buavita — TikTok
+- [ ] MAHI Royco — TikTok
+- [ ] MAHI Sariwangi — TikTok
+- [ ] Mamypoko Unicharm — TikTok
+- [x] Mercon Merah Putih — TikTok
+- [x] Nutrimart — Shopee
+- [ ] Sari Lemon Lovita — Shopee
+- [ ] Sumak Optima — Shopee
+- [ ] Unicharm Official — TikTok
+- [ ] Vela Market Tissue — TikTok
+- [x] Vitmaker — Shopee
+
+## Home & Living (88)
+
+- [ ] Advance Store — TikTok
+- [ ] Amilio House — TikTok
+- [ ] AOYAMA — TikTok
+- [ ] BMW Kitchen — TikTok
+- [x] BONBOX — TikTok + Shopee
+- [x] BRAVHOM — TikTok + Shopee
+- [ ] Capykit — TikTok
+- [x] CICIDO Indonesia — Shopee
+- [x] Cooger — TikTok + Shopee
+- [x] CPM — TikTok
+- [x] Cubbie — Shopee
+- [ ] Cubbie Shop — TikTok
+- [ ] Cuculemon Tumblr — Shopee
+- [ ] Cypruz Kitchenware — TikTok
+- [ ] Daykit — TikTok
+- [ ] Deviling — TikTok
+- [x] DYSON — TikTok
+- [x] Ecentio — TikTok + Shopee
+- [x] EGLUX — TikTok
+- [x] Ellara — Shopee
+- [x] Freemir — TikTok + Shopee
+- [ ] freemir Electric — Shopee
+- [ ] freemir Original Store — Shopee
+- [x] Gaabor — TikTok
+- [x] GM Bear — TikTok
+- [x] Golden Home Living — TikTok
+- [x] goojodoq store — TikTok
+- [x] Goto Living — TikTok
+- [x] Han River — Shopee
+- [ ] Happy Family Storee — TikTok
+- [x] Heefn — Shopee
+- [x] Hogasan — Shopee
+- [ ] Homeware.hw — TikTok
+- [x] Icebiu — Shopee
+- [x] INTHEBOX — TikTok
+- [ ] INTHEBOX Kasur — Shopee
+- [x] JIB Indonesia — TikTok
+- [x] KLINBOS — Shopee
+- [x] Kuda Laut Biru — TikTok
+- [x] LeDingDing — TikTok
+- [x] LIBY — TikTok + Shopee
+- [x] Luminetumblr77 — TikTok
+- [x] Madia Kitchenware — TikTok
+- [x] Majestic Karpet — TikTok
+- [x] MASTAP.ID — TikTok
+- [x] MAXIM — TikTok
+- [x] Mito Electronic — Shopee
+- [x] MIXIO — Shopee
+- [x] Moderno Houseware — TikTok
+- [x] Modofo Official Indonesia — TikTok
+- [x] Neozen — Shopee
+- [ ] NEW Cooger — TikTok
+- [x] OHSOME! — TikTok
+- [ ] OMFU — TikTok
+- [ ] OMI lunchbox — TikTok
+- [x] PANOVA — Shopee
+- [x] Papaso — Shopee
+- [ ] Pero — Shopee
+- [x] PERO Indonesia — TikTok + Shopee
+- [x] Pol Perabot — TikTok + Shopee
+- [x] POLKI — Shopee
+- [ ] RAJA KARPET — TikTok + Shopee
+- [x] Ratu Sprei — Shopee
+- [x] SAMONO — Shopee
+- [x] Samono Indonesia — TikTok
+- [x] Samonomart.id — TikTok
+- [x] Sandy Collection — TikTok
+- [x] SEMUT BERSIH — TikTok
+- [x] Seruni Living — Shopee
+- [x] Simplus — TikTok + Shopee
+- [x] SINDA — TikTok
+- [x] Stein — Shopee
+- [x] Summerscent — Shopee
+- [x] Sunhouse — Shopee
+- [ ] Suprice Store — TikTok
+- [x] TACO — Shopee
+- [ ] The Plaze — TikTok
+- [ ] Tiktok Rumahku ID — TikTok
+- [ ] Toko Pojok Perabot — Shopee
+- [ ] Tomitaofficial — TikTok
+- [x] TOP TOY — Shopee
+- [ ] Tusen New September — Shopee
+- [ ] UCLOUDSOME — TikTok
+- [x] Unilever Homecare — Shopee
+- [x] XMVP — TikTok
+- [x] YESALL — TikTok
+- [x] Youware — TikTok + Shopee
+- [ ] Zinus Indonesia — TikTok
+
+## Mom & Baby (19)
+
+- [x] Abbott — Shopee
+- [ ] ASTHIN — Shopee
+- [x] Bebiotic — Shopee
+- [ ] Careso Baby — Shopee
+- [x] Cool Vita — Shopee
+- [x] Curcuma Plus — Shopee
+- [ ] Dexter Indonesia — Shopee
+- [ ] Expert Boost — Shopee
+- [x] Expert Care — Shopee
+- [x] HealthyWay — Shopee
+- [x] IMBOOST — Shopee
+- [x] Moell — Shopee
+- [x] Mom Uung — Shopee
+- [x] Momami — Shopee
+- [x] My Baby — Shopee
+- [x] Sweety — Shopee
+- [x] Tentang Anak Shop — Shopee
+- [x] Vidoran — Shopee
+- [x] Vitabumin — Shopee
+
+## Sports (1)
+
+- [x] Speeds — Shopee
+
+## Tech (43)
+
+- [x] Acome — Shopee
+- [x] Advance — TikTok + Shopee
+- [x] Airbot — TikTok
+- [x] Aitu — Shopee
+- [x] AIUEO — Shopee
+- [ ] Aolon — TikTok
+- [x] Asta Homeware — Shopee
+- [x] Bardi — TikTok
+- [x] Bodimax — Shopee
+- [x] BukuAgen Store — Shopee
+- [x] Case Sultan JRYU — TikTok
+- [x] Cuan Kabel — Shopee
+- [x] ENCHEN — Shopee
+- [x] Gamen — Shopee
+- [x] Goojodoq — TikTok + Shopee
+- [x] Huafit — TikTok
+- [x] Inbex — TikTok + Shopee
+- [ ] Jamay — TikTok
+- [x] Jisulife — TikTok
+- [x] Kakimi — TikTok
+- [x] KEELAT — Shopee
+- [x] KiiP — Shopee
+- [ ] Lampuledstrip — Shopee
+- [ ] Laxasmart — TikTok
+- [x] Mirror Space — Shopee
+- [x] Monster Audio — TikTok
+- [x] Olike — TikTok + Shopee
+- [x] Onlife — Shopee
+- [x] Rapatech — TikTok + Shopee
+- [x] Realfit — Shopee
+- [x] ROBOT — Shopee
+- [x] ROBOT PC — Shopee
+- [x] SKMEI — TikTok
+- [ ] SOGO Mastap — Shopee
+- [ ] The Pods — TikTok
+- [ ] Toothbrush airuidu — TikTok
+- [x] TORRAS — TikTok
+- [x] TOSHIBA — Shopee
+- [x] Ulike — Shopee
+- [x] UPHOME — Shopee
+- [ ] WAGMI (buku Leo_Geovanii) — TikTok
+- [ ] Winland — Shopee
+- [x] Yesplus — TikTok

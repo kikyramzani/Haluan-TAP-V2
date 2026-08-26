@@ -1,0 +1,191 @@
+/**
+ * Token desain TAP.
+ *
+ * Gelap adalah tema bawaan, mengikuti hcommerce.id. Terang tetap ada sebagai
+ * pilihan, bukan sebagai pembalikan warna: kontras, bayangan, dan kekuatan
+ * aksennya ditulis ulang supaya keduanya terasa disengaja.
+ */
+
+@font-face {
+  font-family: Archivo;
+  src: url("/archivo.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Inter;
+  src: url("/inter.woff2") format("woff2");
+  font-display: swap;
+}
+
+:root {
+  /**
+   * Palet hcommerce.id, diambil dari design token situsnya:
+   * ink #08080a, ink-1 #0c0c11, ink-2 #121219, paper #f2f0ea,
+   * pink #eb1487 / deep #d81280 / press #cf0f79, cyan #66d7e8, acid #d8ff36.
+   *
+   * hcommerce adalah situs gelap, jadi gelap pula yang jadi bawaan di sini.
+   */
+  color-scheme: dark;
+
+  /* Permukaan */
+  --bg: #08080a;
+  --surface: #0c0c11;
+  --surface-sunken: #0a0a0e;
+  --surface-raised: #121219;
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.18);
+
+  /* Teks: putih penuh untuk judul, dua tingkat redup untuk sisanya. */
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.74);
+  --text-subtle: rgba(255, 255, 255, 0.58);
+  --text-inverse: #08080a;
+
+  /**
+   * Cyan membawa elemen interaktif karena kontrasnya 11,86 di atas ink.
+   *
+   * Tombol utama memakai pink-deep, bukan pink terang: label putih di atas
+   * #eb1487 hanya 4,21 dan gagal AA, sedangkan di atas #d81280 mencapai 4,86.
+   * hcommerce sendiri mengisi tombolnya dengan pink-deep.
+   */
+  --brand: #eb1487;
+  --brand-deep: #d81280;
+  --brand-press: #cf0f79;
+  --brand-acid: #d8ff36;
+  --brand-cyan: #66d7e8;
+  --accent: #66d7e8;
+  --accent-strong: #8fe5f2;
+  --accent-soft: rgba(102, 215, 232, 0.14);
+  --accent-line: rgba(102, 215, 232, 0.3);
+  --accent-contrast: #08080a;
+
+  /* Tombol utama */
+  --cta: #d81280;
+  --cta-hover: #cf0f79;
+  --cta-contrast: #ffffff;
+
+  /* Status */
+  --positive: #5fd3a0;
+  --positive-soft: rgba(95, 211, 160, 0.13);
+  --warning: #e8b45e;
+  --warning-soft: rgba(232, 180, 94, 0.13);
+  --danger: #f0857c;
+  --danger-soft: rgba(240, 133, 124, 0.13);
+
+  /* Bayangan */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 20px 52px rgba(0, 0, 0, 0.7);
+
+  /* Jarak. Dua langkah setengah ada khusus untuk padding badge dan chip, yang
+     terlihat terlalu tinggi bila dipaksa ke kelipatan 4. */
+  --space-half: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+  --space-section: clamp(56px, 4vw + 40px, 112px);
+
+  /* Radius. Pil hanya untuk badge dan kontrol ringkas. */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-pill: 999px;
+
+  /**
+   * Tipografi. Archivo untuk display, sama seperti hcommerce.
+   *
+   * Teks isi mendahulukan font sistem: di iOS dan macOS yang terpakai SF Pro,
+   * dan Inter tidak pernah diunduh sama sekali.
+   */
+  --font-display: Archivo, "SF Pro Display", system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif;
+
+  --text-display: clamp(40px, 6vw, 76px);
+  --text-h1: clamp(32px, 4.2vw, 52px);
+  --text-h2: clamp(25px, 2.6vw, 34px);
+  --text-h3: clamp(19px, 1.5vw, 22px);
+  /* Empat langkah saja di rentang kecil. */
+  --text-lead: 18px;
+  --text-body: 16px;
+  --text-sm: 14px;
+  --text-xs: 12px;
+
+  /* Empat bobot. Selisih 50 tidak terbaca oleh mata. */
+  --weight-regular: 400;
+  --weight-medium: 550;
+  --weight-semibold: 650;
+  --weight-display: 750;
+
+  --tracking-display: -0.035em;
+  --tracking-tight: -0.018em;
+  --tracking-wide: 0.06em;
+
+  /* Gerak */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --shell-width: 1180px;
+  --header-height: 64px;
+}
+
+/**
+ * Tema terang memakai paper krem hcommerce, bukan putih murni.
+ *
+ * Acid dan cyan tidak pernah membawa teks di sini: kontrasnya 1,01 dan 1,48 di
+ * atas paper, praktis tidak terlihat. Keduanya hanya dipakai sebagai bidang.
+ * Aksen teks pindah ke pink-press, satu-satunya pink yang lolos AA di latar
+ * terang (4,61).
+ */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f2f0ea;
+  --surface: #ffffff;
+  --surface-sunken: #eae7de;
+  --surface-raised: #ffffff;
+  --line: rgba(8, 8, 10, 0.12);
+  --line-strong: rgba(8, 8, 10, 0.2);
+
+  --text: #08080a;
+  --text-muted: #4a4a55;
+  /* Harus lolos 4,5 di ketiga permukaan terang, termasuk sunken #eae7de yang
+     dipakai kartu campaign yang sudah berakhir. */
+  --text-subtle: #63636e;
+  --text-inverse: #ffffff;
+
+  --accent: #cf0f79;
+  --accent-strong: #b00c68;
+  --accent-soft: #fdeaf4;
+  --accent-line: rgba(207, 15, 121, 0.26);
+  --accent-contrast: #ffffff;
+
+  --cta: #cf0f79;
+  --cta-hover: #b00c68;
+  --cta-contrast: #ffffff;
+
+  --positive: #0d7a52;
+  --positive-soft: #e3f4ec;
+  --warning: #8a5a00;
+  --warning-soft: #fbf1df;
+  --danger: #b3261e;
+  --danger-soft: #fbeae8;
+
+  --shadow-sm: 0 1px 2px rgba(8, 8, 10, 0.06);
+  --shadow-md: 0 4px 14px rgba(8, 8, 10, 0.08);
+  --shadow-lg: 0 18px 48px rgba(8, 8, 10, 0.14);
+}

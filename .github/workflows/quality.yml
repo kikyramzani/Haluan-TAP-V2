@@ -1,0 +1,64 @@
+name: Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "15 1 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Audit live rate source (non-blocking ops report)
+        continue-on-error: true
+        run: mkdir -p outputs && npm run audit:rates | tee outputs/rate-audit.txt
+      - name: Upload rate quality report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: rate-quality-report
+          path: outputs/rate-audit.txt
+          retention-days: 30
+      # The atomic contract test executes the production Lua against a real
+      # server and fails loudly without one. GitHub's Ubuntu image does not ship
+      # Redis, so the release gate would stop before build or E2E.
+      - name: Install Redis for the atomic contract test
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y redis-server redis-tools
+          redis-server --version
+          redis-cli --version
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Run checked-out-SHA quality gate
+        env:
+          GATE_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before || 'origin/main' }}
+        run: npm run gate -- --runs 1 --out "outputs/release-gates/ci-${GITHUB_SHA}-${GITHUB_RUN_ATTEMPT}.log"
+      - name: Upload release-gate evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-gate-${{ github.sha }}-${{ github.run_attempt }}
+          path: outputs/release-gates/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload Playwright evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

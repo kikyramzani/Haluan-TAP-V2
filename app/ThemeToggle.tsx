@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 type Theme = "dark" | "light";
 
 export default function ThemeToggle() {
-  // Gelap adalah bawaan aplikasi, jadi itu pula tebakan awal sebelum DOM dibaca.
-  const [theme, setTheme] = useState<Theme>("dark");
+  // Terang adalah bawaan aplikasi, jadi itu pula tebakan awal sebelum DOM dibaca.
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     queueMicrotask(() => setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark"));

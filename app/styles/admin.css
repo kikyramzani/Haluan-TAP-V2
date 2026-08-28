@@ -52,6 +52,8 @@
   border-bottom-color: var(--accent);
 }
 
+/* workspace.css duplicates this stat-tile job as .admin-stats/.kpi — check
+   there before adding a third variant of the same component. */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -102,8 +104,14 @@
   min-width: 220px;
 }
 
-/* Tabel */
+/* Tabel. workspace.css duplicates this as .admin-table-wrap — check there
+   before adding a third variant of the same component. */
 .table-wrap {
+  /* Grid/flex items default to min-width: auto, so without this the wrapper
+     grows past the viewport to fit .admin-table's own min-width instead of
+     scrolling internally — the whole page becomes horizontally scrollable
+     at narrow widths instead of just the table. */
+  min-width: 0;
   overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -240,7 +248,7 @@
   font-size: var(--text-xs);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .tier-row {
     grid-template-columns: 1fr;
   }
@@ -301,7 +309,7 @@
   font-size: var(--text-xs);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .issue-row {
     grid-template-columns: 1fr;
     gap: var(--space-2);
@@ -326,4 +334,91 @@
 
 .empty-cell {
   color: var(--text-subtle);
+}
+
+/*
+ * Baris metrik dengan bar proporsional (mis. /admin/analitik: top campaign,
+ * top kreator, split platform, funnel). `.metric-line` sudah dipakai di
+ * tempat lain hanya untuk warna/ukuran teks — aturan tata letak flex di
+ * bawah ini yang sebelumnya belum ada sama sekali.
+ */
+.metric-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.metric-line:last-child {
+  border-bottom: 0;
+}
+
+.metric-line b {
+  flex: 0 0 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--weight-medium);
+  color: var(--text);
+}
+
+.metric-line i {
+  flex: 1;
+  display: block;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  overflow: hidden;
+  font-style: normal;
+}
+
+.metric-line em {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.metric-line strong {
+  flex: 0 0 auto;
+  min-width: 36px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-sm);
+}
+
+/* Tren harian /admin/analitik: satu batang vertikal per hari. */
+.analitik-trend {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 160px;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  overflow-x: auto;
+}
+
+.analitik-trend-bar {
+  flex: 1 0 6px;
+  min-width: 6px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.analitik-trend-bar em {
+  display: block;
+  width: 100%;
+  min-height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--accent);
+  font-style: normal;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.analitik-trend-bar:hover em {
+  background: var(--accent-strong);
 }

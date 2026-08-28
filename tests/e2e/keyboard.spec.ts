@@ -1,9 +1,23 @@
 import { expect, test } from "@playwright/test";
+import { cleanupCatalogFixtures, seedCatalogFixtures } from "./helpers/db";
 
 // Keyboard journeys model a desktop user, so this file is deliberately outside the
 // mobile-webkit project's match: the iPhone profile has no Tab key, and a skip that
 // fires on every run is a hole the gate would have to be taught to ignore. Both
 // Chromium projects hold the contract instead.
+
+// Nothing here reads `fixtures` — the test only needs *some* actionable
+// campaign to exist on /deals so "Dapatkan komisi" has a button to press.
+// The real catalog (691+ brands) already guarantees that today, but seeding
+// one `e2e-`-prefixed campaign keeps the guarantee independent of real
+// catalog state, matching the pattern the other rewritten specs use.
+test.beforeAll(async () => {
+  await seedCatalogFixtures();
+});
+
+test.afterAll(async () => {
+  await cleanupCatalogFixtures();
+});
 
 test("keyboard menjalankan detail campaign: buka, terkunci, tutup, fokus kembali", async ({ page, browserName }) => {
   // A keyboard journey models a desktop user; the iPhone profile has no Tab key,

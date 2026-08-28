@@ -48,7 +48,7 @@ export const viewport: Viewport = {
   // aksesibilitas, tapi tanpa batas atas kontrol standalone jadi mudah tergeser.
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f2f0ea" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#08080a" },
   ],
 };
@@ -57,10 +57,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
-    // Gelap adalah bawaan, mengikuti hcommerce. Skrip di bawah hanya memulihkan
-    // pilihan yang pernah disimpan creator, dijalankan sebelum paint supaya
-    // tidak ada kedip tema.
-    <html lang="id" data-theme="dark" suppressHydrationWarning>
+    // Terang adalah bawaan. Skrip di bawah hanya memulihkan pilihan yang
+    // pernah disimpan creator, dijalankan sebelum paint supaya tidak ada
+    // kedip tema.
+    <html lang="id" data-theme="light" suppressHydrationWarning>
       <head>
         <script
           nonce={nonce}

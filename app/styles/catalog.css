@@ -208,6 +208,18 @@
   color: var(--bg);
 }
 
+/* Toggle platform Shopee terbaca sebagai Shopee saat aktif, bukan warna
+   generik yang sama dengan setiap chip lain. Memakai --platform-shopee-solid
+   (bukan --platform-shopee, yang dipakai garis tepi tipis kartu) — oranye
+   asli brand terlalu terang untuk teks putih di atasnya (~3.6:1, di bawah
+   ambang AA 4.5:1); versi solid ini lebih pekat supaya putih tetap jelas
+   terbaca tanpa kartu ikut berubah warna. */
+.chip--shopee-toggle[aria-pressed="true"] {
+  background: var(--platform-shopee-solid);
+  border-color: var(--platform-shopee-solid);
+  color: #ffffff;
+}
+
 /* Angka dibedakan lewat ketebalan huruf, bukan opacity — menurunkan opacity
    membuat kontrasnya jatuh di bawah ambang WCAG di kedua tema. */
 .chip-count {
@@ -293,6 +305,15 @@
   transition: transform var(--duration-normal) var(--ease-out),
     border-color var(--duration-normal) var(--ease-out),
     box-shadow var(--duration-normal) var(--ease-out);
+}
+
+/* Aksen platform: satu garis tepi atas, bukan isian — penanda, bukan badge. */
+.deal-card--tiktok {
+  border-top-color: var(--platform-tiktok);
+}
+
+.deal-card--shopee {
+  border-top-color: var(--platform-shopee);
 }
 
 @media (hover: hover) {

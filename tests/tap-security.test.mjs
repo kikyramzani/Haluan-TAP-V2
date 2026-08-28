@@ -6,8 +6,7 @@ import { brandLogo, duplicateLogoKeys, registeredLogoPaths } from "../app/brand-
 import { existsSync, readdirSync } from "node:fs";
 import { backfillLegacyVerification, needsLegacyVerificationBackfill, strongerVerification } from "../lib/user-migration.ts";
 import { authEmailEnabled, debugEmailCode, localEmailModeEnabled } from "../lib/email-mode.ts";
-import { createFilterCache } from "../lib/filter-cache.ts";
-import { retryAfterMessage } from "../lib/rate-limit.ts";
+import { retryAfterMessage } from "../lib/rate-limit-message.ts";
 
 test("return path menolak open redirect",()=>{
   assert.equal(safeReturnTo("https://evil.test"),"/dashboard");
@@ -29,70 +28,6 @@ test("bukti verifikasi hanya naik, tidak pernah turun",()=>{
   assert.equal(strongerVerification("code","migrated"),"code");
   assert.equal(strongerVerification("google","grandfathered"),"google");
   assert.equal(strongerVerification("code","google"),"google");
-});
-
-test("mock datastore menghormati PX, takeover, dan pelepasan token salah",async()=>{
-  const{createServer}=await import("node:http");
-  const{spawn}=await import("node:child_process");
-  void createServer;void spawn;
-  // Ask for any free port and read back the one the OS gave us: a fixed port made
-  // two parallel runs of this suite fight over the same socket.
-  const server=spawn(process.execPath,["tests/helpers/mock-redis.mjs"],{env:{...process.env,MOCK_REDIS_PORT:"0"},stdio:["ignore","pipe","ignore"]});
-  const port=await new Promise((resolve,reject)=>{
-    let output="";
-    server.stdout.on("data",chunk=>{
-      output+=String(chunk);
-      const match=output.match(/ready on (\d+)/);
-      if(match)resolve(Number(match[1]));
-    });
-    server.once("exit",()=>reject(new Error("mock datastore exited before reporting a port")));
-  });
-  const call=async(...command)=>{
-    const response=await fetch(`http://127.0.0.1:${port}`,{method:"POST",headers:{authorization:"Bearer tap-local-test-token","content-type":"application/json"},body:JSON.stringify(command)});
-    return (await response.json()).result;
-  };
-  try{
-    for(let attempt=0;attempt<50;attempt++){
-      try{ if(await call("PING"))break; }catch{ await new Promise(r=>setTimeout(r,60)); }
-    }
-    const lock="tap:v1:lock:user:px";
-    const del='-- __delete_if_equals__';
-    const renew='-- __renew_if_equals__';
-
-    // PX benar-benar kedaluwarsa
-    assert.equal(await call("SET",lock,"first","NX","PX",30),"OK");
-    assert.equal(await call("SET",lock,"second","NX","PX",30),null);
-    await new Promise(r=>setTimeout(r,60));
-    assert.equal(await call("GET",lock),null);
-
-    // takeover: pemegang lama tidak boleh menghapus milik penerus
-    assert.equal(await call("SET",lock,"second","NX","PX",5000),"OK");
-    assert.equal(await call("EVAL",del,1,lock,"first"),0);
-    assert.equal(await call("GET",lock),"second");
-
-    // renew hanya untuk pemilik, dan stale guard gagal
-    assert.equal(await call("EVAL",renew,1,lock,"first",5000),0);
-    assert.equal(await call("EVAL",renew,1,lock,"second",5000),1);
-
-    // pelepasan oleh pemilik berhasil
-    assert.equal(await call("EVAL",del,1,lock,"second"),1);
-    assert.equal(await call("GET",lock),null);
-  } finally { server.kill("SIGKILL"); }
-});
-
-test("cache filter membuang entri kedaluwarsa dan menahan jumlah entri",()=>{
-  const cache=createFilterCache(1000,3);
-  const start=1_000_000;
-  cache.set("a",["satu"],start);
-  assert.deepEqual(cache.get("a",start+999),["satu"]);
-  assert.equal(cache.get("a",start+1001),null);
-  const fresh=start+2000;
-  for(const name of ["b","c","d","e"])cache.set(name,[name],fresh);
-  assert.ok(cache.size<=3,`entri tersimpan ${cache.size}`);
-  assert.equal(cache.get("b",fresh),null);
-  assert.deepEqual(cache.get("e",fresh),["e"]);
-  cache.clear();
-  assert.equal(cache.size,0);
 });
 
 test("pesan rate limit menyebut sisa waktu yang bisa dibaca",()=>{

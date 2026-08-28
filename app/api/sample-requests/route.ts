@@ -2,7 +2,9 @@ import { getCurrentUser } from "../../../lib/auth";
 import { checkRateLimit } from "../../../lib/rate-limit";
 import { createSampleRequest, listUserSampleRequests } from "../../../lib/requests";
 import { cleanText, clientIp, sameOrigin } from "../../../lib/security";
-import { isSampleAvailable } from "../../../lib/campaign-links";
+import { hashIp } from "../../../lib/hash-ip";
+import { SAMPLE_GATE_MESSAGES } from "../../../lib/sample-gate";
+import { evaluateSampleGate } from "./gate-check";
 
 export async function GET() {
   try {
@@ -17,9 +19,10 @@ export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
     if (!user) return Response.json({ error: "Masuk sebagai creator untuk mengajukan sample." }, { status: 401 });
-    if (user.membership !== "verified") return Response.json({ error: "Keanggotaan MCN kamu masih menunggu verifikasi." }, { status: 403 });
-    const rate = await checkRateLimit("sample", `${user.id}:${clientIp(request)}`, 5, 86400);
-    if (!rate.allowed) return Response.json({ error: "Batas request harian tercapai." }, { status: 429 });
+    // 5 per 5 minutes per account+IP — a burst guard, not a daily quota (the
+    // doc's target; the old 5/day limit was a much looser stand-in).
+    const rate = await checkRateLimit("sample", `${user.id}:${hashIp(clientIp(request))}`, 5, 300);
+    if (!rate.allowed) return Response.json({ error: "Terlalu banyak request sample dalam waktu singkat. Coba lagi sebentar lagi." }, { status: 429, headers: { "retry-after": String(rate.retryAfterSeconds) } });
     const body = await request.json();
     const input = {
       userId: user.id,
@@ -35,9 +38,15 @@ export async function POST(request: Request) {
     if (!input.brand || !["TikTok", "Shopee", "Instagram"].includes(input.platform) || !input.username || !/^https:\/\//i.test(input.profileUrl) || !input.recipientName || input.phone.replace(/\D/g, "").length < 9 || input.address.length < 12 || !input.commitment) {
       return Response.json({ error: "Lengkapi seluruh data request dengan benar." }, { status: 400 });
     }
-    if (!(await isSampleAvailable(input.brand, input.platform))) return Response.json({error:"Campaign ini tidak memiliki sample aktif."},{status:409});
+    // Never trust a client-side pre-check alone (see /api/sample-requests/gate) —
+    // the full 5-reason gate is re-evaluated here, server-side, right before the
+    // row is created.
+    const { result } = await evaluateSampleGate(user, input.brand, input.platform);
+    if (!result.allowed) return Response.json({ error: SAMPLE_GATE_MESSAGES[result.reason] }, { status: 409 });
     const saved = await createSampleRequest(input);
-    return Response.json({ request: saved }, { status: 201 });
+    // Only the id is ever read by the client (app/request-sample/page.tsx) —
+    // no reason to hand back the full creator/campaign relation graph.
+    return Response.json({ request: { id: saved.id, status: saved.status } }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "TAP_DATASTORE_UNAVAILABLE") return Response.json({ error: "Sistem request belum tersambung. Hubungi tim Haluan." }, { status: 503 });
     return Response.json({ error: "Request gagal disimpan." }, { status: 500 });

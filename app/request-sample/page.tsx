@@ -14,6 +14,16 @@ type Viewer = {
   address?: string;
 };
 type SampleOption = { brand: string; platform: "TikTok" | "Shopee" };
+type GateCheck = { allowed: true } | { allowed: false; reason: string; message: string };
+/** Tagged with the campaign key it was computed for, so a stale result from a
+ * just-abandoned selection is never shown against the new one — the render
+ * below only trusts `gate` when its `key` still matches the current pick.
+ * `result: null` means the check itself failed (network/server error) — that
+ * is never treated as a block, only as "nothing to show". Whether a check is
+ * still in flight is derived at render time from the absence of an entry for
+ * the current key, the same way app/components/CampaignSheet.tsx derives its
+ * `loading` flag, rather than a separately-managed boolean. */
+type GateState = { key: string; result: GateCheck | null };
 
 export default function RequestSamplePage() {
   const [requestId, setRequestId] = useState("");
@@ -25,6 +35,7 @@ export default function RequestSamplePage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
   const [viewer, setViewer] = useState<Viewer | null>(null);
+  const [gate, setGate] = useState<GateState | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -56,6 +67,24 @@ export default function RequestSamplePage() {
       .catch(() => setLoadFailed(true))
       .finally(() => setAuthChecked(true));
   }, []);
+
+  // Evaluate the gate as soon as a campaign is picked, so a creator sees why
+  // they can't request before filling out the whole form — not just after
+  // submitting. This is a convenience pre-check only; the server re-runs the
+  // full gate at actual submission regardless (see submit() below).
+  useEffect(() => {
+    const selected = campaigns.find((option) => `${option.brand} · ${option.platform}` === campaignQuery);
+    if (!viewer || viewer.membership !== "verified" || !selected) return;
+    const key = `${selected.brand}·${selected.platform}`;
+    const controller = new AbortController();
+    fetch(`/api/sample-requests/gate?brand=${encodeURIComponent(selected.brand)}&platform=${encodeURIComponent(selected.platform)}`, { cache: "no-store", signal: controller.signal })
+      .then((response) => response.json())
+      .then((payload: GateCheck) => setGate({ key, result: payload }))
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") setGate({ key, result: null });
+      });
+    return () => controller.abort();
+  }, [viewer, campaignQuery, campaigns]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -107,6 +136,10 @@ export default function RequestSamplePage() {
   }
 
   const selectedCampaign = campaigns.find((option) => `${option.brand} · ${option.platform}` === campaignQuery) ?? null;
+  const selectedKey = selectedCampaign ? `${selectedCampaign.brand}·${selectedCampaign.platform}` : null;
+  const gateEntry = gate && gate.key === selectedKey ? gate : null;
+  const gateResult = gateEntry?.result ?? null;
+  const gateChecking = Boolean(selectedCampaign) && viewer?.membership === "verified" && !gateEntry;
   const returnTo = `/request-sample${selectedCampaign ? `?brand=${encodeURIComponent(selectedCampaign.brand)}&platform=${selectedCampaign.platform}` : ""}`;
   const profileUrl = viewer?.tiktokUsername
     ? `https://www.tiktok.com/@${viewer.tiktokUsername.replace(/^@/, "")}`
@@ -202,7 +235,7 @@ export default function RequestSamplePage() {
           ) : (
             <form onSubmit={submit}>
               <div className="form-heading"><span>Request form</span><b>± 2 menit</b></div>
-              <label><span>Cari campaign dengan sample tersedia</span><input name="campaign" list="sample-campaign-options" value={campaignQuery} onChange={(event) => { setCampaignQuery(event.target.value); setCampaignError(""); }} placeholder="Ketik nama brand lalu pilih dari daftar…" autoComplete="off" aria-invalid={campaignError ? "true" : "false"} aria-describedby={campaignError ? "campaign-error" : undefined} required/><datalist id="sample-campaign-options">{campaigns.map((item) => <option key={`${item.platform}-${item.brand}`} value={`${item.brand} · ${item.platform}`}/>)}</datalist>{campaignError && <small id="campaign-error" className="field-error" role="alert">{campaignError}</small>}</label>
+              <label><span>Cari campaign dengan sample tersedia</span><input name="campaign" list="sample-campaign-options" value={campaignQuery} onChange={(event) => { setCampaignQuery(event.target.value); setCampaignError(""); }} placeholder="Ketik nama brand lalu pilih dari daftar…" autoComplete="off" aria-invalid={campaignError ? "true" : "false"} aria-describedby={campaignError ? "campaign-error" : undefined} required/><datalist id="sample-campaign-options">{campaigns.map((item) => <option key={`${item.platform}-${item.brand}`} value={`${item.brand} · ${item.platform}`}/>)}</datalist>{campaignError && <small id="campaign-error" className="field-error" role="alert">{campaignError}</small>}{!campaignError && gateChecking && <small className="field-hint">Memeriksa ketersediaan sample…</small>}{!campaignError && !gateChecking && gateResult && !gateResult.allowed && <small className="field-error" role="alert">{gateResult.message}</small>}</label>
               <div className="two-col"><label><span>Nama penerima</span><input name="recipientName" defaultValue={viewer.recipientName || viewer.name} placeholder="Nama lengkap" autoComplete="name" required /></label><label><span>Nomor WhatsApp</span><input name="phone" type="tel" inputMode="tel" defaultValue={viewer.phone} placeholder="08xxxxxxxxxx" autoComplete="tel" required /></label></div>
               <label><span>Username creator</span><input name="username" defaultValue={viewer.tiktokUsername || ""} placeholder="@username" autoComplete="off" required /></label>
               <label><span>Link profil creator</span><input name="profile" type="url" defaultValue={profileUrl} placeholder="https://tiktok.com/@username" inputMode="url" required /></label>
@@ -220,7 +253,7 @@ export default function RequestSamplePage() {
                 <label><span>Kode pos</span><input name="kodePos" inputMode="numeric" pattern="[0-9]{5}" maxLength={5} placeholder="12345" autoComplete="postal-code" required /></label>
               </div>
               <label className="checkbox"><input name="commitment" type="checkbox" required /><span>Saya bersedia membuat konten sesuai brief dan timeline campaign.</span></label>
-              <button className="submit-btn" type="submit" disabled={busy}>{busy ? "Menyimpan…" : "Kirim request"} <span>↗</span></button>
+              <button className="submit-btn" type="submit" disabled={busy || gateResult?.allowed === false}>{busy ? "Menyimpan…" : "Kirim request"} <span>↗</span></button>
               {notice && <p className="form-error" role="alert">{notice}</p>}
               <p className="form-note">Request tidak otomatis disetujui. Kecocokan profil dan kuota campaign tetap diverifikasi oleh tim Haluan.</p>
             </form>

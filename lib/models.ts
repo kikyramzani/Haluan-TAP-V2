@@ -1,5 +1,9 @@
-export type MembershipStatus = "pending" | "verified" | "rejected";
-export type UserRole = "creator" | "admin";
+// "suspended" and "super_admin" are additive: the Postgres rebuild's schema
+// (prisma/schema.prisma MembershipStatus/UserRole) supports both, but the
+// admin UI to set them (Phase 4's /admin/creator Suspend action and
+// /admin/pengguna role management) doesn't exist yet.
+export type MembershipStatus = "pending" | "verified" | "rejected" | "suspended";
+export type UserRole = "creator" | "admin" | "super_admin";
 /** How an account earned `emailVerifiedAt`, so grandfathered records stay auditable. */
 export type VerificationSource = "code" | "google" | "migrated" | "grandfathered";
 
@@ -27,40 +31,4 @@ export type TapUser = {
   recipientName?: string;
   address?: string;
   assignedPic?: string;
-};
-
-export type SampleStatus = "submitted" | "review" | "approved" | "rejected" | "on_hold" | "shipped" | "received" | "content_submitted";
-
-export type SampleRequest = {
-  id: string;
-  userId: string;
-  brand: string;
-  platform: string;
-  username: string;
-  profileUrl: string;
-  recipientName: string;
-  phone: string;
-  address: string;
-  commitment: boolean;
-  sow?: "VT" | "Live" | "Live + VT";
-  followers?: number;
-  gmv?: number;
-  preferredSample?: string;
-  picName?: string;
-  picPhone?: string;
-  requestGroupId?: string;
-  status: SampleStatus;
-  trackingNumber?: string;
-  adminNote?: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type ClickEvent = {
-  id: string;
-  userId: string;
-  campaignId: string;
-  createdAt: string;
-  referrer?: string;
-  userAgent?: string;
 };

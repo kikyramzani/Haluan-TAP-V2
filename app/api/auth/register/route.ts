@@ -1,7 +1,8 @@
 import { createSession, createUser, deletePendingUser, publicUser } from "../../../../lib/auth";
 import { checkRateLimit, retryAfterMessage } from "../../../../lib/rate-limit";
 import { cleanText, clientIp, sameOrigin, safeReturnTo, validEmail, validPassword } from "../../../../lib/security";
-import { authEmailEnabled, createEmailChallenge, debugEmailCode, issueVerifyContinuation, reserveEmailSend, tryDiscardEmailChallenge, sendEmailCode, tryReleaseEmailSend } from "../../../../lib/email-auth";
+import { hashIp } from "../../../../lib/hash-ip";
+import { authEmailEnabled, createEmailChallenge, debugEmailCode, issueVerifyContinuation, sendEmailCode } from "../../../../lib/email-auth";
 
 export async function POST(request: Request) {
   try {
@@ -10,7 +11,7 @@ export async function POST(request: Request) {
     const name = cleanText(body.name, 80);
     const email = cleanText(body.email, 254).toLowerCase();
     const phone = cleanText(body.phone, 24);
-    const [ipRate, accountRate] = await Promise.all([checkRateLimit("register-ip", clientIp(request), 6, 3600), checkRateLimit("register-account", email || phone || "invalid", 3, 3600)]);
+    const [ipRate, accountRate] = await Promise.all([checkRateLimit("register-ip", hashIp(clientIp(request)), 6, 3600), checkRateLimit("register-account", email || phone || "invalid", 3, 3600)]);
     const blocked = !ipRate.allowed ? ipRate : !accountRate.allowed ? accountRate : null;
     if (blocked) return Response.json({ error: `Terlalu banyak percobaan. Coba lagi dalam ${retryAfterMessage(blocked.retryAfterSeconds)}.` }, { status: 429, headers: { "retry-after": String(blocked.retryAfterSeconds) } });
     const password = typeof body.password === "string" ? body.password : "";
@@ -20,30 +21,20 @@ export async function POST(request: Request) {
     const verificationRequired = authEmailEnabled();
     const user = await createUser({ name, email, phone, password, provider: "credentials", requireEmailVerification: verificationRequired });
     if (verificationRequired) {
-      // A reservation this request does not own is not a licence to send. Minting
-      // a fresh id would bypass the send right entirely, so registration fails
-      // closed and the account is rolled back instead.
-      const reservation = await reserveEmailSend("verify", user.email);
-      if (!reservation.reserved || !reservation.id) {
-        await deletePendingUser(user.id);
-        return Response.json({ error: "Email verifikasi belum dapat dikirim. Coba kembali beberapa saat lagi." }, { status: 503 });
-      }
       try {
-        const challenge = await createEmailChallenge({ userId: user.id, email: user.email, purpose: "verify", id: reservation.id });
-        await sendEmailCode({ email: user.email, name: user.name, purpose: "verify", code: challenge.code });
+        const challenge = await createEmailChallenge({ userId: user.id, email: user.email, purpose: "verify" });
+        if (!challenge.reused && challenge.code) {
+          await sendEmailCode({ email: user.email, name: user.name, purpose: "verify", code: challenge.code });
+        }
         // Proof that this client is the one continuing *this* account's signup. A
         // later code can only be reissued against it, so an address alone never
         // decides which account a verification activates.
-        const continuation = await issueVerifyContinuation(user.id);
-        return Response.json({ verificationRequired: true, challengeId: challenge.id, continuation, debugCode: debugEmailCode(challenge.code), returnTo: safeReturnTo(body.returnTo) }, { status: 202 });
+        const continuation = issueVerifyContinuation(user.id);
+        return Response.json({ verificationRequired: true, challengeId: challenge.id, continuation, debugCode: debugEmailCode(challenge.code ?? ""), returnTo: safeReturnTo(body.returnTo) }, { status: 202 });
       } catch (error) {
-        // Dropping the account is the part that must happen; releasing the pointer
-        // only lets the address retry sooner, and it expires on its own. Running
-        // them together let a failed release skip the deletion and strand a
-        // pending account holding the very address it was rolled back from.
-        await tryDiscardEmailChallenge(reservation.id);
+        // The account never became usable, so it must not hold the address it
+        // just claimed — deleting it cascades away its challenge row too.
         await deletePendingUser(user.id);
-        await tryReleaseEmailSend("verify", user.email, reservation.id);
         throw error;
       }
     }

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getCampaignCatalog } from "../lib/campaign-links";
+import { getCampaignCatalog } from "../lib/catalog-db";
 import { siteUrl } from "../lib/site-url";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

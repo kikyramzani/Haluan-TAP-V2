@@ -73,6 +73,20 @@
   --danger: #f0857c;
   --danger-soft: rgba(240, 133, 124, 0.13);
 
+  /**
+   * Aksen platform (garis tepi tipis di kartu katalog saja, bukan isian).
+   * Bukan pink/cyan brand asli TikTok — keduanya nyaris sama dengan
+   * --cta/--accent milik situs sendiri, jadi kartu TikTok akan terbaca
+   * seperti kartu berstatus "aktif/hover" alih-alih penanda platform.
+   */
+  --platform-tiktok: #1fd8d1;
+  --platform-shopee: #f2652f;
+  /* Isian solid (bukan garis tepi tipis) butuh oranye lebih pekat supaya teks
+     putih di atasnya tetap ≥4.5:1 — satu nilai saja, dipakai sama di kedua
+     tema (tidak ditimpa ulang di blok tema terang) karena isian solid ini
+     bukan permukaan netral yang harus ikut berbalik terang/gelap. */
+  --platform-shopee-solid: #c2410c;
+
   /* Bayangan */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.55);
@@ -154,9 +168,9 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg: #f2f0ea;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-sunken: #eae7de;
+  --surface-sunken: #f4f3f0;
   --surface-raised: #ffffff;
   --line: rgba(8, 8, 10, 0.12);
   --line-strong: rgba(8, 8, 10, 0.2);
@@ -184,6 +198,9 @@
   --warning-soft: #fbf1df;
   --danger: #b3261e;
   --danger-soft: #fbeae8;
+
+  --platform-tiktok: #0a8f88;
+  --platform-shopee: #ee4d2d;
 
   --shadow-sm: 0 1px 2px rgba(8, 8, 10, 0.06);
   --shadow-md: 0 4px 14px rgba(8, 8, 10, 0.08);

@@ -41,6 +41,8 @@ type Props = {
   previewLimit?: number;
   initialQuery?: string;
   initialCategory?: string;
+  /** Shopee tidak punya kolom komisi sama sekali, jadi filter/sort komisi disembunyikan. */
+  platform?: "tiktok" | "shopee";
 };
 
 export default function CampaignCatalog({
@@ -49,8 +51,11 @@ export default function CampaignCatalog({
   previewLimit = 6,
   initialQuery = "",
   initialCategory = "",
+  platform,
 }: Props) {
   const isPreview = variant === "preview";
+  const isShopee = platform === "shopee";
+  const sorts = isShopee ? SORTS.filter((option) => !option.id.startsWith("commission-")) : SORTS;
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
   const [band, setBand] = useState("");
@@ -203,7 +208,7 @@ export default function CampaignCatalog({
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortId)}
               >
-                {SORTS.map((option) => (
+                {sorts.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.label}
                   </option>
@@ -214,17 +219,19 @@ export default function CampaignCatalog({
 
           <div className="filter-row">
             <div className="filter-chips" role="group" aria-label="Filter komisi dan sample">
-              {COMMISSION_BANDS.map((item) => (
-                <button
-                  key={item.id}
-                  className="chip"
-                  type="button"
-                  aria-pressed={band === item.id}
-                  onClick={() => setBand(band === item.id ? "" : item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
+              {!isShopee
+                ? COMMISSION_BANDS.map((item) => (
+                    <button
+                      key={item.id}
+                      className="chip"
+                      type="button"
+                      aria-pressed={band === item.id}
+                      onClick={() => setBand(band === item.id ? "" : item.id)}
+                    >
+                      {item.label}
+                    </button>
+                  ))
+                : null}
               {sampleCount > 0 ? (
                 <button
                   className="chip"

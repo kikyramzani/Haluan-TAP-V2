@@ -89,7 +89,11 @@
   padding: var(--space-6);
   display: grid;
   gap: var(--space-6);
-  align-content: start;
+  /* Centered, not top-packed: a Shopee sheet (no commission tile, often a
+     single tier) is short enough that "start" left a large dead gap between
+     the link field and the footer. Long content still scrolls the same way
+     either way — this only redistributes genuinely leftover space. */
+  align-content: center;
 }
 
 .sheet-metrics {

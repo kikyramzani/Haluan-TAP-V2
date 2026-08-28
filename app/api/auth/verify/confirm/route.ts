@@ -1,7 +1,7 @@
 import { createSession, publicUser, verifyEmailWithChallenge } from "../../../../../lib/auth";
-import { isMutationConflict } from "../../../../../lib/mutation";
 import { cleanText, clientIp, sameOrigin, safeReturnTo } from "../../../../../lib/security";
 import { checkRateLimit, retryAfterMessage } from "../../../../../lib/rate-limit";
+import { hashIp } from "../../../../../lib/hash-ip";
 
 export async function POST(request: Request) {
   try {
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const challengeId = cleanText(body.challengeId, 128);
     const [challengeRate, senderRate] = await Promise.all([
       checkRateLimit("verify-confirm", challengeId || "invalid", 30, 3600),
-      checkRateLimit("verify-confirm-ip", clientIp(request), 10, 3600),
+      checkRateLimit("verify-confirm-ip", hashIp(clientIp(request)), 10, 3600),
     ]);
     const blocked = !senderRate.allowed ? senderRate : !challengeRate.allowed ? challengeRate : null;
     if (blocked) return Response.json({ error: `Terlalu banyak percobaan kode. Coba lagi dalam ${retryAfterMessage(blocked.retryAfterSeconds)}.` }, { status: 429, headers: { "retry-after": String(blocked.retryAfterSeconds) } });
@@ -33,9 +33,7 @@ export async function POST(request: Request) {
     }
     await createSession(result.user.id);
     return Response.json({ user: publicUser(result.user), signedIn: true, returnTo: safeReturnTo(body.returnTo) });
-  } catch (error) {
-    // The code was not spent, so the visitor can simply try again.
-    if (isMutationConflict(error)) return Response.json({ error: "Akun sedang diperbarui. Coba lagi sebentar; kodemu masih berlaku." }, { status: 409 });
+  } catch {
     return Response.json({ error: "Verifikasi gagal. Coba kembali." }, { status: 500 });
   }
 }

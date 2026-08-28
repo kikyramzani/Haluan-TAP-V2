@@ -1,6 +1,7 @@
 import { createSession, findUserByEmail, publicUser, verifyPassword } from "../../../../lib/auth";
 import { checkRateLimit, retryAfterMessage } from "../../../../lib/rate-limit";
 import { cleanText, clientIp, sameOrigin, safeReturnTo } from "../../../../lib/security";
+import { hashIp } from "../../../../lib/hash-ip";
 import { authEmailEnabled, issueVerifyContinuation } from "../../../../lib/email-auth";
 
 export async function POST(request: Request) {
@@ -8,7 +9,7 @@ export async function POST(request: Request) {
     if (!sameOrigin(request)) return Response.json({ error: "Origin tidak valid." }, { status: 403 });
     const body = await request.json();
     const email = cleanText(body.email, 254).toLowerCase();
-    const [ipRate, accountRate] = await Promise.all([checkRateLimit("login-ip", clientIp(request), 10, 900), checkRateLimit("login-account", email || "invalid", 8, 900)]);
+    const [ipRate, accountRate] = await Promise.all([checkRateLimit("login-ip", hashIp(clientIp(request)), 10, 900), checkRateLimit("login-account", email || "invalid", 8, 900)]);
     const blocked = !ipRate.allowed ? ipRate : !accountRate.allowed ? accountRate : null;
     if (blocked) return Response.json({ error: `Terlalu banyak percobaan login. Coba lagi dalam ${retryAfterMessage(blocked.retryAfterSeconds)}.` }, { status: 429, headers: { "retry-after": String(blocked.retryAfterSeconds) } });
     const password = typeof body.password === "string" ? body.password : "";

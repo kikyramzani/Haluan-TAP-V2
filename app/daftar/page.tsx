@@ -1,5 +1,5 @@
 import AuthClient from "./AuthClient";
-import { getCampaignCatalog } from "../../lib/campaign-links";
+import { getCampaignCatalog } from "../../lib/catalog-db";
 import { authEmailEnabled } from "../../lib/email-auth";
 
 export const dynamic = "force-dynamic";

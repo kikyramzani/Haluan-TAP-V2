@@ -1,0 +1,576 @@
+// TAP by Haluan — Postgres schema (rebuild target).
+//
+// This schema is additive infrastructure: introducing it does not change how
+// the running app behaves. Redis (lib/redis.ts) and the live Google Sheets
+// catalog remain the app's actual data source until each phase in
+// /Users/macbook/.claude/plans/kamu-lihat-dari-bagian-purrfect-hopcroft.md
+// repoints a specific read/write path at Prisma and migrates its data.
+//
+// Naming/shape choices intentionally mirror existing Redis models
+// (lib/models.ts) and the target spec document so field-by-field migration
+// mapping stays traceable. See that plan file for the phase-by-phase order.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Connection strings live in prisma.config.ts (CLI/migrate) and lib/db.ts
+// (runtime client, via a driver adapter) — Prisma 7 no longer reads `url`/
+// `directUrl` from this file.
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Identity & auth
+// ---------------------------------------------------------------------------
+
+enum AuthProvider {
+  CREDENTIALS
+  GOOGLE
+}
+
+/// How an account earned emailVerifiedAt, so grandfathered records stay auditable.
+enum VerificationSource {
+  CODE
+  GOOGLE
+  MIGRATED
+  GRANDFATHERED
+}
+
+enum UserRole {
+  CREATOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ChallengePurpose {
+  VERIFY
+  RESET
+}
+
+model User {
+  id                         String              @id @default(cuid())
+  name                       String
+  email                      String              @unique
+  phone                      String?             @unique
+  passwordHash               String?
+  provider                   AuthProvider
+  emailVerifiedAt            DateTime?
+  emailVerificationStartedAt DateTime?
+  verificationSource         VerificationSource?
+  /// Sessions created before this instant no longer authenticate.
+  sessionsInvalidBefore      DateTime?
+  role                       UserRole            @default(CREATOR)
+  createdAt                  DateTime            @default(now())
+  updatedAt                  DateTime            @updatedAt
+
+  creator                Creator?
+  sessions               Session[]
+  emailChallenges        EmailChallenge[]
+  notifications          Notification[]
+  pushSubscriptions      PushSubscription[]
+  auditLogsAsActor       AuditLog[]         @relation("AuditActor")
+  approvedSampleRequests SampleRequest[]    @relation("SampleApprovedBy")
+  importRuns             ImportRun[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+}
+
+model EmailChallenge {
+  id          String           @id @default(cuid())
+  userId      String?
+  user        User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose     ChallengePurpose
+  codeHash    String
+  payloadHash String?
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Creator profile
+// ---------------------------------------------------------------------------
+
+enum MembershipStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+model Creator {
+  id                    String           @id @default(cuid())
+  userId                String           @unique
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership            MembershipStatus @default(PENDING)
+  /// Preferred short name shown around the dashboard ("panggilan") — distinct
+  /// from User.name (legal/full name used for verification and shipping).
+  nickname              String?
+  /// Free-text creator bio shown on the Data Pribadi tab of /dashboard/profil.
+  bio                   String?
+  tiktokUsername        String?
+  shopeeUsername        String?
+  /// Free-text content niche, carried over from the pre-rebuild profile form.
+  /// Phase 5 replaces this with the structured multi-select CreatorCategory
+  /// join (the Kategori tab) — kept only so the current form keeps working
+  /// until then.
+  niche                 String?
+  followers             Int?
+  gmv                   Float?
+  recipientName         String?
+  assignedPic           String?
+  /// Instagram/YouTube/TikTok Affiliate usernames — added alongside the
+  /// existing tiktokUsername/shopeeUsername for the Social Media tab of
+  /// /dashboard/profil. Scalar fields, matching how this project has
+  /// consistently favored pragmatic scalar additions over new tables for
+  /// creator-profile data (see niche/tiktokUsername/shopeeUsername above).
+  instagramUsername        String?
+  youtubeUsername          String?
+  tiktokAffiliateUsername  String?
+  /// Per-platform follower counts. `followers` above stays as the legacy
+  /// aggregate the pre-rebuild profile form/API still read/write; these are
+  /// net-new and only populated via the Social Media tab.
+  tiktokFollowers          Int?
+  shopeeFollowers          Int?
+  instagramFollowers       Int?
+  youtubeFollowers         Int?
+  tiktokAffiliateFollowers Int?
+  /// Set once /daftar/lengkapi is completed; gates entry to /dashboard.
+  onboardingCompletedAt DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  address        CreatorAddress?
+  categories     CreatorCategory[]
+  sampleRequests SampleRequest[]
+  linkClicks     LinkClick[]
+  savedCampaigns SavedCampaign[]
+}
+
+model CreatorAddress {
+  id                String    @id @default(cuid())
+  creatorId         String    @unique
+  creator           Creator   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  provinceId        String?
+  province          Province? @relation(fields: [provinceId], references: [id])
+  regencyId         String?
+  regency           Regency?  @relation(fields: [regencyId], references: [id])
+  districtId        String?
+  district          District? @relation(fields: [districtId], references: [id])
+  villageId         String?
+  village           Village?  @relation(fields: [villageId], references: [id])
+  rt                String?
+  rw                String?
+  postalCode        String?
+  detailAddress     String?
+  recipientName     String?
+  recipientPhone    String?
+  /// Verbatim free-text address carried over from the old single-string
+  /// Redis field, for rows that predate structured wilayah selection.
+  legacyAddressText String?
+  updatedAt         DateTime  @updatedAt
+}
+
+model CreatorCategory {
+  creatorId  String
+  creator    Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([creatorId, categoryId])
+}
+
+// ---------------------------------------------------------------------------
+// Wilayah reference data (BPS/Kemendagri) — net-new, seeded once, not migrated
+// from anything in Redis.
+// ---------------------------------------------------------------------------
+
+model Province {
+  id   String @id @default(cuid())
+  code String @unique
+  name String
+
+  regencies Regency[]
+  addresses CreatorAddress[]
+}
+
+model Regency {
+  id         String   @id @default(cuid())
+  /// Not @unique: the source BPS dump has a handful of kecamatan-level codes
+  /// duplicated across genuinely distinct regencies — a real upstream data
+  /// quality issue, not a modeling choice. `id` is the actual FK-safe key.
+  code       String
+  name       String
+  provinceId String
+  province   Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+
+  districts District[]
+  addresses CreatorAddress[]
+
+  @@index([provinceId])
+  @@index([code])
+}
+
+model District {
+  id        String  @id @default(cuid())
+  /// Not @unique — see Regency.code.
+  code      String
+  name      String
+  regencyId String
+  regency   Regency @relation(fields: [regencyId], references: [id], onDelete: Cascade)
+
+  villages  Village[]
+  addresses CreatorAddress[]
+
+  @@index([regencyId])
+  @@index([code])
+}
+
+model Village {
+  id         String   @id @default(cuid())
+  /// Not @unique — see Regency.code.
+  code       String
+  name       String
+  postalCode String?
+  districtId String
+  district   District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+
+  addresses CreatorAddress[]
+
+  @@index([districtId])
+  @@index([code])
+}
+
+// ---------------------------------------------------------------------------
+// Catalog — brand / campaign / commission
+//
+// Brand.brandKey mirrors lib/brand-key.ts's brandKey() normalization, the
+// existing join key across Sheet rows, CampaignOverride records, and
+// app/brand-assets.ts's logo lookup. Migration must key off the same
+// function, not a new slug scheme.
+// ---------------------------------------------------------------------------
+
+enum Platform {
+  TIKTOK_SHOP
+  SHOPEE_AFFILIATE
+}
+
+/// PERSENTASE = TikTok Shop (rate required). KETENTUAN_PLATFORM = Shopee
+/// (rate must be null even if source data / an admin tries to set one).
+enum CommissionType {
+  PERSENTASE
+  KETENTUAN_PLATFORM
+}
+
+enum CampaignStatus {
+  ACTIVE
+  ENDED
+  HIDDEN
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  brands   Brand[]
+  creators CreatorCategory[]
+}
+
+model Brand {
+  id           String    @id @default(cuid())
+  /// Normalized via lib/brand-key.ts brandKey() — the existing cross-source join key.
+  brandKey     String    @unique
+  displayName  String
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id])
+  /// Static path (public/brand-logos/*, public/brand-media/*, or
+  /// public/brand-logos-migrated/*) — never a re-encoded copy of an
+  /// existing logo. See app/brand-assets.ts.
+  logoUrl      String?
+  hidden       Boolean   @default(false)
+  /// Shown on the homepage "Live opportunity board" ahead of non-featured brands.
+  featured     Boolean   @default(false)
+  mergedIntoId String?
+  mergedInto   Brand?    @relation("BrandMerge", fields: [mergedIntoId], references: [id])
+  mergedFrom   Brand[]   @relation("BrandMerge")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  campaigns     Campaign[]
+  platformStats BrandPlatformStat[]
+}
+
+model Campaign {
+  id                   String         @id @default(cuid())
+  brandId              String
+  brand                Brand          @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  /// The /deal/[slug] and /go/[slug] path segment — brandSlug(brand name) for
+  /// TikTok, `shopee-${slug(brand name)}` for Shopee (see lib/brand-key.ts /
+  /// lib/shopee-catalog.ts). Stored (not recomputed per request) so public
+  /// pages can look up a campaign directly instead of scanning every row.
+  slug                 String         @unique
+  platform             Platform
+  commissionType       CommissionType
+  status               CampaignStatus @default(ACTIVE)
+  sampleQuota          Int?
+  sampleQuotaRemaining Int?
+  brief                String?
+  creatorRequirements  String?
+  displayOrderWeight   Int            @default(0)
+  hasSample            Boolean?
+  newSku               Boolean        @default(false)
+  specialLivePrice     Boolean        @default(false)
+  validUntil           DateTime?
+  /// Set once the ending-soon cron has notified creators about this campaign,
+  /// so the nightly sweep never re-notifies the same campaign every night
+  /// while it's within the window.
+  endingSoonNotifiedAt DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  tiers          CampaignTier[]
+  links          CampaignLink[]
+  sampleRequests SampleRequest[]
+  linkClicks     LinkClick[]
+  savedBy        SavedCampaign[]
+
+  @@index([brandId, platform])
+  @@index([status])
+}
+
+model CampaignTier {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  label      String?
+  /// Must be null whenever the parent campaign's commissionType is
+  /// KETENTUAN_PLATFORM — enforced at the application layer on every write.
+  commission Decimal?
+  sortIndex  Int      @default(0)
+
+  @@index([campaignId])
+}
+
+model CampaignLink {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  url        String
+  /// Exactly one true per campaign — enforced at the application layer.
+  isPrimary  Boolean  @default(false)
+  sortIndex  Int      @default(0)
+
+  @@index([campaignId])
+}
+
+model BrandPlatformStat {
+  id            String   @id @default(cuid())
+  brandId       String
+  brand         Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  platform      Platform
+  /// Only PERSENTASE (TikTok) tiers ever count toward min/max — see
+  /// lib/commission-display.ts once Phase 6 lands.
+  minCommission Decimal?
+  maxCommission Decimal?
+  campaignCount Int      @default(0)
+  recomputedAt  DateTime @default(now())
+
+  @@unique([brandId, platform])
+}
+
+// ---------------------------------------------------------------------------
+// Activity — sample requests, clicks, saved campaigns, notifications, audit
+// ---------------------------------------------------------------------------
+
+enum SampleRequestStatus {
+  PENDING
+  APPROVED
+  SHIPPED
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+model SampleRequest {
+  id                String              @id @default(cuid())
+  creatorId         String
+  creator           Creator             @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  campaignId        String?
+  campaign          Campaign?           @relation(fields: [campaignId], references: [id])
+  /// Kept even when campaignId can't be resolved (renamed/removed brand),
+  /// so migrated history is never silently dropped.
+  brandNameSnapshot String
+  status            SampleRequestStatus @default(PENDING)
+  /// Structured address copied from CreatorAddress at approval time —
+  /// later profile edits must not retroactively change an approved request.
+  addressSnapshot   Json?
+  /// Verbatim old free-text address, for rows migrated before structured
+  /// snapshotting existed. Also where the current pre-Phase-5 request form
+  /// writes its ad-hoc address text (Phase 5 replaces the form with "use my
+  /// saved profile address", at which point new requests stop setting this).
+  legacyAddressText String?
+  /// The following six are carried over from the pre-rebuild flat model so
+  /// the current /request-sample form and admin batch-create keep working
+  /// without forcing Phase 5's full redesign early. Not part of the target
+  /// schema's own field set.
+  username          String?
+  profileUrl        String?
+  commitment        Boolean             @default(false)
+  sow               String?
+  preferredSample   String?
+  picName           String?
+  picPhone          String?
+  recipientName     String?
+  recipientPhone    String?
+  rejectionReason   String?
+  approveNote       String?
+  carrier           String?
+  trackingNumber    String?
+  approvedById      String?
+  approvedBy        User?               @relation("SampleApprovedBy", fields: [approvedById], references: [id])
+  requestedAt       DateTime            @default(now())
+  approvedAt        DateTime?
+  shippedAt         DateTime?
+  completedAt       DateTime?
+  cancelledAt       DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([creatorId])
+  @@index([campaignId])
+  @@index([status])
+}
+
+model LinkClick {
+  id         String   @id @default(cuid())
+  creatorId  String?
+  creator    Creator? @relation(fields: [creatorId], references: [id])
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  referrer   String?
+  userAgent  String?
+  /// SHA-256 + secret salt — never a raw IP. Null for clicks migrated from
+  /// before this column existed (the old ClickEvent had no IP field at all).
+  ipHash     String?
+  /// The ?ref= value, distinguishing direct vs. referred clicks.
+  refCode    String?
+  createdAt  DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([creatorId])
+}
+
+model SavedCampaign {
+  id         String   @id @default(cuid())
+  creatorId  String
+  creator    Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([creatorId, campaignId])
+}
+
+enum NotificationType {
+  SAMPLE_STATUS_CHANGED
+  SAMPLE_REQUEST_NEW
+  PROFILE_VERIFIED
+  PROFILE_REJECTED
+  CAMPAIGN_NEW
+  CAMPAIGN_ENDING_SOON
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  payload   Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id])
+  action     String
+  targetType String?
+  targetId   String?
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([targetType, targetId])
+}
+
+model ImportRun {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id])
+  summary   Json
+  createdAt DateTime @default(now())
+}
+
+/// Last-run heartbeat per cron job (Phase 8: moved off Redis onto Postgres,
+/// alongside the rest of this rebuild — one row per job, overwritten on every
+/// run, so "did this job ever run" is a lookup, not a scan of audit history.
+model CronRun {
+  job        String   @id
+  status     String
+  startedAt  DateTime
+  finishedAt DateTime
+  durationMs Int
+  removed    Int?
+  expiredSessionsRemoved Int?
+  error      String?
+  details    Json?
+}
+
+/// Fixed-window rate-limit counters (Phase 7: moved off Redis onto Postgres
+/// per an explicit user decision — Redis was the recommended default for this
+/// high-churn counter pattern, but this project runs the counters here
+/// instead). `identity` is never a raw IP — callers hash it first (lib/hash-ip.ts)
+/// before it ever reaches this table. One row per (scope, identity, window).
+model RateLimitBucket {
+  id        String   @id @default(cuid())
+  scope     String
+  identity  String
+  bucket    Int
+  count     Int      @default(0)
+  expiresAt DateTime
+
+  @@unique([scope, identity, bucket])
+  @@index([expiresAt])
+}

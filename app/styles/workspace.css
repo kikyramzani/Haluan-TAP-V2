@@ -40,7 +40,8 @@
   margin-bottom: var(--space-2);
 }
 
-.admin-sidebar button {
+.admin-sidebar button,
+.admin-sidebar a.nav-link {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -54,17 +55,20 @@
   transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
 }
 
-.admin-sidebar button:hover {
+.admin-sidebar button:hover,
+.admin-sidebar a.nav-link:hover {
   background: var(--surface-sunken);
   color: var(--text);
 }
 
-.admin-sidebar button.active {
+.admin-sidebar button.active,
+.admin-sidebar a.nav-link.active {
   background: var(--accent-soft);
   color: var(--accent-strong);
 }
 
-.admin-sidebar button i {
+.admin-sidebar button i,
+.admin-sidebar a.nav-link i {
   font-style: normal;
   width: 18px;
   text-align: center;
@@ -95,6 +99,12 @@
 .admin-main {
   padding: var(--space-8);
   display: grid;
+  /* Explicit minmax(0, 1fr), not the implicit "auto" a bare single-column
+     grid falls back to — "auto" track sizing can still grow to fit a wide
+     child's max-content (e.g. .admin-table's min-width: 720px) even though
+     the child itself has min-width: 0, pushing this track past the viewport
+     at narrow widths instead of letting the child's own overflow-x scroll. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-6);
   align-content: start;
   min-width: 0;
@@ -325,6 +335,8 @@
   color: var(--accent);
 }
 
+/* admin.css duplicates this stat-tile job as .kpi-grid/.kpi — check there
+   before adding a third variant of the same component. */
 .admin-stats,
 .hda-kpis,
 .admin-overview-panels {
@@ -418,7 +430,13 @@
   font-size: var(--text-sm);
 }
 
+/* admin.css duplicates this table job as .table-wrap/.admin-table — check
+   there before adding a third variant of the same component. */
 .admin-table-wrap {
+  /* Grid/flex items default to min-width: auto, so without this the wrapper
+     grows past the viewport to fit the table's own min-width instead of
+     scrolling internally. */
+  min-width: 0;
   overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
@@ -717,14 +735,28 @@
   padding: var(--space-2);
 }
 
-.checkbox {
+/**
+ * Setiap pemakaian nyata dari .checkbox duduk di dalam salah satu 4 pembungkus
+ * form ini, dan aturan umum ".admin-request-form label"/".form-panel label"
+ * dkk. (di bawah) punya spesifisitas lebih tinggi (kelas+elemen) daripada
+ * .checkbox sendirian (satu kelas) — tanpa digabung begini, checkbox-nya
+ * menumpuk vertikal alih-alih sebaris dengan labelnya, sama seperti masalah
+ * .auth-consent yang sudah pernah diperbaiki di bawah.
+ */
+.admin-request-form .checkbox,
+.form-panel .checkbox,
+.profile-form .checkbox,
+.auth-form .checkbox {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
   font-size: var(--text-sm);
 }
 
-.checkbox input {
+.admin-request-form .checkbox input,
+.form-panel .checkbox input,
+.profile-form .checkbox input,
+.auth-form .checkbox input {
   width: auto;
   min-height: 0;
   margin-top: 3px;
@@ -1574,6 +1606,37 @@
   }
 }
 
+/* /dashboard/profil: empat tab, masing-masing dengan Server Action sendiri. */
+.profil-tab-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.profil-tab-nav button {
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+}
+
+.profil-tab-nav button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.profil-tab-nav button.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  font-weight: var(--weight-semibold);
+}
+
 /* ── Keadaan memuat pada halaman sample ──────────────────────────────── */
 
 .sample-skeleton,
@@ -1990,4 +2053,179 @@ main:has(> .form-panel) {
   width: 100%;
   justify-content: center;
   margin-top: var(--space-2);
+}
+
+/* ── Notifikasi creator (/dashboard/notifikasi) ──────────────────────── */
+
+.push-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  margin-bottom: var(--space-6);
+}
+
+.push-toggle b {
+  font-weight: var(--weight-semibold);
+}
+
+.push-toggle p {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  margin-top: 2px;
+  max-width: 52ch;
+}
+
+.push-toggle .form-error {
+  margin-top: var(--space-2);
+}
+
+.notification-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.notification-list {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  text-align: left;
+  transition: border-color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
+}
+
+.notification-item.unread {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  cursor: pointer;
+}
+
+.notification-item.unread:hover {
+  border-color: var(--accent);
+}
+
+.notification-item[disabled] {
+  cursor: default;
+}
+
+.notification-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.notification-item.unread .notification-dot {
+  background: var(--accent);
+}
+
+.notification-body {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-body b {
+  font-weight: var(--weight-semibold);
+}
+
+.notification-body p {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.notification-body time {
+  color: var(--text-subtle);
+  font-size: var(--text-xs);
+}
+
+/* ── /dashboard/sample: per-request card, happy-path stepper, branch states ── */
+
+.sample-request-list {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.sample-request-card {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Reuses .timeline's dot-and-connector list (see the block above) as a
+   4-step happy-path stepper (PENDING → APPROVED → SHIPPED → COMPLETED).
+   These three modifiers are the only thing specific to that use. */
+.sample-progress li.step-done::before {
+  background: var(--positive);
+}
+
+.sample-progress li.step-current::before {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.sample-progress li.step-upcoming {
+  color: var(--text-subtle);
+}
+
+.sample-progress li.step-upcoming::before {
+  background: var(--line-strong);
+}
+
+/* REJECTED/CANCELLED are branch states, not a continuation of the linear
+   happy path above — rendered as their own note instead of a stepper. */
+.sample-branch-note {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+
+.sample-branch-note.branch-rejected {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.sample-branch-note.branch-cancelled {
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+
+.sample-shipping-meta {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.sample-cancel-form {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--space-2);
+}
+
+.status-completed {
+  background: var(--positive-soft);
+  color: var(--positive);
+}
+
+.status-cancelled {
+  background: var(--surface-sunken);
+  color: var(--text-muted);
 }

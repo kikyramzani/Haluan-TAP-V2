@@ -1,15 +1,18 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCampaignCatalog, getTapLinks, pickPrimaryLink } from "../../../lib/campaign-links";
+import { pickPrimaryLink } from "../../../lib/campaign-links";
+import { getCampaignCatalog, getTapLinks } from "../../../lib/catalog-db";
 import { formatCommission } from "../../../lib/commission";
 import { classifyExpiry, expiryLabel, isActionable } from "../../../lib/campaign-flags";
 import { getCurrentUser } from "../../../lib/auth";
+import { prisma } from "../../../lib/db";
 import AffiliateLinkField from "../../components/AffiliateLinkField";
 import BrandMark from "../../components/BrandMark";
 import SiteHeader from "../../components/SiteHeader";
 import SiteFooter from "../../components/SiteFooter";
 import ShareDealButton from "../ShareDealButton";
+import SaveCampaignButton from "./SaveCampaignButton";
 
 type DealPageProps = { params: Promise<{ campaignId: string }> };
 
@@ -63,6 +66,30 @@ export default async function DealDetail({ params }: DealPageProps) {
   const expiryNote = expiryLabel(expiry);
   const stillRunning = isActionable(expiry);
   const user = await getCurrentUser().catch(() => null);
+
+  // Bookmarking (SavedCampaign) keys off the real Prisma Campaign.id, not the
+  // slug this route uses — resolved once here, cheaply, alongside whether
+  // this viewer already saved this exact campaign.
+  let savedCampaignState: { campaignId: string; initialSaved: boolean } | null = null;
+  try {
+    const campaignRow = await prisma.campaign.findUnique({ where: { slug: campaignId }, select: { id: true } });
+    if (campaignRow) {
+      let initialSaved = false;
+      if (user) {
+        const creator = await prisma.creator.findUnique({ where: { userId: user.id }, select: { id: true } });
+        if (creator) {
+          const saved = await prisma.savedCampaign.findUnique({
+            where: { creatorId_campaignId: { creatorId: creator.id, campaignId: campaignRow.id } },
+            select: { id: true },
+          });
+          initialSaved = Boolean(saved);
+        }
+      }
+      savedCampaignState = { campaignId: campaignRow.id, initialSaved };
+    }
+  } catch {
+    savedCampaignState = null;
+  }
 
   return (
     <>
@@ -141,8 +168,16 @@ export default async function DealDetail({ params }: DealPageProps) {
           </section>
         ) : null}
 
-        <div style={{ marginTop: "var(--space-8)" }}>
+        <div style={{ marginTop: "var(--space-8)", display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}>
           <ShareDealButton brand={brand} />
+          {savedCampaignState ? (
+            <SaveCampaignButton
+              campaignId={savedCampaignState.campaignId}
+              initialSaved={savedCampaignState.initialSaved}
+              isSignedIn={Boolean(user)}
+              returnTo={`/deal/${campaignId}`}
+            />
+          ) : null}
         </div>
 
         <p style={{ color: "var(--text-subtle)", fontSize: "var(--text-xs)", marginTop: "var(--space-8)" }}>

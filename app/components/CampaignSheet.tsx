@@ -56,6 +56,7 @@ function SheetContent({ campaign, onClose }: { campaign: Campaign; onClose: () =
   const loading = link === null && !failed;
   const expiry = classifyExpiry(campaign.expiresAt);
   const expiryNote = expiryLabel(expiry);
+  const isShopee = campaign.platform === "Shopee Affiliate";
 
   return (
     <div className="sheet-backdrop" data-open="true">
@@ -85,10 +86,12 @@ function SheetContent({ campaign, onClose }: { campaign: Campaign; onClose: () =
 
         <div className="sheet-body">
           <dl className="sheet-metrics">
-            <div className="metric-tile">
-              <dt>Komisi creator</dt>
-              <dd>{formatCommission(campaign.commission)}</dd>
-            </div>
+            {!isShopee ? (
+              <div className="metric-tile">
+                <dt>Komisi creator</dt>
+                <dd>{formatCommission(campaign.commission)}</dd>
+              </div>
+            ) : null}
             {campaign.hasSample !== null ? (
               <div className="metric-tile">
                 <dt>Sample</dt>

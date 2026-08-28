@@ -1,4 +1,5 @@
-import { cleanupExpiredPendingUsers, reconcileChallengeSettlements, reconcileStalePhoneClaims } from "../../../../lib/auth";
+import { cleanupExpiredPendingUsers } from "../../../../lib/auth";
+import { prisma } from "../../../../lib/db";
 import { recordAudit } from "../../../../lib/audit";
 import { recordCronRun } from "../../../../lib/cron-status";
 
@@ -11,15 +12,28 @@ export async function GET(request: Request) {
   const startedAt = new Date(started).toISOString();
   try {
     const removed = await cleanupExpiredPendingUsers();
-    const phoneClaims = await reconcileStalePhoneClaims();
-    // Housekeeping that a landed commit could not finish is retried here rather
-    // than left for the next person to trip over.
-    const settlements = await reconcileChallengeSettlements();
-    await recordCronRun({ job: "cleanup-users", status: "succeeded", startedAt, finishedAt: new Date().toISOString(), durationMs: Date.now() - started, removed, phoneClaimsRepaired: phoneClaims.repaired, phoneClaimsContended: phoneClaims.contended, settlementsSettled: settlements.settled, settlementsPending: settlements.pending });
+    // Postgres transactions never leave a phone/email claim orphaned or a
+    // challenge commit half-settled the way the old Redis primitives could —
+    // both reconciliation sweeps that used to run here are gone, not just
+    // skipped. Expired sessions are routine housekeeping, not correctness.
+    const expiredSessions = await prisma.session.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+    // Rate-limit buckets (Phase 7, now on Postgres — see lib/rate-limit.ts)
+    // are equally routine: a stale bucket is inert, this just reclaims space.
+    const expiredRateLimits = await prisma.rateLimitBucket.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+    await recordCronRun({
+      job: "cleanup-users",
+      status: "succeeded",
+      startedAt,
+      finishedAt: new Date().toISOString(),
+      durationMs: Date.now() - started,
+      removed,
+      expiredSessionsRemoved: expiredSessions.count,
+      details: { expiredRateLimitBucketsRemoved: expiredRateLimits.count },
+    });
     try {
-      await recordAudit({ actorId: "system:cron", action: "users.cleanup", targetId: "pending-users", after: { removed, phoneClaimsRepaired: phoneClaims.repaired, phoneClaimsContended: phoneClaims.contended, settlementsSettled: settlements.settled, settlementsPending: settlements.pending, durationMs: Date.now() - started } });
+      await recordAudit({ actorId: "system:cron", action: "users.cleanup", targetId: "pending-users", after: { removed, expiredSessionsRemoved: expiredSessions.count, expiredRateLimitBucketsRemoved: expiredRateLimits.count, durationMs: Date.now() - started } });
     } catch { /* Cleanup already succeeded; the trail must not undo it. */ }
-    return Response.json({ removed, phoneClaimsRepaired: phoneClaims.repaired, phoneClaimsContended: phoneClaims.contended, settlementsSettled: settlements.settled, settlementsPending: settlements.pending });
+    return Response.json({ removed, expiredSessionsRemoved: expiredSessions.count, expiredRateLimitBucketsRemoved: expiredRateLimits.count });
   } catch (error) {
     // A failed sweep must be as visible as a successful one.
     await recordCronRun({

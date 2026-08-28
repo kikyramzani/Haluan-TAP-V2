@@ -5,6 +5,14 @@
     {
       "path": "/api/cron/cleanup-users",
       "schedule": "17 2 * * *"
+    },
+    {
+      "path": "/api/cron/expire-campaigns",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/recompute-commission-stats",
+      "schedule": "30 1 * * *"
     }
   ]
 }

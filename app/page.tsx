@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getCampaignCatalog } from "../lib/campaign-links";
+import { getCampaignCatalog } from "../lib/catalog-db";
 import type { Campaign } from "../lib/catalog";
 import { getCurrentUser } from "../lib/auth";
 import SiteHeader from "./components/SiteHeader";

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getCampaignCatalog } from "../../lib/campaign-links";
+import { getCampaignCatalog } from "../../lib/catalog-db";
 import type { Campaign } from "../../lib/catalog";
 import { getCurrentUser } from "../../lib/auth";
 import SiteHeader from "../components/SiteHeader";
@@ -63,7 +63,7 @@ export default async function DealsPage({ searchParams }: Props) {
 TikTok Shop <span className="chip-count">{platform === "tiktok" ? campaigns.length : other} deal live</span>
               </Link>
               <Link
-                className="chip"
+                className="chip chip--shopee-toggle"
                 href="/deals?platform=shopee"
                 aria-pressed={platform === "shopee"}
                 role="button"
@@ -89,6 +89,7 @@ Shopee Affiliate <span className="chip-count">{platform === "shopee" ? campaigns
               campaigns={campaigns}
               initialQuery={params.q ?? ""}
               initialCategory={params.kategori ?? ""}
+              platform={platform}
             />
           )}
         </section>

@@ -1,39 +1,15 @@
 import { datastoreReady, key, redis } from "./redis.ts";
 import { cleanShopeeBrand, extractShopeeUrls, slug } from "./shopee-catalog.ts";
 import { buildCampaignCatalog, buildShopeeCampaigns, compareCampaigns, parseCsv } from "./catalog.ts";
-import type { CatalogIssue } from "./catalog.ts";
 import { parseCommissionCell } from "./commission.ts";
 import { buildBrandMetrics, lookupBrandMetric } from "./brand-metrics.ts";
-import { mergeCatalog, overridePlatform } from "./catalog-overrides.ts";
-import type { OverridePlatform } from "./catalog-overrides.ts";
-import { safeListOverrides } from "./catalog-store.ts";
-import { brandKey, brandSlug } from "./brand-key.ts";
+import { brandSlug } from "./brand-key.ts";
 
 const DEVELOPMENT_SHEET_CSV = "https://docs.google.com/spreadsheets/d/1uPzMJ1S7RAYgZagFAyT1gE2O7SPcTQCKc5852H1i4mQ/export?format=csv&gid=0";
 const DEVELOPMENT_SHOPEE_CSV = "https://docs.google.com/spreadsheets/d/17XSBE_G3-3nmx86OWeqykFDShgoxgwb-1aIf8QnVvPc/export?format=csv&gid=0";
 const REDIS_CAMPAIGN_CSV_KEY = key("campaign-links", "csv");
 const REDIS_SHOPEE_CSV_KEY = key("campaign-links", "shopee", "csv");
 const REDIS_BRAND_METRICS_CSV_KEY = key("brand-metrics", "csv");
-
-export async function campaignLinkSourceReady() {
-  if (process.env.CAMPAIGN_LINKS_CSV_URL) return true;
-  if (process.env.CAMPAIGN_LINKS_STORAGE === "redis") {
-    if (!datastoreReady()) return false;
-    try { return Number(await redis<number>("EXISTS", REDIS_CAMPAIGN_CSV_KEY)) === 1; }
-    catch { return false; }
-  }
-  return Boolean(process.env.CAMPAIGN_LINKS_CSV_URL) || process.env.NODE_ENV !== "production";
-}
-
-export async function shopeeCampaignSourceReady() {
-  if (process.env.SHOPEE_CAMPAIGNS_CSV_URL) return true;
-  if (process.env.SHOPEE_CAMPAIGNS_STORAGE === "redis") {
-    if (!datastoreReady()) return false;
-    try { return Number(await redis<number>("EXISTS", REDIS_SHOPEE_CSV_KEY)) === 1; }
-    catch { return false; }
-  }
-  return process.env.NODE_ENV !== "production";
-}
 
 function campaignLinkSource() {
   const source = process.env.CAMPAIGN_LINKS_CSV_URL || (process.env.NODE_ENV !== "production" ? DEVELOPMENT_SHEET_CSV : "");
@@ -92,97 +68,24 @@ async function loadCampaignCsv(platform: "tiktok" | "shopee") {
 }
 
 /**
- * Katalog publik: sheet → metrik brand → override admin.
+ * Katalog publik: sheet → metrik brand.
  *
- * Override diterapkan paling akhir supaya suntingan CMS selalu menang atas
- * nilai sheet, dan sinkronisasi ulang tidak pernah menghapusnya.
+ * Kept only for scripts/migrate-catalog.mjs's ops-fallback re-migration path
+ * (Phase 8 — every live page reads Postgres via lib/catalog-db.ts instead).
+ * The admin-override merge layer that used to run last here is gone: the old
+ * Redis-backed CampaignOverride CMS never had any real data (confirmed before
+ * Phase 2's migration) and was fully replaced by the Postgres-backed
+ * /admin/campaign, /admin/brand, etc. in Phase 4 — there is no longer any
+ * write path that could ever populate an override.
  */
 export async function getCampaignCatalog(platform: "tiktok" | "shopee") {
   if (platform === "shopee") {
-    const [csv, overrides] = await Promise.all([loadCampaignCsv(platform), safeListOverrides()]);
-    const campaigns = buildShopeeCampaigns(csv);
-    // Shopee tidak pernah menerima campaign buatan admin: bentuknya TikTok,
-    // lengkap dengan komisi yang sheet Shopee sendiri tidak punya.
-    return overrides.size
-      ? mergeCatalog(campaigns, overrides, { platform: "shopee", allowManual: false })
-      : campaigns;
+    const csv = await loadCampaignCsv(platform);
+    return buildShopeeCampaigns(csv);
   }
-  const [csv, resolveMetric, overrides] = await Promise.all([
-    loadCampaignCsv(platform),
-    getBrandMetricResolver(),
-    safeListOverrides(),
-  ]);
+  const [csv, resolveMetric] = await Promise.all([loadCampaignCsv(platform), getBrandMetricResolver()]);
   const { campaigns } = buildCampaignCatalog(csv, resolveMetric);
-  return overrides.size
-    ? mergeCatalog(campaigns, overrides, { platform: "tiktok" }).sort(compareCampaigns)
-    : campaigns;
-}
-
-/**
- * Katalog untuk CMS: hasil akhir, nilai mentah sheet, baris yang ditolak
- * parser, dan seluruh override — beserta kunci brand yang menghubungkannya.
- *
- * Kuncinya dihitung di server. Kalau klien menebaknya sendiri, sebuah brand
- * yang namanya baru saja diganti admin akan kehilangan jejak ke override-nya.
- */
-export async function getCampaignCatalogWithIssues(platform: OverridePlatform = "tiktok") {
-  const isShopee = platform === "shopee";
-  const [csv, resolveMetric, overrides] = await Promise.all([
-    loadCampaignCsv(platform),
-    isShopee ? Promise.resolve(undefined) : getBrandMetricResolver(),
-    safeListOverrides(),
-  ]);
-
-  // Sheet Shopee tidak punya kolom komisi, jadi tidak ada baris yang bisa
-  // ditolak parser komisi: daftar isu-nya memang kosong, bukan disembunyikan.
-  const built = isShopee
-    ? { campaigns: buildShopeeCampaigns(csv), issues: [] as CatalogIssue[] }
-    : buildCampaignCatalog(csv, resolveMetric);
-  const { campaigns, issues } = built;
-
-  const merged = overrides.size
-    ? mergeCatalog(campaigns, overrides, { platform, allowManual: !isShopee }).sort(compareCampaigns)
-    : campaigns;
-
-  /** Override milik platform ini saja, dikunci ulang dengan kunci brand polos. */
-  const scoped = new Map(
-    [...overrides.values()]
-      .filter((item) => overridePlatform(item) === platform)
-      .map((item) => [brandKey(item.brandKey), item] as const),
-  );
-
-  const sheetByKey = new Map(campaigns.map((campaign) => [brandKey(campaign.brand), campaign]));
-  const rows = merged.map((campaign) => {
-    // Sebuah kartu bisa berasal dari baris sheet atau dari campaign buatan
-    // admin; keduanya dicari lewat kunci yang sama.
-    const renamed = [...scoped.values()].find((item) => brandSlug(item.displayName ?? item.brandKey) === campaign.id);
-    const key = renamed ? brandKey(renamed.brandKey) : brandKey(campaign.brand);
-    const sheet = sheetByKey.get(key);
-    return {
-      key,
-      campaign,
-      sheet: sheet
-        ? { commission: sheet.commission, tierCommissions: sheet.tierCommissions, category: sheet.category, hasSample: sheet.hasSample }
-        : null,
-      override: scoped.get(key) ?? null,
-    };
-  });
-
-  // Brand yang disembunyikan tidak muncul di katalog, tapi admin tetap harus
-  // bisa melihat dan membatalkannya.
-  for (const [key, override] of scoped) {
-    if (rows.some((row) => row.key === key)) continue;
-    const sheet = sheetByKey.get(key);
-    if (!sheet) continue;
-    rows.push({
-      key,
-      campaign: sheet,
-      sheet: { commission: sheet.commission, tierCommissions: sheet.tierCommissions, category: sheet.category, hasSample: sheet.hasSample },
-      override,
-    });
-  }
-
-  return { rows, issues, overrideCount: scoped.size, platform };
+  return campaigns.sort(compareCampaigns);
 }
 
 /**
@@ -217,40 +120,6 @@ export function pickPrimaryLink(links: readonly TapLink[]): TapLink | null {
     if (best === null || link.commission < (best.commission as number)) best = link;
   }
   return best ?? links[0];
-}
-
-/**
- * Menempelkan suntingan admin ke daftar link sebuah brand: TAP link yang
- * diperbaiki, label yang diganti, dan campaign yang seluruhnya dibuat manual.
- * Tanpa ini, CMS bisa menampilkan link yang tidak pernah dipakai `/go`.
- */
-function applyLinkOverrides(
-  brand: string,
-  links: TapLink[],
-  overrides: Map<string, import("./catalog-overrides.ts").CampaignOverride>,
-) {
-  const override = overrides.get(brandKey(brand));
-  if (!override) return links;
-  if (override.hidden) return [];
-
-  const patched = links.map((link, index) => {
-    const edit = override.tiers?.find((tier) => tier.index === index);
-    if (!edit) return link;
-    return {
-      ...link,
-      url: edit.tapLink?.trim() || link.url,
-      label: edit.label?.trim() || link.label,
-      // Komisi hasil suntingan ikut dibawa, supaya link yang terpilih bergerak
-      // bersama angka yang diubah admin.
-      commission: edit.commission !== undefined ? edit.commission : link.commission,
-    };
-  });
-
-  for (const tier of override.manualTiers ?? []) {
-    if (!/^https:\/\//i.test(tier.tapLink)) continue;
-    patched.push({ url: tier.tapLink, brand, label: tier.label, hasSample: tier.hasSample, expiresAt: null, commission: tier.commission });
-  }
-  return patched;
 }
 
 export async function getTapLinks(campaignId: string) {
@@ -335,20 +204,10 @@ export async function getTapLinks(campaignId: string) {
     } catch { /* abaikan link rusak */ }
   }
 
-  // Brand buatan admin tidak punya baris di sheet, jadi namanya diambil dari
-  // override yang slug-nya cocok dengan campaignId.
-  const overrides = await safeListOverrides();
-  const brandName = links[0]?.brand
-    ?? [...overrides.values()].find((item) => brandSlug(item.displayName ?? item.brandKey) === campaignId)?.displayName;
-  return brandName ? applyLinkOverrides(brandName, links, overrides) : links;
+  return links;
 }
 
 /** Link tunggal yang ditawarkan untuk sebuah brand: komisi terkecil. */
 export async function getPrimaryTapLink(campaignId: string) {
   return pickPrimaryLink(await getTapLinks(campaignId));
-}
-
-export async function isSampleAvailable(brand:string,platform="TikTok"){
-  const links=await getTapLinks(`${platform.toLowerCase()==="shopee"?"shopee-":""}${slug(brand)}`);
-  return links.some(link=>link.hasSample);
 }

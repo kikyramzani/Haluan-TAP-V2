@@ -1,6 +1,5 @@
 import { getCurrentUser, publicUser, updateProfile } from "../../../lib/auth";
 import { cleanText, sameOrigin } from "../../../lib/security";
-import { isMutationConflict } from "../../../lib/mutation";
 import type { TapUser } from "../../../lib/models";
 
 type ProfileInput = Partial<Pick<TapUser, "name" | "phone" | "tiktokUsername" | "shopeeUsername" | "niche" | "followers" | "gmv" | "recipientName" | "address">>;
@@ -41,7 +40,6 @@ export async function PATCH(request: Request) {
     // a missing account, not a failed save, and the difference decides whether the
     // visitor should retry or sign in again.
     if (error instanceof Error && error.message === "USER_NOT_FOUND") return Response.json({ error: "Akun tidak ditemukan. Silakan masuk kembali." }, { status: 404 });
-    if (isMutationConflict(error)) return Response.json({ error: "Profil sedang disimpan dari perangkat lain. Coba lagi." }, { status: 409 });
     return Response.json({ error: "Profil gagal disimpan." }, { status: 500 });
   }
 }

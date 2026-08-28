@@ -35,13 +35,17 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
   const hasCommission = campaign.commission !== null;
   const benefits = promotable
     ? [
+        // Shopee tidak pernah menampilkan angka komisi (lihat komentar di atas
+        // deal-benefits di bawah), jadi badge ini yang menggantikan perannya —
+        // bukan data per campaign, selalu ada selama campaign-nya promotable.
+        isShopee ? "Komisi Special" : null,
         campaign.hasSample === true ? "Sample tersedia" : null,
         campaign.specialLivePrice ? "Harga live khusus" : null,
       ].filter((benefit): benefit is string => benefit !== null)
     : [];
 
   return (
-    <article className={`deal-card${actionable ? "" : " deal-card-expired"}`}>
+    <article className={`deal-card${actionable ? "" : " deal-card-expired"}${isShopee ? " deal-card--shopee" : " deal-card--tiktok"}`}>
       <div className="deal-card-head">
         <BrandMark brand={campaign.brand} logoOverride={campaign.image} priority={priority} />
         <div className="deal-identity">
@@ -71,7 +75,6 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
           ) : (
             <p className="deal-benefit-empty">Belum ada benefit yang dikonfirmasi brand.</p>
           )}
-          <span className="deal-commission-label">Komisi mengikuti ketentuan Shopee</span>
         </div>
       ) : (
         <div className={`deal-commission${hasCommission ? "" : " deal-commission-unknown"}`}>
@@ -110,7 +113,7 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
               onOpen(campaign);
             }}
           >
-            Dapatkan komisi <span aria-hidden="true">↗</span>
+            {isShopee ? "Lihat campaign" : "Dapatkan komisi"} <span aria-hidden="true">↗</span>
           </button>
         ) : (
           <span className="deal-cta" aria-disabled="true">

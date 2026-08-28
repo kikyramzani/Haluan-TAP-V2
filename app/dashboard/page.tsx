@@ -1,42 +1,175 @@
 import Link from "next/link";
-import Image from "next/image";
 import { requireUser } from "../../lib/auth";
-import { listUserSampleRequests } from "../../lib/requests";
-import { logoutAction } from "../logout-action";
-import ProfileForm from "./ProfileForm";
+import { prisma } from "../../lib/db";
+import { computeProfileCompleteness } from "../../lib/profile-completeness";
+import { scoreCampaignForCreator, topQuartileThreshold } from "../../lib/recommendation";
+import { campaignCommissionLabel, minMaxCommission } from "../../lib/commission-display";
 
-const actions = [
-  { href: "/deals", icon: "↗", label: "Buka katalog", title: "Cari link komisi", copy: "Bandingkan rate Haluan dan pilih deal yang paling cocok untuk kontenmu." },
-  { href: "/request-sample", icon: "+", label: "Ajukan sample", title: "Request product sample", copy: "Kirim kebutuhan sample dan pantau statusnya langsung di dashboard." },
-  { href: "/dashboard#profile", icon: "→", label: "Lengkapi profil", title: "Naikkan peluang approval", copy: "Tambahkan akun TikTok, niche, followers, GMV, dan data pengiriman." },
-];
+const RECOMMENDATION_COUNT = 4;
+const ENDING_SOON_DAYS_WINDOW = 60; // only bother computing "days until end" for campaigns ending reasonably soon
 
-export default async function CreatorDashboard({searchParams}:{searchParams:Promise<{error?:string}>}) {
+export default async function CreatorDashboard({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   const user = await requireUser("/dashboard");
-  let requests = [] as Awaited<ReturnType<typeof listUserSampleRequests>>;
-  try { requests = await listUserSampleRequests(user.id); } catch { requests = []; }
-  const profileFields = [user.tiktokUsername || user.shopeeUsername, user.niche, user.followers, user.recipientName, user.address];
-  const completeness = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 75 + 25);
-  const membershipLabel = user.membership === "verified" ? "MCN terverifikasi" : user.membership === "rejected" ? "Verifikasi perlu diperbaiki" : "Menunggu verifikasi MCN";
 
-  return <main className="creator-app">
-    <nav className="creator-topbar shell">
-      <Link className="brand" href="/"><Image src="/haluan-logo.png" alt="Haluan Digital Network" width={107} height={35}/><span className="brand-divider"/><strong>TAP</strong></Link>
-      <div className="creator-user"><span><b>{user.name}</b><small>{membershipLabel}</small></span><i>{user.name.slice(0,1).toUpperCase()}</i><form action={logoutAction}><button type="submit">Keluar</button></form></div>
-    </nav>
-    <section className="dashboard-shell shell">
-      <aside className="creator-sidebar"><span className="sidebar-label">WORKSPACE</span><a className="active" href="/dashboard"><i>⌂</i> Overview</a><a href="/deals"><i>⌁</i> Link komisi</a><a href="/request-sample"><i>+</i> Request sample</a><a href="#profile"><i>○</i> Profil creator</a>{user.role === "admin" && <a href="/admin"><i>◆</i> Admin</a>}<div className="sidebar-help"><b>Butuh bantuan?</b><p>Tim Haluan siap membantu proses aktivasi akunmu.</p><a href="mailto:hello@haluandigital.agency">Hubungi tim ↗</a></div></aside>
-      <div className="creator-content">
-        {error === "membership_pending" && <div className="dashboard-alert" role="alert"><b>Request sample belum dapat diajukan.</b><span>Link etalase tetap dapat dibuka. Lengkapi profil agar tim dapat memverifikasi akunmu untuk request sample.</span><a href="#profile">Lengkapi profil →</a></div>}
-        {error === "forbidden" && <div className="dashboard-alert" role="alert"><b>Akses admin tidak tersedia.</b><span>Akun ini terdaftar sebagai creator.</span></div>}
-        <header className="dashboard-welcome"><div><span className="eyebrow"><span className="live-dot"/> Creator dashboard</span><h1>Halo, <em>{user.name.split(" ")[0]}.</em></h1><p>Satu tempat untuk membuka extra commission, mengajukan sample, dan memantau aktivitas affiliate kamu.</p></div><a href="/deals">Lihat deal aktif <span>↗</span></a></header>
-        <div className={`activation-card ${user.membership === "verified" ? "verified" : ""}`}><div className="activation-score">{completeness}<small>%</small></div><div><span>{membershipLabel.toUpperCase()}</span><h2>{user.membership === "verified" ? "Akunmu siap untuk request sample." : "Lengkapi profil untuk mempercepat verifikasi."}</h2><p>{user.membership === "verified" ? "Kamu dapat mengajukan sample dan memantau statusnya dari dashboard." : "Tim Haluan akan mencocokkan akun ini dengan master creator MCN."}</p></div><a href="#profile">{completeness === 100 ? "Perbarui profil" : "Lengkapi sekarang"} →</a></div>
-        <section className="dashboard-section"><div className="dashboard-title"><div><span>AKTIVITAS SAMPLE</span><h2>Request terbaru</h2></div><small>{requests.length} request</small></div>{requests.length ? <div className="request-timeline">{requests.slice(0,5).map((item)=><article key={item.id}><div><b>{item.brand}</b><small>{item.id} · {new Date(item.createdAt).toLocaleDateString("id-ID")}</small></div><span className={`status-${item.status}`}>{item.status.replace("_", " ")}</span></article>)}</div> : <div className="dashboard-empty"><b>Belum ada request sample.</b><p>Pilih campaign dengan badge sample, lalu ajukan setelah membership terverifikasi.</p><Link href="/request-sample">Cari sample tersedia →</Link></div>}</section>
-        <section className="product-intel"><div className="intel-copy"><span>PRODUCT INTELLIGENCE · WEEKLY</span><h2>Product of the Week</h2><p>Rekomendasi menggabungkan momentum penjualan, pertumbuhan creator, tingkat kompetisi, extra commission TAP, dan kesiapan sample.</p><div className="intel-sources"><b>FastMoss</b><b>Kalodata</b><b>TAP first-party data</b></div></div><div className="intel-score"><div className="intel-lock">⌁</div><span>DATA CONNECTOR</span><strong>Analisis hanya tayang<br/>setelah sumber terverifikasi.</strong><small>TAP tidak mempublikasikan angka estimasi sebagai data penjualan aktual.</small><button type="button" disabled>Coming soon</button></div></section>
-        <section className="dashboard-section"><div className="dashboard-title"><div><span>MULAI DARI SINI</span><h2>Apa yang ingin kamu lakukan?</h2></div><small>3 akses utama</small></div><div className="dashboard-actions">{actions.map((item)=><article key={item.title}><i>{item.icon}</i><h3>{item.title}</h3><p>{item.copy}</p><a href={item.href}>{item.label} <span>→</span></a></article>)}</div></section>
-        <section className="profile-preview" id="profile"><div><span className="kicker">PROFIL CREATOR</span><h2>Data yang tepat.<br/>Approval lebih cepat.</h2><p>Data performa dipakai untuk matching campaign. Alamat hanya dipakai untuk pengiriman sample.</p></div><ProfileForm user={user}/></section>
+  const creator = await prisma.creator.findUniqueOrThrow({
+    where: { userId: user.id },
+    include: { address: true, categories: true },
+  });
+
+  const [campaignActiveCount, sampleRequestCount, sampleApprovedCount, savedCampaignCount] = await Promise.all([
+    prisma.campaign.count({ where: { status: "ACTIVE" } }),
+    prisma.sampleRequest.count({ where: { creatorId: creator.id } }),
+    prisma.sampleRequest.count({ where: { creatorId: creator.id, status: { in: ["APPROVED", "SHIPPED", "COMPLETED"] } } }),
+    prisma.savedCampaign.count({ where: { creatorId: creator.id } }),
+  ]);
+
+  const completeness = computeProfileCompleteness({
+    name: user.name,
+    phone: user.phone,
+    provinceId: creator.address?.provinceId,
+    regencyId: creator.address?.regencyId,
+    districtId: creator.address?.districtId,
+    villageId: creator.address?.villageId,
+    detailAddress: creator.address?.detailAddress,
+    postalCode: creator.address?.postalCode,
+    recipientPhone: creator.address?.recipientPhone,
+  });
+
+  const recommendations = await buildRecommendations(creator.id, creator.categories.map((c) => c.categoryId));
+
+  const membershipLabel = user.membership === "verified" ? "MCN terverifikasi" : user.membership === "rejected" ? "Verifikasi perlu diperbaiki" : user.membership === "suspended" ? "Akun ditangguhkan" : "Menunggu verifikasi MCN";
+
+  return (
+    <>
+      {error === "membership_pending" ? (
+        <div className="dashboard-alert" role="alert">
+          <b>Request sample belum dapat diajukan.</b>
+          <span>Link etalase tetap dapat dibuka. Lengkapi profil agar tim dapat memverifikasi akunmu untuk request sample.</span>
+          <Link href="/dashboard/profil">Lengkapi profil →</Link>
+        </div>
+      ) : null}
+      {error === "forbidden" ? (
+        <div className="dashboard-alert" role="alert">
+          <b>Akses admin tidak tersedia.</b>
+          <span>Akun ini terdaftar sebagai creator.</span>
+        </div>
+      ) : null}
+
+      <header className="dashboard-welcome">
+        <div>
+          <span className="eyebrow">
+            <span className="live-dot" /> Creator dashboard
+          </span>
+          <h1>
+            Halo, <em>{user.name.split(" ")[0]}.</em>
+          </h1>
+          <p>Satu tempat untuk membuka extra commission, mengajukan sample, dan memantau aktivitas affiliate kamu.</p>
+        </div>
+        <Link href="/deals">
+          Lihat deal aktif <span>↗</span>
+        </Link>
+      </header>
+
+      <div className={`activation-card ${user.membership === "verified" ? "verified" : ""}`}>
+        <div className="activation-score">
+          {completeness.percent}
+          <small>%</small>
+        </div>
+        <div>
+          <span>{membershipLabel.toUpperCase()}</span>
+          <h2>{user.membership === "verified" ? "Akunmu siap untuk request sample." : "Lengkapi profil untuk mempercepat verifikasi."}</h2>
+          <p>{completeness.complete ? "Profil sudah lengkap. Tim Haluan akan memverifikasi keanggotaan MCN kamu." : `Masih perlu: ${completeness.missingFields.join(", ")}.`}</p>
+        </div>
+        <Link href="/dashboard/profil">{completeness.percent === 100 ? "Perbarui profil" : "Lengkapi sekarang"} →</Link>
       </div>
-    </section>
-  </main>;
+
+      <section className="admin-stats" aria-label="Statistik akun">
+        <article>
+          <span>Campaign Aktif</span>
+          <strong>{campaignActiveCount}</strong>
+        </article>
+        <article>
+          <span>Sample Request</span>
+          <strong>{sampleRequestCount}</strong>
+        </article>
+        <article>
+          <span>Sample Approved</span>
+          <strong>{sampleApprovedCount}</strong>
+        </article>
+        <article>
+          <span>Saved Campaign</span>
+          <strong>{savedCampaignCount}</strong>
+        </article>
+      </section>
+
+      <section className="dashboard-section">
+        <div className="dashboard-title">
+          <div>
+            <span>UNTUK KAMU</span>
+            <h2>Deal yang cocok dengan kamu</h2>
+          </div>
+          <Link href="/deals">Lihat semua ↗</Link>
+        </div>
+        {recommendations.length ? (
+          <div className="deal-grid">
+            {recommendations.map((item) => (
+              <Link key={item.slug} className="deal-card" href={`/deal/${item.slug}`}>
+                <b>{item.brandName}</b>
+                <small>
+                  {item.categoryName} · {item.platform === "SHOPEE_AFFILIATE" ? "Shopee" : "TikTok Shop"}
+                </small>
+                <strong>{item.commissionLabel}</strong>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="dashboard-empty">
+            <b>Belum ada rekomendasi.</b>
+            <p>Lengkapi kategori kontenmu di profil supaya kami bisa mencocokkan deal yang relevan.</p>
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
+
+async function buildRecommendations(creatorId: string, creatorCategoryIds: string[]) {
+  const [clickedBrandRows, campaigns] = await Promise.all([
+    prisma.linkClick.findMany({ where: { creatorId }, select: { campaign: { select: { brandId: true } } }, distinct: ["campaignId"] }),
+    prisma.campaign.findMany({
+      where: { status: "ACTIVE" },
+      include: { brand: { include: { category: true } }, tiers: true },
+    }),
+  ]);
+  const clickedBrandIds = new Set(clickedBrandRows.map((row) => row.campaign.brandId));
+
+  const allRates = campaigns
+    .filter((c) => c.commissionType === "PERSENTASE")
+    .flatMap((c) => c.tiers.map((t) => (t.commission === null ? null : Number(t.commission))))
+    .filter((rate): rate is number => rate !== null);
+  const threshold = topQuartileThreshold(allRates);
+
+  const now = Date.now();
+  const scored = campaigns.map((campaign) => {
+    const { min: minCommission } = minMaxCommission(campaign.tiers);
+    const daysUntilEnd = campaign.validUntil ? Math.round((campaign.validUntil.getTime() - now) / 86_400_000) : null;
+    const score = scoreCampaignForCreator({
+      categoryMatches: Boolean(campaign.brand.categoryId && creatorCategoryIds.includes(campaign.brand.categoryId)),
+      brandPreviouslyClicked: clickedBrandIds.has(campaign.brandId),
+      hasSample: campaign.hasSample,
+      isTopQuartileCommission: threshold !== null && minCommission !== null && minCommission >= threshold,
+      daysUntilEnd: daysUntilEnd !== null && daysUntilEnd <= ENDING_SOON_DAYS_WINDOW ? daysUntilEnd : null,
+    });
+    return {
+      slug: campaign.slug,
+      brandName: campaign.brand.displayName,
+      categoryName: campaign.brand.category?.name ?? "Lainnya",
+      platform: campaign.platform,
+      commissionLabel: campaignCommissionLabel({ commissionType: campaign.commissionType, commission: minCommission }),
+      score,
+    };
+  });
+
+  return scored.sort((a, b) => b.score - a.score).slice(0, RECOMMENDATION_COUNT);
 }

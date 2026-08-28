@@ -2,11 +2,12 @@
   <defs>
     <linearGradient id="hMark" x1="77" y1="77" x2="435" y2="435" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#d81280" />
+      <stop offset="0.5" stop-color="#a855f7" />
       <stop offset="1" stop-color="#66d7e8" />
     </linearGradient>
   </defs>
-  <rect width="512" height="512" fill="#08080a" />
-  <rect x="77" y="77" width="72" height="358" fill="url(#hMark)" />
-  <rect x="363" y="77" width="72" height="358" fill="url(#hMark)" />
-  <rect x="77" y="220" width="358" height="72" fill="url(#hMark)" />
+  <rect width="512" height="512" rx="112" ry="112" fill="#08080a" />
+  <rect x="77" y="77" width="72" height="358" rx="36" ry="36" fill="url(#hMark)" />
+  <rect x="363" y="77" width="72" height="358" rx="36" ry="36" fill="url(#hMark)" />
+  <rect x="77" y="220" width="358" height="72" rx="36" ry="36" fill="url(#hMark)" />
 </svg>

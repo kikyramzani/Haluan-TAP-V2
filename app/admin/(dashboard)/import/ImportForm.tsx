@@ -32,8 +32,8 @@ export default function ImportForm() {
       </a>
       <form action={previewAction}>
         <label>
-          <span>Tempel CSV brand (kolom: name, category, logoUrl, hidden, featured)</span>
-          <textarea name="csv" rows={8} placeholder={"name,category,logoUrl,hidden,featured\nMS Glow,Beauty & Health,/brand-logos/ms-glow.webp,false,true"} />
+          <span>Tempel CSV brand (kolom: nama, kategori, logo, sembunyikan, unggulan)</span>
+          <textarea name="csv" rows={8} placeholder={"nama,kategori,logo,sembunyikan,unggulan\nMS Glow,Beauty & Health,/brand-logos/ms-glow.webp,FALSE,TRUE"} />
         </label>
         <label>
           <span>…atau unggah file CSV</span>

@@ -283,6 +283,44 @@
   font-size: var(--text-sm);
 }
 
+/* Blok penjelasan singkat untuk pengisi non-teknis (mis. panduan kolom CSV
+   import) — beda dari .admin-panel-empty (khusus status "belum ada data") dan
+   .field-hint (satu baris di bawah satu input saja). */
+.admin-note {
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--surface-sunken);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-6);
+}
+
+.admin-note b {
+  color: var(--text);
+}
+
+.admin-note ul {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-1-5);
+}
+
+.admin-note p {
+  margin: var(--space-3) 0 0;
+}
+
+.admin-note code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--text-xs);
+  padding: 1px var(--space-1-5);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
 /* ── Panel, KPI, dan tabel admin ─────────────────────────────────────── */
 
 .admin-panel,

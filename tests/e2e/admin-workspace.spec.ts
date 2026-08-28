@@ -199,7 +199,7 @@ test("template CSV import bisa diunduh dan langsung lolos pratinjau tanpa error"
   // new — that's not a parse failure, so only Gagal (and total rows) matter.
   await superPage.locator('textarea[name="csv"]').fill(templateCsv);
   await superPage.getByRole("button", { name: "Pratinjau" }).click();
-  await expect(superPage.getByRole("heading", { name: "2 baris dibaca" })).toBeVisible();
+  await expect(superPage.getByRole("heading", { name: "3 baris dibaca" })).toBeVisible();
   const kpis = superPage.locator(".admin-stats .kpi");
   await expect(kpis.filter({ hasText: "Gagal" }).locator("dd")).toHaveText("0");
 

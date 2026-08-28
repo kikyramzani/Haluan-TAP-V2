@@ -24,6 +24,18 @@ export default async function AdminImportPage() {
         </div>
       </div>
 
+      <div className="admin-note">
+        <b>Cara mengisi template CSV</b>
+        <ul>
+          <li><b>nama</b> — wajib diisi, persis seperti nama brand yang ingin ditampilkan.</li>
+          <li><b>kategori</b> — opsional. Harus sama persis dengan salah satu kategori di halaman Kategori. Kalau tidak cocok, brand tetap masuk tapi tanpa kategori — bisa dirapikan lagi belakangan.</li>
+          <li><b>logo</b> — opsional, boleh dikosongkan dulu. Logo bisa diunggah manual dari halaman detail brand kapan saja.</li>
+          <li><b>sembunyikan</b> — isi <code>TRUE</code> kalau brand ini belum boleh tampil ke publik, atau kosongkan/<code>FALSE</code> kalau boleh tampil.</li>
+          <li><b>unggulan</b> — isi <code>TRUE</code> kalau brand ini ingin ditonjolkan sebagai unggulan.</li>
+        </ul>
+        <p>Nama brand yang sama muncul dua kali di file yang sama akan ditolak — cukup satu baris per brand.</p>
+      </div>
+
       <ImportForm />
 
       <div className="panel-heading" style={{ marginTop: "var(--space-8)" }}>

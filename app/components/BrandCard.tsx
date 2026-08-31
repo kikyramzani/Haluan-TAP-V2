@@ -5,6 +5,8 @@ import type { Campaign } from "../../lib/catalog";
 import { classifyExpiry, expiryLabel, isActionable, isPromotable } from "../../lib/campaign-flags";
 import { formatCommission } from "../../lib/commission";
 import BrandMark from "./BrandMark";
+import Icon from "./Icon";
+import HotBadge, { liveHotBadge } from "./HotBadge";
 
 type Props = {
   campaign: Campaign;
@@ -33,6 +35,7 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
   const expiryNote = expiryLabel(expiry);
   const isShopee = campaign.platform === "Shopee Affiliate";
   const hasCommission = campaign.commission !== null;
+  const hotBadge = liveHotBadge(campaign);
   const benefits = promotable
     ? [
         // Shopee tidak pernah menampilkan angka komisi (lihat komentar di atas
@@ -51,7 +54,7 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
         <div className="deal-identity">
           <h3 className="deal-brand-name">{campaign.brand}</h3>
           <p className="deal-category">
-            {campaign.category} · {campaign.campaignCount} campaign
+            <Icon name="tag" /> {campaign.category} · {campaign.campaignCount} campaign
           </p>
           {/* Menempel pada kategori, bukan di baris badge bawah: SKU baru adalah
               keterangan tentang brandnya, bukan status campaign seperti sample
@@ -68,7 +71,7 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
             <ul>
               {benefits.map((benefit) => (
                 <li key={benefit}>
-                  <span aria-hidden="true">✓</span> {benefit}
+                  <Icon name="check" /> {benefit}
                 </li>
               ))}
             </ul>
@@ -78,24 +81,21 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
         </div>
       ) : (
         <div className={`deal-commission${hasCommission ? "" : " deal-commission-unknown"}`}>
+          {hasCommission ? <span className="badge badge-neutral deal-commission-tag">Komisi creator</span> : null}
           <span className="deal-commission-value">{formatCommission(campaign.commission)}</span>
-          <span className="deal-commission-label">
-            {hasCommission ? (
-              <>
-                Komisi creator
-                {campaign.campaignCount > 1 ? <> · mulai dari</> : null}
-              </>
-            ) : (
-              <>Komisi belum terbaca dari sheet</>
-            )}
-          </span>
+          {hasCommission ? (
+            campaign.campaignCount > 1 ? <span className="deal-commission-note">mulai dari komisi terendah</span> : null
+          ) : (
+            <span className="deal-commission-note">Komisi belum terbaca dari sheet</span>
+          )}
         </div>
       )}
 
       <div className="deal-flags">
+        {hotBadge ? <HotBadge badge={hotBadge} /> : null}
         {!isShopee && promotable && campaign.hasSample === true ? (
           <span className="badge badge-sample">
-            <span aria-hidden="true">✓</span> Sample tersedia
+            <Icon name="check" /> Sample tersedia
           </span>
         ) : null}
         {expiryNote ? (
@@ -113,7 +113,7 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
               onOpen(campaign);
             }}
           >
-            {isShopee ? "Lihat campaign" : "Dapatkan komisi"} <span aria-hidden="true">↗</span>
+            {isShopee ? "Lihat campaign" : "Dapatkan komisi"} <Icon name="arrow-up-right" />
           </button>
         ) : (
           <span className="deal-cta" aria-disabled="true">

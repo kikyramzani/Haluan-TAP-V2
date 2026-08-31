@@ -51,11 +51,22 @@ svg {
   max-width: 100%;
 }
 
-h1,
+/* Archivo cuma untuk h1 — dipakai di setiap heading, di layar mobile dengan
+   5+ heading bertumpuk (hero, proof-bar, SKU baru, kepala katalog, FAQ)
+   ketebalan geometrisnya berulang dan malah saling bersaing, bukan menonjol
+   sekali seperti mestinya. */
+h1 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+  text-wrap: balance;
+}
+
 h2,
 h3,
 h4 {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-tight);
   margin: 0;
@@ -162,8 +173,11 @@ p {
   transform: scale(0.98);
 }
 
+/* Gradasi yang sama dengan .deal-cta — keduanya tombol utama, dan memberi
+   gradasi ke salah satunya saja akan membuat CTA header terlihat beda dari
+   CTA kartu. */
 .btn-primary {
-  background: var(--cta);
+  background: var(--gradient-cta);
   color: var(--cta-contrast);
 }
 
@@ -199,6 +213,14 @@ p {
 
 .btn-block {
   width: 100%;
+}
+
+/* Ikon Phosphor dirender inline di samping teks. Tanpa koreksi baseline,
+   setiap CTA terlihat seperti ikonnya melorot dua piksel. */
+.tap-icon {
+  display: inline-block;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
 }
 
 /* Badge */
@@ -247,11 +269,41 @@ p {
   border-color: color-mix(in srgb, var(--danger) 26%, transparent);
 }
 
+/* Hot Deals — semua sudah dipakai/diverifikasi kontrasnya di tempat lain
+   (badge-new-sku, badge-warning, badge-sample, badge-danger), cuma dipasang
+   ulang di sini untuk keempat kategori badge yang dihasilkan cron
+   CampaignEngagementStat. */
+.badge-hot-top-brand {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-line);
+}
+
+.badge-hot-trending {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 26%, transparent);
+}
+
+.badge-hot-high-conversion {
+  background: var(--positive-soft);
+  color: var(--positive);
+  border-color: color-mix(in srgb, var(--positive) 24%, transparent);
+}
+
+.badge-hot-high-demand {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 26%, transparent);
+}
+
 .theme-toggle {
   position: fixed;
   right: var(--space-4);
-  bottom: var(--space-4);
-  z-index: 60;
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  /* Di bawah .mobile-nav (55), bukan di atasnya. Kalau perhitungan jaraknya
+     pernah meleset lagi, tombol ini masuk ke balik bar — bukan menutupinya. */
+  z-index: 54;
   width: 44px;
   height: 44px;
   border-radius: var(--radius-pill);
@@ -270,7 +322,9 @@ p {
 
 @media (max-width: 900px) {
   .theme-toggle {
-    bottom: calc(var(--space-16) + var(--space-2));
+    /* Satu sumber tinggi bar, termasuk safe area. Sebelumnya 72px datar, yang
+       di iPhone berponi hanya menyisakan ~38px terhadap bar 56px. */
+    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-3));
   }
 }
 

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
 import { headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -13,6 +12,8 @@ import "./styles/forms.css";
 import "./styles/admin.css";
 import "./styles/workspace.css";
 import ThemeToggle from "./ThemeToggle";
+import MobileNav from "./MobileNav";
+import { getCurrentUser } from "../lib/auth";
 import { siteUrl } from "../lib/site-url";
 
 export const metadata: Metadata = {
@@ -55,6 +56,11 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  // Tab bawah berbeda untuk yang sudah dan belum masuk. Dibaca di server supaya
+  // tidak ada kedip "belum masuk" di setiap perpindahan halaman; getCurrentUser
+  // pulang null sebelum menyentuh database kalau tidak ada cookie, jadi
+  // pengunjung anonim tidak membayar kueri apa pun.
+  const viewer = await getCurrentUser().catch(() => null);
 
   return (
     // Terang adalah bawaan. Skrip di bawah hanya memulihkan pilihan yang
@@ -78,34 +84,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <div id="main-content" tabIndex={-1}>
           {children}
         </div>
-        <nav className="mobile-nav" aria-label="Navigasi utama">
-          <ul>
-            <li>
-              <Link href="/deals">
-                <span className="mobile-nav-icon" aria-hidden="true">
-                  ◈
-                </span>
-                Deal
-              </Link>
-            </li>
-            <li>
-              <Link href="/request-sample">
-                <span className="mobile-nav-icon" aria-hidden="true">
-                  ＋
-                </span>
-                Sample
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard">
-                <span className="mobile-nav-icon" aria-hidden="true">
-                  ◯
-                </span>
-                Akun
-              </Link>
-            </li>
-          </ul>
-        </nav>
+        <MobileNav isSignedIn={Boolean(viewer)} />
         <Analytics />
         <SpeedInsights />
       </body>

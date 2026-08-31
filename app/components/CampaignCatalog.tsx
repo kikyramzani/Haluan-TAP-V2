@@ -5,6 +5,9 @@ import type { Campaign } from "../../lib/catalog";
 import { classifyExpiry, isActionable } from "../../lib/campaign-flags";
 import BrandCard from "./BrandCard";
 import CampaignSheet from "./CampaignSheet";
+import Icon, { type IconName } from "./Icon";
+import { HOT_BADGE_LABEL, HOT_BADGE_ICON, HOT_BADGE_ORDER, liveHotBadge } from "./HotBadge";
+import type { HotBadge as HotBadgeId } from "../../lib/hot-deals-config";
 
 const PAGE_SIZE = 24;
 
@@ -23,6 +26,23 @@ const SORTS = [
 ] as const;
 
 type SortId = (typeof SORTS)[number]["id"];
+
+/**
+ * Ikon per kategori, dikunci ke nama kategori persis. Admin bisa menambah
+ * kategori kapan saja lewat /admin/kategori, jadi yang tidak dikenal jatuh ke
+ * ikon tag generik — bukan ikon kosong, bukan error.
+ */
+const CATEGORY_ICON: Record<string, IconName> = {
+  "Beauty & Health": "sparkle",
+  Tech: "device-mobile",
+  "Home & Living": "couch",
+  Fashion: "t-shirt",
+  "Mom & Baby": "baby",
+  "Food & FMCG": "fork-knife",
+  Sports: "barbell",
+};
+
+const categoryIcon = (name: string): IconName => CATEGORY_ICON[name] ?? "tag";
 
 /** Menyamakan huruf besar-kecil dan diakritik supaya "L'Oréal" cocok dengan "loreal". */
 function normalize(value: string) {
@@ -59,6 +79,7 @@ export default function CampaignCatalog({
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
   const [band, setBand] = useState("");
+  const [popular, setPopular] = useState<"" | "any" | HotBadgeId>("");
   const [sampleOnly, setSampleOnly] = useState(false);
   const [sort, setSort] = useState<SortId>("recommended");
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -75,12 +96,32 @@ export default function CampaignCatalog({
   // filter yang selalu menghasilkan nol.
   const sampleCount = useMemo(() => campaigns.filter((item) => item.hasSample === true).length, [campaigns]);
 
+  // Chip popularitas dibangun dari hitungan, bukan didaftar keras: jenis badge
+  // yang baru diraih cron besok otomatis dapat chip. Dihitung terhadap daftar
+  // dasar (bukan hasil filter berjalan), sama seperti sampleCount, supaya
+  // angkanya tidak berkedip tiap ketikan di kotak pencarian.
+  const badgeCounts = useMemo(() => {
+    const counts = new Map<HotBadgeId, number>();
+    for (const item of campaigns) {
+      const badge = liveHotBadge(item);
+      if (badge) counts.set(badge, (counts.get(badge) ?? 0) + 1);
+    }
+    return counts;
+  }, [campaigns]);
+
+  const badgedTotal = useMemo(() => [...badgeCounts.values()].reduce((sum, n) => sum + n, 0), [badgeCounts]);
+
   const filtered = useMemo(() => {
     const needle = normalize(query);
     const bandRule = COMMISSION_BANDS.find((item) => item.id === band);
 
     const matched = campaigns.filter((item) => {
       if (category && item.category !== category) return false;
+      if (popular) {
+        const badge = liveHotBadge(item);
+        if (!badge) return false;
+        if (popular !== "any" && badge !== popular) return false;
+      }
       if (sampleOnly && item.hasSample !== true) return false;
       if (bandRule) {
         if (item.commission === null) return false;
@@ -105,12 +146,12 @@ export default function CampaignCatalog({
       }
       return 0; // Urutan bawaan sudah "Rekomendasi" dari server.
     });
-  }, [campaigns, query, category, band, sampleOnly, sort]);
+  }, [campaigns, query, category, band, sampleOnly, sort, popular]);
 
   // Halaman kembali ke awal setiap kali filter berubah. Disesuaikan saat render
   // — bukan lewat useEffect — supaya tidak ada render perantara yang sempat
   // menampilkan potongan daftar dengan panjang lama.
-  const filterKey = `${query}|${category}|${band}|${sampleOnly}|${sort}`;
+  const filterKey = `${query}|${category}|${band}|${sampleOnly}|${sort}|${popular}`;
   const [lastFilterKey, setLastFilterKey] = useState(filterKey);
   if (filterKey !== lastFilterKey) {
     setLastFilterKey(filterKey);
@@ -148,9 +189,10 @@ export default function CampaignCatalog({
     setCategory("");
     setBand("");
     setSampleOnly(false);
+    setPopular("");
   }, []);
 
-  const hasFilters = Boolean(query || category || band || sampleOnly);
+  const hasFilters = Boolean(query || category || band || sampleOnly || popular);
 
   return (
     <>
@@ -158,7 +200,7 @@ export default function CampaignCatalog({
         <div className="catalog-controls">
           <div className="search-field">
             <span className="search-icon" aria-hidden="true">
-              ⌕
+              <Icon name="magnifying-glass" />
             </span>
             <input
               ref={searchRef}
@@ -171,7 +213,7 @@ export default function CampaignCatalog({
             />
             {query ? (
               <button className="search-clear" type="button" onClick={() => setQuery("")} aria-label="Hapus pencarian">
-                <span aria-hidden="true">✕</span>
+                <Icon name="x" />
               </button>
             ) : (
               <span className="search-hint" aria-hidden="true">
@@ -181,10 +223,42 @@ export default function CampaignCatalog({
             )}
           </div>
 
+          {badgedTotal > 0 ? (
+            <div className="filter-row">
+              <div className="filter-chips" role="group" aria-label="Filter popularitas">
+                {/* "Paling populer" hanya muncul kalau ada lebih dari satu jenis
+                    badge — dengan satu jenis, hasilnya identik dengan chip jenis
+                    itu sendiri, jadi chip keduanya cuma beban. */}
+                {badgeCounts.size > 1 ? (
+                  <button
+                    className="chip"
+                    type="button"
+                    aria-pressed={popular === "any"}
+                    onClick={() => setPopular((value) => (value === "any" ? "" : "any"))}
+                  >
+                    <Icon name="fire" /> Paling populer <span className="chip-count">{badgedTotal}</span>
+                  </button>
+                ) : null}
+                {HOT_BADGE_ORDER.filter((id) => (badgeCounts.get(id) ?? 0) > 0).map((id) => (
+                  <button
+                    key={id}
+                    className="chip"
+                    type="button"
+                    aria-pressed={popular === id}
+                    onClick={() => setPopular((value) => (value === id ? "" : id))}
+                  >
+                    <Icon name={HOT_BADGE_ICON[id]} /> {HOT_BADGE_LABEL[id]}{" "}
+                    <span className="chip-count">{badgeCounts.get(id)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           <div className="filter-row">
             <div className="filter-chips" role="group" aria-label="Filter kategori">
               <button className="chip" type="button" aria-pressed={!category} onClick={() => setCategory("")}>
-                Semua <span className="chip-count">{campaigns.length}</span>
+                <Icon name="squares-four" /> Semua <span className="chip-count">{campaigns.length}</span>
               </button>
               {categories.map(([name, count]) => (
                 <button
@@ -194,7 +268,7 @@ export default function CampaignCatalog({
                   aria-pressed={category === name}
                   onClick={() => setCategory(category === name ? "" : name)}
                 >
-                  {name} <span className="chip-count">{count}</span>
+                  <Icon name={categoryIcon(name)} /> {name} <span className="chip-count">{count}</span>
                 </button>
               ))}
             </div>
@@ -228,7 +302,7 @@ export default function CampaignCatalog({
                       aria-pressed={band === item.id}
                       onClick={() => setBand(band === item.id ? "" : item.id)}
                     >
-                      {item.label}
+                      <Icon name="percent" /> {item.label}
                     </button>
                   ))
                 : null}
@@ -239,7 +313,7 @@ export default function CampaignCatalog({
                   aria-pressed={sampleOnly}
                   onClick={() => setSampleOnly((value) => !value)}
                 >
-                  ✓ Sample tersedia <span className="chip-count">{sampleCount}</span>
+                  <Icon name="check" /> Sample tersedia <span className="chip-count">{sampleCount}</span>
                 </button>
               ) : null}
             </div>

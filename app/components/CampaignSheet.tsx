@@ -8,6 +8,7 @@ import { formatCommission } from "../../lib/commission";
 import BrandMark from "./BrandMark";
 import AffiliateLinkField from "./AffiliateLinkField";
 import { useFocusTrap } from "./useFocusTrap";
+import Icon from "./Icon";
 
 type PrimaryLink = {
   label: string;
@@ -80,7 +81,7 @@ function SheetContent({ campaign, onClose }: { campaign: Campaign; onClose: () =
             </p>
           </div>
           <button className="sheet-close" type="button" onClick={onClose} aria-label="Tutup detail campaign">
-            <span aria-hidden="true">✕</span>
+            <Icon name="x" />
           </button>
         </header>
 
@@ -135,7 +136,7 @@ function SheetContent({ campaign, onClose }: { campaign: Campaign; onClose: () =
                 campaign.platform === "Shopee Affiliate" ? "Shopee" : "TikTok"
               }`}
             >
-              Request sample ↗
+              Request sample <Icon name="arrow-up-right" />
             </Link>
           ) : null}
         </footer>

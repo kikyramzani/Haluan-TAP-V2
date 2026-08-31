@@ -3,6 +3,7 @@ import type { Campaign } from "../../lib/catalog";
 import { classifyExpiry, isActionable } from "../../lib/campaign-flags";
 import { formatCommission } from "../../lib/commission";
 import BrandMark from "./BrandMark";
+import Icon from "./Icon";
 
 type Props = {
   campaigns: readonly Campaign[];
@@ -39,7 +40,7 @@ export default function NewSkuHighlight({ campaigns }: Props) {
           </p>
         </div>
         <Link className="btn btn-secondary" href="/deals">
-          Lihat semua deal ↗
+          Lihat semua deal <Icon name="arrow-up-right" />
         </Link>
       </div>
 

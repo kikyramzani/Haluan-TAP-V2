@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toggleSavedCampaign } from "../../dashboard/tersimpan/actions";
+import Icon from "../../components/Icon";
 
 type Props = {
   /** Real Prisma Campaign.id (the FK SavedCampaign points at), not the slug in the URL. */
@@ -24,7 +25,7 @@ export default function SaveCampaignButton({ campaignId, initialSaved, isSignedI
   if (!isSignedIn) {
     return (
       <Link className="btn btn-secondary" href={`/daftar?mode=login&returnTo=${encodeURIComponent(returnTo)}`}>
-        <span aria-hidden="true">☆</span> Simpan campaign
+        <Icon name="star" /> Simpan campaign
       </Link>
     );
   }
@@ -38,7 +39,7 @@ export default function SaveCampaignButton({ campaignId, initialSaved, isSignedI
 
   return (
     <button type="button" className="btn btn-secondary" onClick={toggle} disabled={pending} aria-pressed={saved}>
-      <span aria-hidden="true">{saved ? "★" : "☆"}</span> {saved ? "Tersimpan" : "Simpan campaign"}
+      <Icon name={saved ? "star-fill" : "star"} /> {saved ? "Tersimpan" : "Simpan campaign"}
     </button>
   );
 }

@@ -184,6 +184,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: var(--space-1-5);
   padding: 0 var(--space-4);
   border-radius: var(--radius-pill);
   border: 1px solid var(--line-strong);
@@ -222,8 +223,13 @@
 
 /* Angka dibedakan lewat ketebalan huruf, bukan opacity — menurunkan opacity
    membuat kontrasnya jatuh di bawah ambang WCAG di kedua tema. */
+.chip .tap-icon {
+  font-size: var(--icon-sm);
+}
+
+/* Tanpa margin: jarak ke label sekarang datang dari `gap` milik .chip, dan
+   membiarkan margin lamanya membuat setiap angka berjarak dua kali. */
 .chip-count {
-  margin-left: 6px;
   font-weight: var(--weight-regular);
   color: currentColor;
   font-variant-numeric: tabular-nums;
@@ -298,7 +304,12 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  background: var(--surface);
+  /* Lapisan latar, bukan ::before: .deal-cta::after memakai position:absolute
+     terhadap kartu ini supaya seluruh kartu bisa diklik, sedangkan anak-anak
+     kartu lainnya tidak diposisikan — sebuah ::before yang diposisikan akan
+     tergambar DI ATAS nama brand dan angka komisi. Kartu berakhir memakai
+     shorthand `background` lagi di bawah, jadi sapuannya hilang otomatis. */
+  background: var(--gradient-wash), var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-xl);
   padding: var(--space-6);
@@ -318,15 +329,17 @@
 
 @media (hover: hover) {
   .deal-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     border-color: var(--line-strong);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-card);
   }
 
-  .deal-card:hover .deal-cta {
-    background: var(--accent);
-    color: var(--accent-contrast);
-    border-color: var(--accent);
+  /* :not() wajib — tanpa itu aturan ini (0,3,0) mengalahkan
+     .deal-card-expired .deal-cta (0,2,0) dan menyalakan tombol yang mati. */
+  .deal-card:not(.deal-card-expired):hover .deal-cta {
+    background: var(--cta-hover);
+    color: var(--cta-contrast);
+    border-color: var(--cta-hover);
   }
 }
 
@@ -358,6 +371,7 @@
 .deal-card-expired .deal-cta {
   color: var(--text-muted);
   background: transparent;
+  border-color: var(--line-strong);
   cursor: not-allowed;
 }
 
@@ -413,15 +427,30 @@
 }
 
 .deal-category {
+  display: flex;
+  /* Teks kategori membungkus 2–3 baris di kartu sempit. Dengan `center` ikon
+     tag ikut turun ke tengah blok dan terbaca seolah memimpin baris kedua,
+     bukan baris pertama — persis salah baca yang ingin dihindari. */
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
   font-size: var(--text-xs);
+  line-height: 1.5;
   color: var(--text-subtle);
   margin-top: 2px;
 }
 
+/* Menengahkan ikon 1em terhadap kotak baris pertama yang tingginya 1.5em. */
+.deal-category .tap-icon {
+  margin-top: 0.25em;
+}
+
 /* Komisi adalah informasi yang paling dicari creator, jadi dia yang paling besar.
-   Labelnya ditumpuk di bawah angka, bukan di sampingnya, supaya panjang label
-   tidak pernah mengubah tinggi baris angka. */
+   Pil "KOMISI CREATOR" ada di atas angka dan keterangannya di bawah, supaya
+   panjang keduanya tidak pernah mengubah tinggi baris angka.
+   align-items wajib, kalau tidak pilnya melar selebar kartu. */
 .deal-commission {
+  align-items: flex-start;
   margin-top: var(--space-6);
   display: flex;
   flex-direction: column;
@@ -437,7 +466,16 @@
   font-variant-numeric: tabular-nums;
 }
 
-.deal-commission-label {
+/* Pil ini elemen BARU, bukan .deal-commission-label yang dialihfungsikan:
+   public.spec.ts memeriksa teks .deal-commission-value sendiri, dan label lama
+   membawa dua pesan berbeda yang tidak muat jadi satu pil nowrap. */
+.deal-commission-tag {
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.deal-commission-note {
   font-size: var(--text-xs);
   color: var(--text-subtle);
   line-height: 1.35;
@@ -485,8 +523,9 @@
   min-height: 44px;
   padding: 0 var(--space-4);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
+  border: 1px solid transparent;
+  background: var(--gradient-cta);
+  color: var(--cta-contrast);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   display: inline-flex;
@@ -613,19 +652,27 @@
   .brand-mark {
     width: 32px;
     height: 32px;
+    /* --radius-md (12px) yang diwarisi kartu penuh terlalu besar buat lambang
+       32px — proporsi sudutnya jadi terlihat seperti stiker, bukan ikon. */
+    border-radius: var(--radius-sm);
   }
 
   .deal-brand-name {
     font-size: var(--text-xs);
   }
 
+  /* Satu ritme spacing yang diulang (--space-3), bukan campuran space-2/3/4 —
+     supaya mata membaca satu irama konsisten di kartu sekecil ini. */
   .deal-commission,
   .deal-benefits {
-    margin-top: var(--space-4);
+    margin-top: var(--space-3);
   }
 
   .deal-commission-value {
     font-size: 28px;
+    /* --tracking-display (-0.035em) dirancang untuk angka besar; di 28px
+       jaraknya jadi terlalu rapat. */
+    letter-spacing: -0.02em;
   }
 
   .deal-commission-unknown .deal-commission-value {
@@ -637,12 +684,12 @@
   }
 
   .deal-flags {
-    margin-top: var(--space-2);
+    margin-top: var(--space-3);
     min-height: 0;
   }
 
   .deal-footer {
-    margin-top: var(--space-4);
+    margin-top: var(--space-3);
     padding-top: var(--space-3);
   }
 
@@ -652,5 +699,37 @@
     font-size: var(--text-xs);
     white-space: normal;
     text-align: center;
+    /* Isian penuhnya sekarang datang dari aturan dasar .deal-cta, jadi tidak
+       ada yang perlu ditimpa di sini. Ronde sebelumnya sengaja memakai isian
+       tonal supaya "tetap terasa tenang"; itu dibalik dengan sadar — ini
+       satu-satunya aksi di kartu, jadi boleh jadi elemen paling menonjol. */
+  }
+
+  /* "Tinggi konversi" berikut ikonnya ~150px kalau nowrap, lebih lebar dari
+     ~141px ruang isi kartu dua kolom di iPhone 14 — itu akan mendorong
+     scrollWidth melewati clientWidth. Belum bisa terjadi hari ini (nol baris
+     memenuhinya), tapi kodenya harus aman saat cron-nya nanti menyala. */
+  .deal-flags .badge {
+    white-space: normal;
+    padding-inline: var(--space-2);
+  }
+
+  .deal-commission-tag {
+    padding-inline: var(--space-2);
+    letter-spacing: 0.04em;
+    margin-bottom: var(--space-1-5);
+  }
+
+  /* Empat baris filter di header lengket sudah memakan sepertiga layar. */
+  /* Berhenti lengket di layar kecil. Dengan baris popularitas, kontrol ini jadi
+     empat baris (~320px); ditambah header yang juga lengket, lebih dari separuh
+     layar 664px terpakai permanen dan kartu di baliknya tidak bisa disentuh —
+     dua tes e2e mobile-webkit gagal justru karena blok ini mencegat klik.
+     Menyusutkan gap saja tidak cukup, jadi filter ikut menggulung: pengguna
+     menggulir ke atas saat butuh, dan mendapat seluruh layar untuk hasilnya. */
+  .catalog-controls {
+    position: static;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
   }
 }

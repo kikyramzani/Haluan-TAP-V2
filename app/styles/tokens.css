@@ -91,6 +91,16 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.55);
   --shadow-lg: 0 20px 52px rgba(0, 0, 0, 0.7);
+  /* Khusus kartu deal — --shadow-md dipakai bareng modal/sheet, terlalu berat
+     untuk hover kartu yang cuma naik 2px. */
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.32);
+
+  /* Gradasi. Dua saja, dan hanya untuk dua jenis permukaan: isian utama yang
+     memuat teks putih, dan sapuan lembut di sudut kartu. Setiap perhentian
+     --gradient-cta bergerak makin GELAP, tidak pernah makin terang: putih di
+     atas #eb1487 hanya 4.21:1, di bawah ambang AA untuk label 14px. */
+  --gradient-cta: linear-gradient(135deg, var(--cta) 0%, #a8166f 55%, #8b1a9e 100%);
+  --gradient-wash: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--cta) 14%, transparent) 0%, transparent 62%);
 
   /* Jarak. Dua langkah setengah ada khusus untuk padding badge dan chip, yang
      terlihat terlalu tinggi bila dipaksa ke kelipatan 4. */
@@ -108,6 +118,18 @@
   --space-24: 96px;
   --space-32: 128px;
   --space-section: clamp(56px, 4vw + 40px, 112px);
+
+  /* Ukuran ikon. Satu keluarga, empat langkah — disetel lewat font-size
+     karena ikon Phosphor default-nya 1em (lihat app/components/Icon.tsx). */
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+  --icon-xl: 28px;
+
+  /* Tinggi navigasi bawah. Angkanya dulu ditulis ulang di tiga tempat di
+     layout.css; sekarang satu sumber, sudah termasuk safe area. */
+  --bottom-nav-height: 64px;
+  --bottom-nav-inset: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
 
   /* Radius. Pil hanya untuk badge dan kontrol ringkas. */
   --radius-sm: 8px;
@@ -205,4 +227,11 @@
   --shadow-sm: 0 1px 2px rgba(8, 8, 10, 0.06);
   --shadow-md: 0 4px 14px rgba(8, 8, 10, 0.08);
   --shadow-lg: 0 18px 48px rgba(8, 8, 10, 0.14);
+  --shadow-card: 0 2px 10px rgba(8, 8, 10, 0.05);
+
+  /* Tema terang mengambil versi blush dari referensi: putih ke merah muda
+     dengan sedikit ungu di sudut. Di tema gelap sapuan putih tidak berarti
+     apa-apa, jadi di sana bentuknya sama tapi berupa angkatan merah muda tipis. */
+  --gradient-cta: linear-gradient(135deg, var(--cta) 0%, #a80f63 55%, #7d1690 100%);
+  --gradient-wash: radial-gradient(120% 90% at 100% 0%, #fdeaf4 0%, color-mix(in srgb, #a855f7 6%, transparent) 45%, transparent 70%);
 }

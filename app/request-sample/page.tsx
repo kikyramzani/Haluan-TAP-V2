@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { track } from "@vercel/analytics";
+import Icon from "../components/Icon";
 
 type Viewer = {
   name: string;
@@ -153,7 +154,7 @@ export default function RequestSamplePage() {
           <span className="brand-divider" />
           <strong>TAP</strong>
         </Link>
-        <Link className="back-link" href="/deals">← Kembali ke katalog</Link>
+        <Link className="back-link" href="/deals"><Icon name="arrow-left" /> Kembali ke katalog</Link>
       </nav>
       <section className="form-page shell">
         <aside className="form-intro">
@@ -191,50 +192,50 @@ export default function RequestSamplePage() {
             // Not a stack trace and not a dead end: say which part failed, keep the
             // catalogue reachable, and offer the one action that usually works.
             <div className="sample-access-state">
-              <span className="sample-access-icon" aria-hidden="true">↻</span>
+              <span className="sample-access-icon"><Icon name="arrow-clockwise" /></span>
               <span className="kicker">Koneksi terputus</span>
               <h2>Daftar campaign belum bisa dimuat.</h2>
               <p>Formulirnya baik-baik saja. Yang gagal adalah pengambilan daftar campaign dengan sample aktif. Biasanya ini sementara.</p>
-              <button className="primary-btn" type="button" onClick={() => window.location.reload()}>Coba muat ulang <b>↻</b></button>
+              <button className="primary-btn" type="button" onClick={() => window.location.reload()}>Coba muat ulang <Icon name="arrow-clockwise" /></button>
               <Link className="member-link" href="/deals">Lihat katalog dulu</Link>
             </div>
           ) : requestId ? (
             <div className="success-state">
-              <span>✓</span>
+              <span className="sample-access-icon"><Icon name="check" /></span>
               <h2>Request tersimpan.</h2>
               <p>ID request kamu <b>{requestId}</b>. Tim Haluan akan memprosesnya melalui status review, approval, dan pengiriman yang dapat dipantau di dashboard.</p>
-              <Link href="/dashboard">Pantau di dashboard →</Link>
+              <Link href="/dashboard">Pantau di dashboard <Icon name="arrow-right" /></Link>
             </div>
           ) : !viewer ? (
             <div className="sample-access-state">
-              <span className="sample-access-icon" aria-hidden="true">↗</span>
+              <span className="sample-access-icon"><Icon name="sign-in" /></span>
               <span className="kicker">Creator access</span>
               <h2>Masuk sebelum mengisi request.</h2>
               <p>Data profil dan alamatmu dapat dipakai kembali, jadi kamu tidak perlu mengulang formulir setiap kali meminta sample.</p>
-              <Link className="primary-btn" href={`/daftar?mode=login&returnTo=${encodeURIComponent(returnTo)}`}>Masuk creator <b>↗</b></Link>
+              <Link className="primary-btn" href={`/daftar?mode=login&returnTo=${encodeURIComponent(returnTo)}`}>Masuk creator <Icon name="arrow-up-right" /></Link>
               <Link className="member-link" href={`/daftar?returnTo=${encodeURIComponent(returnTo)}`}>Belum punya akun? Daftar gratis</Link>
             </div>
           ) : viewer.membership !== "verified" ? (
             <div className="sample-access-state">
-              <span className="sample-access-icon" aria-hidden="true">○</span>
+              <span className="sample-access-icon"><Icon name="sparkle" /></span>
               <span className="kicker">Verifikasi membership</span>
               <h2>{viewer.membership === "rejected" ? "Profilmu perlu diperbaiki." : "Verifikasi MCN sedang diproses."}</h2>
               <p>{viewer.membership === "rejected" ? "Perbarui data creator agar tim Haluan dapat memeriksa ulang akunmu." : "Lengkapi profil creator untuk membantu tim mencocokkan akunmu dengan master MCN."}</p>
-              <Link className="primary-btn" href="/dashboard#profile">Buka dashboard <b>↗</b></Link>
+              <Link className="primary-btn" href="/dashboard#profile">Buka dashboard <Icon name="arrow-up-right" /></Link>
               <Link className="member-link" href="/deals">Lihat katalog sementara</Link>
             </div>
           ) : campaigns.length === 0 ? (
             <div className="sample-access-state">
-              <span className="sample-access-icon" aria-hidden="true">◇</span>
+              <span className="sample-access-icon"><Icon name="gift" /></span>
               <span className="kicker">Belum ada sample</span>
               <h2>Tidak ada campaign yang membuka sample saat ini.</h2>
               <p>Daftar ini berubah ketika brand membuka kuota baru. Katalog deal tetap bisa kamu pakai sekarang, dan halaman ini akan terisi begitu ada sample aktif.</p>
-              <Link className="primary-btn" href="/deals">Lihat katalog deal <b>↗</b></Link>
+              <Link className="primary-btn" href="/deals">Lihat katalog deal <Icon name="arrow-up-right" /></Link>
               <Link className="member-link" href="/dashboard">Kembali ke dashboard</Link>
             </div>
           ) : (
             <form onSubmit={submit}>
-              <div className="form-heading"><span>Request form</span><b>± 2 menit</b></div>
+              <div className="form-heading"><span>Request form</span><b>Sekitar 2 menit</b></div>
               <label><span>Cari campaign dengan sample tersedia</span><input name="campaign" list="sample-campaign-options" value={campaignQuery} onChange={(event) => { setCampaignQuery(event.target.value); setCampaignError(""); }} placeholder="Ketik nama brand lalu pilih dari daftar…" autoComplete="off" aria-invalid={campaignError ? "true" : "false"} aria-describedby={campaignError ? "campaign-error" : undefined} required/><datalist id="sample-campaign-options">{campaigns.map((item) => <option key={`${item.platform}-${item.brand}`} value={`${item.brand} · ${item.platform}`}/>)}</datalist>{campaignError && <small id="campaign-error" className="field-error" role="alert">{campaignError}</small>}{!campaignError && gateChecking && <small className="field-hint">Memeriksa ketersediaan sample…</small>}{!campaignError && !gateChecking && gateResult && !gateResult.allowed && <small className="field-error" role="alert">{gateResult.message}</small>}</label>
               <div className="two-col"><label><span>Nama penerima</span><input name="recipientName" defaultValue={viewer.recipientName || viewer.name} placeholder="Nama lengkap" autoComplete="name" required /></label><label><span>Nomor WhatsApp</span><input name="phone" type="tel" inputMode="tel" defaultValue={viewer.phone} placeholder="08xxxxxxxxxx" autoComplete="tel" required /></label></div>
               <label><span>Username creator</span><input name="username" defaultValue={viewer.tiktokUsername || ""} placeholder="@username" autoComplete="off" required /></label>
@@ -253,7 +254,7 @@ export default function RequestSamplePage() {
                 <label><span>Kode pos</span><input name="kodePos" inputMode="numeric" pattern="[0-9]{5}" maxLength={5} placeholder="12345" autoComplete="postal-code" required /></label>
               </div>
               <label className="checkbox"><input name="commitment" type="checkbox" required /><span>Saya bersedia membuat konten sesuai brief dan timeline campaign.</span></label>
-              <button className="submit-btn" type="submit" disabled={busy || gateResult?.allowed === false}>{busy ? "Menyimpan…" : "Kirim request"} <span>↗</span></button>
+              <button className="submit-btn" type="submit" disabled={busy || gateResult?.allowed === false}>{busy ? "Menyimpan…" : "Kirim request"} <Icon name="arrow-up-right" /></button>
               {notice && <p className="form-error" role="alert">{notice}</p>}
               <p className="form-note">Request tidak otomatis disetujui. Kecocokan profil dan kuota campaign tetap diverifikasi oleh tim Haluan.</p>
             </form>

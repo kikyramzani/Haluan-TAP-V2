@@ -347,6 +347,7 @@ model Campaign {
   sampleRequests SampleRequest[]
   linkClicks     LinkClick[]
   savedBy        SavedCampaign[]
+  engagementStat CampaignEngagementStat?
 
   @@index([brandId, platform])
   @@index([status])
@@ -390,6 +391,44 @@ model BrandPlatformStat {
   recomputedAt  DateTime @default(now())
 
   @@unique([brandId, platform])
+}
+
+enum CampaignHotBadge {
+  TOP_BRAND
+  TRENDING
+  HIGH_CONVERSION
+  HIGH_DEMAND
+}
+
+/// Read cache for the public "Hot Deals" rail, recomputed nightly by
+/// /api/cron/recompute-engagement-stats — never computed live on a public
+/// page load (LinkClick already has ~789 campaigns worth of rows and will
+/// keep growing; this mirrors BrandPlatformStat's cache-table pattern).
+/// `badge` is the already-resolved, priority-ordered outcome (see
+/// lib/hot-deals-config.ts) so public reads never re-run ranking logic.
+model CampaignEngagementStat {
+  id                String            @id @default(cuid())
+  campaignId        String            @unique
+  campaign          Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  /// Rolling 7-day LinkClick count as of recomputedAt.
+  clicks7d          Int               @default(0)
+  /// Rolling 30-day SampleRequest count — wider window than clicks because
+  /// sample requests are a rarer, higher-intent action.
+  sampleRequests30d Int               @default(0)
+  /// Current count of SavedCampaign rows (live gauge, not windowed —
+  /// SavedCampaign rows are deleted on unsave, so the current count IS the
+  /// signal, not a rolling total).
+  savedCount        Int               @default(0)
+  /// sampleRequests30d / clicks30d * 100 — null whenever clicks30d is below
+  /// CONVERSION_MIN_CLICKS_30D (lib/hot-deals-config.ts), never a
+  /// divide-by-noise ratio like 1/1.
+  conversionRatePct Decimal?
+  /// Precomputed priority-ordered outcome. Null = this campaign earned no
+  /// badge this run and must not appear in the public rail.
+  badge             CampaignHotBadge?
+  recomputedAt      DateTime          @default(now())
+
+  @@index([badge])
 }
 
 // ---------------------------------------------------------------------------

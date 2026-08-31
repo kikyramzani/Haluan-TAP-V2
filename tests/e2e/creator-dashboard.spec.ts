@@ -102,6 +102,23 @@ test("kreator baru wajib menyelesaikan onboarding sebelum dashboard terbuka, lal
   await expect(page.locator(".admin-stats article", { hasText: "Sample Approved" }).locator("strong")).toHaveText("0");
   await expect(page.locator(".admin-stats article", { hasText: "Saved Campaign" }).locator("strong")).toHaveText("0");
 
+  // Petak aksi cepat membawa empat tujuan yang TIDAK ada di tab bawah, jadi
+  // bar + petak menjangkau seluruh rute creator dalam paling banyak dua ketukan.
+  await expect(page.locator(".quick-actions a")).toHaveCount(4);
+
+  const viewportWidth = page.viewportSize()?.width ?? 0;
+  if (viewportWidth <= 900) {
+    // Navigasi ganda sudah hilang: baris chip di atas dulu menduplikasi tab
+    // bawah (dengan /deals muncul di kedua-duanya) di setiap halaman dashboard.
+    await expect(page.locator(".creator-sidebar")).toBeHidden();
+    await expect(page.locator(".mobile-nav a")).toHaveCount(5);
+    await expect(page.locator('.mobile-nav a[href="/dashboard"]')).toHaveAttribute("aria-current", "page");
+  } else {
+    // Di desktop sidebar-nya tetap navigasi utama — penyembunyian di mobile
+    // tidak boleh diam-diam ikut menghilangkannya di sini.
+    await expect(page.locator(".creator-sidebar")).toBeVisible();
+  }
+
   // Header publik pada halaman lain harus tahu sesi ini sudah masuk: tidak
   // ada lagi ajakan "Daftar" atau "Gabung sekarang" untuk orang yang sudah
   // masuk. ".nav-session" sengaja disembunyikan lewat CSS di bawah 600px
@@ -214,10 +231,11 @@ test("link request sample dari halaman deal dan dari modal katalog membawa brand
   const expectedHref = `/request-sample?brand=${encodeURIComponent(fixtures.single.displayName)}&platform=TikTok`;
 
   // Dari halaman deal penuh. Header dan footer punya link "Request sample"
-  // polos juga, jadi dicocokkan lewat panah "↗" yang hanya dipakai versi
-  // berisi brand ini (lihat app/deal/[campaignId]/page.tsx).
+  // polos juga. Dulu dibedakan lewat panah "↗" di dalam namanya; sekarang
+  // panahnya ikon aria-hidden, jadi pembedanya adalah letaknya di dalam
+  // section.panel milik blok "Perlu produk untuk membuat konten?".
   await page.goto(`/deal/${fixtures.single.campaigns[0].slug}`);
-  await expect(page.getByRole("link", { name: "Request sample ↗" })).toHaveAttribute("href", expectedHref);
+  await expect(page.locator("section.panel").getByRole("link", { name: "Request sample" })).toHaveAttribute("href", expectedHref);
 
   // Dari modal katalog untuk brand yang sama (app/components/CampaignSheet.tsx)
   // — brand dan platform harus ikut terisi otomatis di halaman tujuan juga.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Icon from "./components/Icon";
 
 type Theme = "dark" | "light";
 
@@ -34,7 +35,7 @@ export default function ThemeToggle() {
       title={nextLabel}
       aria-pressed={theme === "dark"}
     >
-      <span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span>
+      <Icon name={theme === "light" ? "moon" : "sun"} />
     </button>
   );
 }

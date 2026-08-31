@@ -3,6 +3,7 @@ import { requireUser } from "../../../lib/auth";
 import { prisma } from "../../../lib/db";
 import NotificationList from "./NotificationList";
 import PushToggle from "./PushToggle";
+import Icon from "../../components/Icon";
 
 const PAGE_SIZE = 30;
 
@@ -57,13 +58,13 @@ export default async function NotifikasiPage({ searchParams }: Props) {
         {total > 0 ? (
           <div className="admin-pagination">
             <Link aria-disabled={page <= 1} href={`/dashboard/notifikasi?page=${page - 1}`}>
-              ← Sebelumnya
+              <Icon name="arrow-left" /> Sebelumnya
             </Link>
             <span>
               Halaman {page} dari {totalPages} · {total} notifikasi
             </span>
             <Link aria-disabled={page >= totalPages} href={`/dashboard/notifikasi?page=${page + 1}`}>
-              Berikutnya →
+              Berikutnya <Icon name="arrow-right" />
             </Link>
           </div>
         ) : null}

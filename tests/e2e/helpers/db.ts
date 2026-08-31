@@ -206,8 +206,52 @@ export async function cleanupCatalogFixtures() {
   await prisma.campaignTier.deleteMany({ where: { campaignId: { in: campaignIds } } });
   await prisma.campaignLink.deleteMany({ where: { campaignId: { in: campaignIds } } });
   await prisma.brandPlatformStat.deleteMany({ where: { brandId: { in: brandIds } } });
+  // CampaignEngagementStat cascades from Campaign (see prisma/schema.prisma),
+  // so it needs no explicit delete here.
   await prisma.campaign.deleteMany({ where: { brandId: { in: brandIds } } });
   await prisma.brand.deleteMany({ where: { id: { in: brandIds } } });
+}
+
+/**
+ * A featured brand with one live campaign, plus its already-resolved
+ * CampaignEngagementStat row — written directly instead of running the
+ * nightly cron, because a spec must never depend on real click/save volume
+ * existing in the shared database.
+ */
+export async function seedHotDealFixture() {
+  const category = await prisma.category.findUniqueOrThrow({ where: { slug: "beauty-health" } });
+  const suffix = String(Date.now());
+  const displayName = `E2E HotDeal ${suffix}`;
+
+  const brand = await prisma.brand.create({
+    data: {
+      brandKey: computeBrandKey(displayName),
+      displayName,
+      categoryId: category.id,
+      featured: true,
+      campaigns: {
+        create: {
+          platform: "TIKTOK_SHOP",
+          commissionType: "PERSENTASE",
+          slug: `${FIXTURE_PREFIX}hotdeal-${suffix}`,
+          status: "ACTIVE",
+          hasSample: true,
+          tiers: { create: [{ label: "Tier 1", commission: 11, sortIndex: 0 }] },
+          links: { create: [{ url: "https://affiliate.example.com/e2e-hotdeal", isPrimary: true, sortIndex: 0 }] },
+        },
+      },
+    },
+    include: { campaigns: true },
+  });
+
+  const campaign = brand.campaigns[0];
+  await prisma.campaignEngagementStat.upsert({
+    where: { campaignId: campaign.id },
+    create: { campaignId: campaign.id, badge: "TOP_BRAND" },
+    update: { badge: "TOP_BRAND" },
+  });
+
+  return { displayName, slug: campaign.slug };
 }
 
 /**

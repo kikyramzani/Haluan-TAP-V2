@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { completeOnboarding } from "./actions";
+import Icon from "../../components/Icon";
 
 type Category = { id: string; name: string };
 
@@ -41,7 +42,7 @@ export default function OnboardingForm({ defaultName, defaultPhone, categories }
         </p>
       ) : null}
       <button className="submit-btn" type="submit" disabled={pending}>
-        {pending ? "Menyimpan…" : "Lanjut ke dashboard"} <span>↗</span>
+        {pending ? "Menyimpan…" : "Lanjut ke dashboard"} <Icon name="arrow-up-right" />
       </button>
     </form>
   );

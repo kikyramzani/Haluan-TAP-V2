@@ -82,6 +82,14 @@ test("katalog publik mobile-first, bisa dicari, dan header keamanannya utuh", as
     expect(card.commission).toBeGreaterThan(card.brand);
     expect(card.ctaHeight).toBeGreaterThanOrEqual(40);
     await expect(page.locator(".mobile-nav")).toBeVisible();
+    // Was dead CSS before MobileNav.tsx existed — the links never actually
+    // set aria-current, so the "active" tab never highlighted.
+    await expect(page.locator('.mobile-nav a[href="/deals"]')).toHaveAttribute("aria-current", "page");
+    // Pengunjung yang belum masuk dapat empat tab, dan tidak satu pun berujung
+    // ke dinding login — /dashboard memang tidak ditawarkan sama sekali.
+    await expect(page.locator(".mobile-nav a")).toHaveCount(4);
+    await expect(page.locator('.mobile-nav a[href="/dashboard"]')).toHaveCount(0);
+    await expect(page.locator('.mobile-nav a[href="/daftar?mode=login"]')).not.toHaveAttribute("aria-current", "page");
   }
 
   const search = page.getByLabel("Cari brand atau campaign");

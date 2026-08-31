@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
@@ -315,7 +316,13 @@ export async function cleanupExpiredPendingUsers(olderThan = Date.now() - PENDIN
   return result.count;
 }
 
-export async function getCurrentUser(): Promise<TapUser | null> {
+/**
+ * Dibungkus React cache(): satu permintaan bisa memanggil ini beberapa kali —
+ * /dashboard memanggilnya dari root layout, layout dashboard, dan halamannya
+ * sendiri. Memoisasi per-permintaan membuat ketiganya jadi satu kueri. Aman
+ * karena setiap pemanggil hanya bertanya "ini siapa" dan tidak menulis apa pun.
+ */
+export const getCurrentUser = cache(async function getCurrentUser(): Promise<TapUser | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
   const session = await prisma.session.findUnique({ where: { tokenHash: tokenHash(token) } });
@@ -326,7 +333,7 @@ export async function getCurrentUser(): Promise<TapUser | null> {
   // sessions issued earlier stop authenticating even before their rows are swept.
   if (user.sessionsInvalidBefore && session.createdAt < user.sessionsInvalidBefore) return null;
   return toTapUser(user);
-}
+});
 
 export async function requireUser(returnTo = "/dashboard") {
   let user = null;

@@ -3,6 +3,7 @@ import { requireUser } from "../../../lib/auth";
 import { prisma } from "../../../lib/db";
 import { campaignCommissionLabel, minMaxCommission } from "../../../lib/commission-display";
 import SavedCampaignCard from "./SavedCampaignCard";
+import Icon from "../../components/Icon";
 
 export default async function TersimpanPage() {
   const user = await requireUser("/dashboard/tersimpan");
@@ -33,9 +34,9 @@ export default async function TersimpanPage() {
       <div className="dashboard-title">
         <div>
           <span>TERSIMPAN</span>
-          <h2>Campaign yang kamu simpan</h2>
+          <h1>Campaign yang kamu simpan</h1>
         </div>
-        <Link href="/deals">Lihat semua deal ↗</Link>
+        <Link href="/deals">Lihat semua deal <Icon name="arrow-up-right" /></Link>
       </div>
 
       {items.length ? (
@@ -56,7 +57,7 @@ export default async function TersimpanPage() {
         <div className="dashboard-empty">
           <b>Belum ada campaign tersimpan.</b>
           <p>Simpan campaign yang kamu suka dari halaman deal untuk melihatnya di sini.</p>
-          <Link href="/deals">Jelajahi semua deal ↗</Link>
+          <Link href="/deals">Jelajahi semua deal <Icon name="arrow-up-right" /></Link>
         </div>
       )}
     </section>

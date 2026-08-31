@@ -13,6 +13,7 @@ import SiteHeader from "../../components/SiteHeader";
 import SiteFooter from "../../components/SiteFooter";
 import ShareDealButton from "../ShareDealButton";
 import SaveCampaignButton from "./SaveCampaignButton";
+import Icon from "../../components/Icon";
 
 type DealPageProps = { params: Promise<{ campaignId: string }> };
 
@@ -97,7 +98,7 @@ export default async function DealDetail({ params }: DealPageProps) {
 
       <main className="shell" style={{ paddingBlock: "var(--space-12) var(--space-16)" }}>
         <Link className="btn btn-ghost" href={`/deals${platform === "Shopee" ? "?platform=shopee" : ""}`}>
-          ← Semua deal
+          <Icon name="arrow-left" /> Semua deal
         </Link>
 
         <header style={{ display: "flex", gap: "var(--space-4)", alignItems: "center", marginTop: "var(--space-6)" }}>
@@ -163,7 +164,7 @@ export default async function DealDetail({ params }: DealPageProps) {
               style={{ marginTop: "var(--space-4)" }}
               href={`/request-sample?brand=${encodeURIComponent(brand)}&platform=${platform}`}
             >
-              Request sample ↗
+              Request sample <Icon name="arrow-up-right" />
             </Link>
           </section>
         ) : null}

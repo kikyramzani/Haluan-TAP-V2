@@ -7,6 +7,7 @@ import SiteFooter from "./components/SiteFooter";
 import CampaignCatalog from "./components/CampaignCatalog";
 import HeroVisual from "./components/HeroVisual";
 import NewSkuHighlight from "./components/NewSkuHighlight";
+import Icon from "./components/Icon";
 
 // Katalog berubah setiap kali sheet disinkronkan, jadi halaman tidak dibekukan
 // menjadi cuplikan kosong saat build.
@@ -22,7 +23,11 @@ async function loadCatalog(platform: "tiktok" | "shopee") {
 }
 
 export default async function HomePage() {
-  const [tiktok, shopee, user] = await Promise.all([loadCatalog("tiktok"), loadCatalog("shopee"), getCurrentUser().catch(() => null)]);
+  const [tiktok, shopee, user] = await Promise.all([
+    loadCatalog("tiktok"),
+    loadCatalog("shopee"),
+    getCurrentUser().catch(() => null),
+  ]);
   const withSample = tiktok.filter((item) => item.hasSample === true).length;
   const totalCampaigns = tiktok.reduce((sum, item) => sum + item.campaignCount, 0);
   const catalogReady = tiktok.length > 0;
@@ -47,7 +52,7 @@ export default async function HomePage() {
             </p>
             <div className="hero-actions">
               <Link className="btn btn-primary" href="/deals">
-                Lihat {tiktok.length} brand ↓
+                Lihat {tiktok.length} brand <Icon name="arrow-down" />
               </Link>
               <Link className="btn btn-secondary" href="/daftar?mode=login">
                 Masuk sebagai anggota
@@ -81,6 +86,27 @@ export default async function HomePage() {
           </section>
         ) : null}
 
+        <section className="shell section" id="cara-kerja">
+          <p className="eyebrow">Dari scroll ke sales</p>
+          <h2 style={{ fontSize: "var(--text-h2)", marginTop: "var(--space-2)" }}>
+            Tiga langkah. Tanpa chat satu-satu.
+          </h2>
+          <div className="step-grid">
+            <div className="step">
+              <h3>Gabung MCN Haluan</h3>
+              <p>Daftar dan hubungkan akun affiliate kamu dengan network Haluan.</p>
+            </div>
+            <div className="step">
+              <h3>Buka akses campaign</h3>
+              <p>Pilih campaign, akses link khusus, dan request sample jika tersedia.</p>
+            </div>
+            <div className="step">
+              <h3>Buat konten &amp; jual</h3>
+              <p>Publish konten seperti biasa. Komisi mengikuti ketentuan campaign.</p>
+            </div>
+          </div>
+        </section>
+
         <NewSkuHighlight campaigns={newSku} />
 
         <section className="shell section" id="campaign">
@@ -94,7 +120,7 @@ export default async function HomePage() {
               </p>
             </div>
             <Link className="btn btn-secondary" href="/deals">
-              Lihat semua {tiktok.length} deal ↗
+              Lihat semua {tiktok.length} deal <Icon name="arrow-up-right" />
             </Link>
           </div>
 
@@ -123,34 +149,13 @@ export default async function HomePage() {
                 </p>
               </div>
               <Link className="btn btn-secondary" href="/deals?platform=shopee">
-                Lihat semua {shopee.length} campaign ↗
+                Lihat semua {shopee.length} campaign <Icon name="arrow-up-right" />
               </Link>
             </div>
 
             <CampaignCatalog campaigns={shopee} variant="preview" previewLimit={12} />
           </section>
         ) : null}
-
-        <section className="shell section" id="cara-kerja">
-          <p className="eyebrow">Dari scroll ke sales</p>
-          <h2 style={{ fontSize: "var(--text-h2)", marginTop: "var(--space-2)" }}>
-            Tiga langkah. Tanpa chat satu-satu.
-          </h2>
-          <div className="step-grid">
-            <div className="step">
-              <h3>Gabung MCN Haluan</h3>
-              <p>Daftar dan hubungkan akun affiliate kamu dengan network Haluan.</p>
-            </div>
-            <div className="step">
-              <h3>Buka akses campaign</h3>
-              <p>Pilih campaign, akses link khusus, dan request sample jika tersedia.</p>
-            </div>
-            <div className="step">
-              <h3>Buat konten &amp; jual</h3>
-              <p>Publish konten seperti biasa. Komisi mengikuti ketentuan campaign.</p>
-            </div>
-          </div>
-        </section>
 
         <section className="shell section" id="faq">
           <p className="eyebrow">Sebelum mulai</p>
@@ -204,7 +209,7 @@ export default async function HomePage() {
             <h2>Sudah bikin konten. Sekarang naikkan rate-nya.</h2>
             <p>Gabung bersama creator Haluan dan akses deal yang tidak tersedia di open plan.</p>
             <Link className="btn btn-primary" href="/daftar">
-              Gabung sekarang ↗
+              Gabung sekarang <Icon name="arrow-up-right" />
             </Link>
           </div>
         </section>

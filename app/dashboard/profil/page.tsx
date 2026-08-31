@@ -58,7 +58,7 @@ export default async function ProfilPage() {
         <div className="dashboard-title">
           <div>
             <span>PROFIL CREATOR</span>
-            <h2>Kelengkapan profil</h2>
+            <h1>Kelengkapan profil</h1>
           </div>
         </div>
         <div className={`activation-card ${completeness.complete ? "verified" : ""}`}>

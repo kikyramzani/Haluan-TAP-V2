@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toggleSavedCampaign } from "./actions";
+import Icon from "../../components/Icon";
 
 type Props = {
   campaignId: string;
@@ -56,7 +57,7 @@ export default function SavedCampaignCard({ campaignId, slug, brandName, categor
           color: "var(--text-muted)",
         }}
       >
-        {pending ? "…" : "✕ Hapus"}
+        {pending ? "…" : <><Icon name="x" /> Hapus</>}
       </button>
       <Link href={`/deal/${slug}`} style={{ display: "contents" }}>
         <b>{brandName}</b>

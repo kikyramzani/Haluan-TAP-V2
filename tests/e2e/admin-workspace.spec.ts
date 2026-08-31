@@ -95,6 +95,11 @@ test("admin biasa melihat sidebar lengkap dan kesembilan rute utama merender jud
   const sidebar = page.locator("aside.admin-sidebar");
   await expect(sidebar).toBeVisible();
 
+  // The creator-facing bottom tab bar used to be unconditional root-layout
+  // markup with no route awareness — it rendered on top of every admin page
+  // at mobile width until MobileNav.tsx added its own /admin bail-out.
+  await expect(page.locator(".mobile-nav")).toHaveCount(0);
+
   // Plain ADMIN (not super_admin) must not see the 3 Super-Admin-only links —
   // AdminNav only renders the SUPER ADMIN block when isSuperAdmin is true.
   for (const [href] of SUPER_ADMIN_ROUTES) {

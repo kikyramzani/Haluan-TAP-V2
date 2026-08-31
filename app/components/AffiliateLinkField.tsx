@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import Icon from "./Icon";
 
 type Props = {
   url: string;
@@ -47,11 +48,11 @@ export default function AffiliateLinkField({ url, openUrl, label }: Props) {
           onFocus={(event) => event.currentTarget.select()}
         />
         <button type="button" onClick={() => void copy()} aria-label={copied ? "Link tersalin" : "Salin link affiliate"}>
-          <span aria-hidden="true">{copied ? "✓" : "⧉"}</span>
+          <Icon name={copied ? "check" : "copy"} />
         </button>
       </div>
       <a className="btn btn-primary btn-block" href={openUrl} target="_blank" rel="noopener noreferrer nofollow">
-        Ambil link affiliate <span aria-hidden="true">↗</span>
+        Ambil link affiliate <Icon name="arrow-up-right" />
       </a>
       {/* Kosong saat diam: teks ajakannya sudah ada di atas field, dan mengulangnya
           di sini membuat halaman terbaca seperti dua instruksi berbeda. Elemennya

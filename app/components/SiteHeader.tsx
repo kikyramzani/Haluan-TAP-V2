@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import Icon from "./Icon";
 
 type Props = {
   /** Beranda menautkan ke anchor di halaman yang sama; halaman lain kembali ke home. */
@@ -68,7 +69,7 @@ export default function SiteHeader({ variant = "home", viewer = null }: Props) {
 
           <div className="nav-actions">
             <a className="nav-session" href={viewer ? "/dashboard" : "/daftar?mode=login"}>
-              {viewer ? `${viewer.name.split(" ")[0]} · Dashboard` : "Masuk creator"} <span aria-hidden="true">↗</span>
+              {viewer ? `${viewer.name.split(" ")[0]} · Dashboard` : "Masuk creator"} <Icon name="arrow-up-right" />
             </a>
             {viewer ? null : (
               <Link className="btn btn-primary" href="/daftar">

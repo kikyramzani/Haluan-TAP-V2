@@ -1,4 +1,5 @@
 import { prisma } from "../../../../lib/db";
+import { conversionRatePct } from "../../../../lib/site-conversion-rate";
 
 /**
  * Read-only 30-day performance view: clicks, sample requests, top
@@ -100,7 +101,7 @@ export default async function AdminAnalitikPage() {
   const creatorById = new Map(creatorRows.map((creator) => [creator.id, creator]));
 
   const activeCreatorCount = activeCreatorRows.length;
-  const conversionRate = totalClicks > 0 ? (totalSampleRequests / totalClicks) * 100 : null;
+  const conversionRate = conversionRatePct(totalClicks, totalSampleRequests);
 
   const topCampaigns = topCampaignGroups.map((group) => {
     const campaign = campaignById.get(group.campaignId);

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Icon from "../components/Icon";
 import { requireUser } from "../../lib/auth";
 import { prisma } from "../../lib/db";
 import { computeProfileCompleteness } from "../../lib/profile-completeness";
@@ -46,7 +47,7 @@ export default async function CreatorDashboard({ searchParams }: { searchParams:
         <div className="dashboard-alert" role="alert">
           <b>Request sample belum dapat diajukan.</b>
           <span>Link etalase tetap dapat dibuka. Lengkapi profil agar tim dapat memverifikasi akunmu untuk request sample.</span>
-          <Link href="/dashboard/profil">Lengkapi profil →</Link>
+          <Link href="/dashboard/profil">Lengkapi profil <Icon name="arrow-right" /></Link>
         </div>
       ) : null}
       {error === "forbidden" ? (
@@ -67,7 +68,7 @@ export default async function CreatorDashboard({ searchParams }: { searchParams:
           <p>Satu tempat untuk membuka extra commission, mengajukan sample, dan memantau aktivitas affiliate kamu.</p>
         </div>
         <Link href="/deals">
-          Lihat deal aktif <span>↗</span>
+          Lihat deal aktif <Icon name="arrow-up-right" />
         </Link>
       </header>
 
@@ -81,8 +82,37 @@ export default async function CreatorDashboard({ searchParams }: { searchParams:
           <h2>{user.membership === "verified" ? "Akunmu siap untuk request sample." : "Lengkapi profil untuk mempercepat verifikasi."}</h2>
           <p>{completeness.complete ? "Profil sudah lengkap. Tim Haluan akan memverifikasi keanggotaan MCN kamu." : `Masih perlu: ${completeness.missingFields.join(", ")}.`}</p>
         </div>
-        <Link href="/dashboard/profil">{completeness.percent === 100 ? "Perbarui profil" : "Lengkapi sekarang"} →</Link>
+        <Link href="/dashboard/profil">{completeness.percent === 100 ? "Perbarui profil" : "Lengkapi sekarang"} <Icon name="arrow-right" /></Link>
       </div>
+
+      {/* Empat tujuan yang TIDAK dibawa tab bawah, jadi bar + petak ini
+          menjangkau seluruh rute creator dalam paling banyak dua ketukan. */}
+      <nav className="quick-actions" aria-label="Aksi cepat">
+        <Link href="/request-sample">
+          <span className="quick-action-icon">
+            <Icon name="package" />
+          </span>
+          Ajukan sample
+        </Link>
+        <Link href="/dashboard/sample">
+          <span className="quick-action-icon">
+            <Icon name="clipboard-text" />
+          </span>
+          Sample saya
+        </Link>
+        <Link href="/dashboard/tersimpan">
+          <span className="quick-action-icon">
+            <Icon name="bookmark-simple" />
+          </span>
+          Tersimpan
+        </Link>
+        <Link href="/dashboard/notifikasi">
+          <span className="quick-action-icon">
+            <Icon name="bell" />
+          </span>
+          Notifikasi
+        </Link>
+      </nav>
 
       <section className="admin-stats" aria-label="Statistik akun">
         <article>
@@ -109,7 +139,7 @@ export default async function CreatorDashboard({ searchParams }: { searchParams:
             <span>UNTUK KAMU</span>
             <h2>Deal yang cocok dengan kamu</h2>
           </div>
-          <Link href="/deals">Lihat semua ↗</Link>
+          <Link href="/deals">Lihat semua <Icon name="arrow-up-right" /></Link>
         </div>
         {recommendations.length ? (
           <div className="deal-grid">

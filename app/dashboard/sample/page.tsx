@@ -3,6 +3,7 @@ import { requireUser } from "../../../lib/auth";
 import { listUserSampleRequests } from "../../../lib/requests";
 import { STATUS_LABELS, formatDate } from "../../admin/(dashboard)/sample/labels";
 import CancelSampleForm from "./CancelSampleForm";
+import Icon from "../../components/Icon";
 
 type HappyPathStatus = "PENDING" | "APPROVED" | "SHIPPED" | "COMPLETED";
 
@@ -35,16 +36,16 @@ export default async function SampleRequestsPage() {
       <div className="dashboard-title">
         <div>
           <span>SAMPLE</span>
-          <h2>Request sample kamu</h2>
+          <h1>Request sample kamu</h1>
         </div>
-        <Link href="/request-sample">Request sample baru ↗</Link>
+        <Link href="/request-sample">Request sample baru <Icon name="arrow-up-right" /></Link>
       </div>
 
       {requests.length === 0 ? (
         <div className="dashboard-empty">
           <b>Belum ada request sample.</b>
           <p>Ajukan sample dari campaign yang membuka kuota untuk mulai membuat konten.</p>
-          <Link href="/request-sample">Request sample →</Link>
+          <Link href="/request-sample">Request sample <Icon name="arrow-right" /></Link>
         </div>
       ) : (
         <div className="sample-request-list">

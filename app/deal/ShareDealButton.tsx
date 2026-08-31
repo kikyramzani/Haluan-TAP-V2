@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Icon from "../components/Icon";
 
 export default function ShareDealButton({ brand }: { brand: string }) {
   const [copied, setCopied] = useState(false);
@@ -28,5 +29,5 @@ export default function ShareDealButton({ brand }: { brand: string }) {
     }
   }
 
-  return <button className="share-deal-button" type="button" onClick={() => void share()}>{copied ? "Link TAP tersalin ✓" : "Bagikan halaman TAP"}<span aria-hidden="true">↗</span></button>;
+  return <button className="share-deal-button" type="button" onClick={() => void share()}>{copied ? <>Link TAP tersalin <Icon name="check" /></> : "Bagikan halaman TAP"}<Icon name="arrow-up-right" /></button>;
 }

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { track } from "@vercel/analytics";
+import Icon from "../components/Icon";
 
 type AuthMode = "register" | "login" | "verify" | "forgot" | "reset";
 
@@ -117,7 +118,7 @@ export default function AuthClient({ googleEnabled, emailVerificationEnabled, in
     <main className="auth-main">
       <nav className="nav shell auth-nav">
         <Link className="brand" href="/" aria-label="TAP by Haluan home"><Image src="/haluan-logo.png" alt="Haluan Digital Network" width={107} height={35}/><span className="brand-divider" /><strong>TAP</strong></Link>
-        <Link className="back-link" href="/">← Kembali ke home</Link>
+        <Link className="back-link" href="/"><Icon name="arrow-left" /> Kembali ke home</Link>
       </nav>
 
       <section className="auth-page shell">
@@ -125,7 +126,7 @@ export default function AuthClient({ googleEnabled, emailVerificationEnabled, in
           <span className="eyebrow"><span className="live-dot" /> Creator access</span>
           <h1>Satu akun.<br /><em>Semua deal.</em></h1>
           <p>{mode === "register" ? "Daftar untuk request sample, melengkapi profil, dan memantau aktivitas campaign kamu." : mode === "login" ? "Masuk untuk melanjutkan request sample dan mengelola profil creator." : "Amankan akses akunmu lewat kode sekali pakai yang dikirim ke email."}</p>
-          <div className="auth-points"><span>{dealCount === null ? "Deal terkurasi" : `${dealCount} deal terkurasi`}</span><span>Extra rate khusus member</span><span>Gratis untuk creator Haluan</span></div>
+          <div className="auth-points"><span><i className="auth-point-mark"><Icon name="check" /></i>{dealCount === null ? "Deal terkurasi" : `${dealCount} deal terkurasi`}</span><span><i className="auth-point-mark"><Icon name="check" /></i>Extra rate khusus member</span><span><i className="auth-point-mark"><Icon name="check" /></i>Gratis untuk creator Haluan</span></div>
         </div>
 
         <div className="auth-card">
@@ -152,10 +153,10 @@ export default function AuthClient({ googleEnabled, emailVerificationEnabled, in
             </>}
             {(mode === "register" || mode === "login" || mode === "forgot") && <label><span>Email</span><input key={`email-${mode}`} name="email" type="email" autoComplete="email" defaultValue={mode === "login" ? authEmail : ""} placeholder="nama@email.com" required /></label>}
             {(mode === "verify" || mode === "reset") && <label><span>Kode enam digit</span><input name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))} placeholder="000000" required /></label>}
-            {(mode === "register" || mode === "login" || mode === "reset") && <label><span>{mode === "reset" ? "Kata sandi baru" : "Kata sandi"}</span><span className="password-field"><input name="password" type={showPassword ? "text" : "password"} minLength={10} autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder="Min. 10 karakter + angka" required /><button type="button" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}>{showPassword ? "◉" : "◎"}</button></span></label>}
+            {(mode === "register" || mode === "login" || mode === "reset") && <label><span>{mode === "reset" ? "Kata sandi baru" : "Kata sandi"}</span><span className="password-field"><input name="password" type={showPassword ? "text" : "password"} minLength={10} autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder="Min. 10 karakter + angka" required /><button type="button" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}><Icon name={showPassword ? "eye-slash" : "eye"} /></button></span></label>}
             {mode === "register" && <label className="auth-consent"><input name="consent" type="checkbox" required /><span>Saya menyetujui <a href="/terms" target="_blank">Ketentuan</a> dan <a href="/privacy" target="_blank">Kebijakan Privasi</a> TAP.</span></label>}
             {mode === "login" && (emailVerificationEnabled ? <button className="forgot-link" type="button" onClick={() => { setMode("forgot"); setNotice(""); }}>Lupa kata sandi?</button> : <a className="forgot-link" href="mailto:hello@haluandigital.agency?subject=Bantuan akses TAP">Lupa kata sandi?</a>)}
-            <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Memproses…" : mode === "register" ? "Buat akun" : mode === "login" ? "Masuk creator" : mode === "verify" ? "Verifikasi email" : mode === "forgot" ? "Kirim kode reset" : "Simpan kata sandi baru"}<span>↗</span></button>
+            <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Memproses…" : mode === "register" ? "Buat akun" : mode === "login" ? "Masuk creator" : mode === "verify" ? "Verifikasi email" : mode === "forgot" ? "Kirim kode reset" : "Simpan kata sandi baru"}<Icon name="arrow-up-right" /></button>
           </form>
 
           {notice && <p className="auth-notice" role="status">{notice}</p>}

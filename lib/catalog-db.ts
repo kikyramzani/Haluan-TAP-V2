@@ -37,6 +37,16 @@ const campaignInclude = {
   links: { orderBy: { sortIndex: "asc" as const } },
 };
 
+/**
+ * Katalog saja. campaignInclude sengaja tidak ikut dilebarkan karena juga
+ * dipakai getTapLinks dan halaman /deal/[slug], yang tidak butuh badge.
+ * `select: { badge: true }` menjaga kolom metrik operasional (clicks7d,
+ * conversionRatePct, dst.) tidak ikut terbaca tiap kali katalog dimuat — dan
+ * tidak ikut terkirim lewat /api/campaigns, yang menyerialkan Campaign[] apa
+ * adanya.
+ */
+const catalogInclude = { ...campaignInclude, engagementStat: { select: { badge: true } } };
+
 type CampaignRow = Awaited<ReturnType<typeof prisma.campaign.findFirst<{ include: typeof campaignInclude }>>>;
 
 function toCampaign(row: NonNullable<CampaignRow>): Campaign {
@@ -65,13 +75,24 @@ function toCampaign(row: NonNullable<CampaignRow>): Campaign {
     specialLivePrice: row.specialLivePrice,
     expiresAt: toSheetDate(row.validUntil),
     newSku: row.newSku,
+    // Gerbang pertama: status. Katalog memakai `status: { not: "HIDDEN" }`
+    // sehingga campaign ENDED ikut tampil — dan campaign yang sudah berakhir
+    // tidak boleh membawa badge. Menyempitkan `where` malah akan membuang
+    // campaign berakhir dari /deals, yang bukan yang diminta.
+    // Gerbang kedua adalah tanggal kedaluwarsa, di liveHotBadge()
+    // (app/components/HotBadge.tsx): sebuah campaign bisa saja ACTIVE tapi
+    // validUntil-nya sudah lewat.
+    hotBadge:
+      row.status === "ACTIVE"
+        ? ((row as { engagementStat?: { badge: Campaign["hotBadge"] | null } | null }).engagementStat?.badge ?? undefined)
+        : undefined,
   };
 }
 
 export async function getCampaignCatalog(platform: "tiktok" | "shopee"): Promise<Campaign[]> {
   const rows = await prisma.campaign.findMany({
     where: { platform: toPrismaPlatform(platform), status: { not: "HIDDEN" } },
-    include: campaignInclude,
+    include: catalogInclude,
   });
   return rows.map(toCampaign).sort(compareCampaigns);
 }

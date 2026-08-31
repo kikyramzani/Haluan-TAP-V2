@@ -60,7 +60,7 @@ export default async function PerformaPage() {
         <div className="dashboard-title">
           <div>
             <span>PERFORMA</span>
-            <h2>Klik link kamu</h2>
+            <h1>Klik link kamu</h1>
           </div>
         </div>
 

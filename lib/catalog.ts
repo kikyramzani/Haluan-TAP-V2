@@ -40,6 +40,14 @@ export type Campaign = {
    * `false`, dan hanya override yang bisa menaikkannya.
    */
   newSku: boolean;
+  /**
+   * Diisi getCampaignCatalog() (lib/catalog-db.ts) dari cron malam
+   * CampaignEngagementStat, dan hanya untuk campaign berstatus ACTIVE —
+   * bukan dihitung ulang di sini. Baca lewat liveHotBadge()
+   * (app/components/HotBadge.tsx), yang juga menyaring tanggal kedaluwarsa,
+   * supaya badge di kartu dan hitungan di chip tidak pernah berbeda.
+   */
+  hotBadge?: "TOP_BRAND" | "TRENDING" | "HIGH_CONVERSION" | "HIGH_DEMAND";
 };
 
 export type CatalogIssue = {
@@ -382,9 +390,24 @@ export function buildCampaignCatalog(csv: string, resolveMetric?: MetricResolver
  * Aturan kedaluwarsa ikut di sini, bukan hanya di pengurutan sisi klien, supaya
  * halaman yang dirender server pun tidak pernah menaruh campaign mati di atas.
  */
+/** Urutan yang sama dipakai cron saat menentukan badge (satu badge per campaign). */
+const BADGE_PRIORITY: Record<NonNullable<Campaign["hotBadge"]>, number> = {
+  TOP_BRAND: 0,
+  TRENDING: 1,
+  HIGH_CONVERSION: 2,
+  HIGH_DEMAND: 3,
+};
+
 export function compareCampaigns(a: Campaign, b: Campaign) {
   const endedRank = Number(!isActionable(classifyExpiry(a.expiresAt))) - Number(!isActionable(classifyExpiry(b.expiresAt)));
   if (endedRank) return endedRank;
+
+  // Deal populer memimpin katalog. Ini pengganti jujur untuk baris "Paling
+  // populer" yang dihapus: tanpa kontrol baru, dan campaign berakhir tetap di
+  // bawah karena tingkat di atas sudah menyaringnya lebih dulu.
+  const badgeRank = (item: Campaign) => (item.hotBadge ? BADGE_PRIORITY[item.hotBadge] : 9);
+  const hotRank = badgeRank(a) - badgeRank(b);
+  if (hotRank) return hotRank;
 
   if (a.gmvRank !== b.gmvRank) {
     if (a.gmvRank === null) return 1;

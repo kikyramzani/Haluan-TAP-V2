@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "../../../../../lib/db";
 import CampaignForm from "./CampaignForm";
 import TierLinkEditor from "./TierLinkEditor";
+import Icon from "../../../../components/Icon";
 
 export default async function EditCampaignPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -39,7 +40,7 @@ export default async function EditCampaignPage({ params }: { params: Promise<{ i
           <h1>{campaign.brand.displayName}</h1>
         </div>
         <Link className="btn btn-ghost" href="/admin/campaign">
-          ← Kembali
+          <Icon name="arrow-left" /> Kembali
         </Link>
       </div>
 

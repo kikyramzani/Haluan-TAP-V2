@@ -2,7 +2,7 @@ import { prisma } from "../../../lib/db";
 
 /**
  * Postgres-backed replacement for the old Sheets/Redis readiness check
- * (Phase 8 — the public catalog now reads Campaign/Brand rows, not live
+ * (Phase 8. The public catalog now reads Campaign/Brand rows, not live
  * CSV sources, so a source-configured check no longer means anything).
  * A cheap connectivity probe plus "the catalog actually has rows" is the
  * equivalent signal: the datastore answers, and it isn't empty.

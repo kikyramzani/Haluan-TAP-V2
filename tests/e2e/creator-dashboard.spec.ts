@@ -11,13 +11,13 @@ import {
 } from "./helpers/db";
 
 // Phone numbers must be unique per real account (prisma/schema.prisma's
-// User.phone) — a hardcoded literal reused across separate runs against this
+// User.phone). A hardcoded literal reused across separate runs against this
 // same real dev Postgres collides with whatever an earlier run already
 // claimed. See tests/e2e/auth-operations.spec.ts for the same fix.
 let phoneCounter = 0;
 function uniquePhone() {
   // The LAST digits of Date.now() are what actually vary between calls a few
-  // ms apart — slicing from the front instead kept the stable leading part
+  // ms apart. Slicing from the front instead kept the stable leading part
   // and produced near-duplicate phones, defeating the point. A counter is
   // layered on top since two calls in the same synchronous tick can still
   // share a millisecond.
@@ -28,21 +28,21 @@ function uniquePhone() {
 /**
  * Rewritten from scratch for Phase 9 of the rebuild plan. The pre-rebuild
  * version of this file (87 lines) tested a single flat /dashboard page with
- * a `#profile` hash-anchor tab and an inline ProfileForm.tsx — both gone.
+ * a `#profile` hash-anchor tab and an inline ProfileForm.tsx. Both gone.
  * The creator dashboard is now a real multi-route app under /dashboard/*
  * (see app/dashboard/DashboardNav.tsx for the route list), gated by
  * app/dashboard/layout.tsx on BOTH being signed in AND having finished
  * /daftar/lengkapi. That second gate is new and load-bearing: register()
  * alone does not satisfy it (Creator.onboardingCompletedAt stays null until
- * the onboarding form itself is submitted — see
+ * the onboarding form itself is submitted. See
  * app/daftar/lengkapi/actions.ts), so every test here either drives that
  * form for real (the main creator-journey test below) or calls
  * completeOnboarding() (helpers/db.ts, added this session, same
  * direct-Prisma pattern as completeCreatorProfileAndVerify) to satisfy the
  * gate without re-testing that same form in every scenario.
  *
- * Routes that had zero e2e coverage before this rewrite — /dashboard/sample,
- * /dashboard/tersimpan, and /dashboard/profil's tabs — are covered here for
+ * Routes that had zero e2e coverage before this rewrite. /dashboard/sample,
+ * /dashboard/tersimpan, and /dashboard/profil's tabs. Are covered here for
  * the first time. The Alamat tab's cascading wilayah selects are the one
  * deliberate gap: completeCreatorProfileAndVerify() already exercises that
  * exact wilayah chain at the Prisma level for the sample-request tests, and
@@ -57,7 +57,7 @@ test.beforeAll(async () => {
   fixtures = await seedCatalogFixtures();
 });
 
-// register-ip (6/hour) and verify-confirm-ip (10/hour) — see
+// register-ip (6/hour) and verify-confirm-ip (10/hour). See
 // auth-operations.spec.ts's beforeEach for why this resets every test.
 test.beforeEach(async () => {
   await resetRateLimitScope("register-ip");
@@ -77,7 +77,7 @@ test("kreator baru wajib menyelesaikan onboarding sebelum dashboard terbuka, lal
   emailsToClean.push(email);
   await register(page, { name: "Dian Kreator", email, phone: uniquePhone() });
 
-  // register()'s own assertion only proves a session exists — it does not
+  // register()'s own assertion only proves a session exists. It does not
   // promise the account is onboarded. Creator.onboardingCompletedAt is still
   // null right after registration, so app/dashboard/layout.tsx redirects the
   // very next /dashboard render to /daftar/lengkapi. This is the gate this
@@ -95,7 +95,7 @@ test("kreator baru wajib menyelesaikan onboarding sebelum dashboard terbuka, lal
   await expect(page).toHaveURL(/\/dashboard$/);
 
   // Overview: sapaan nama depan dan status akun yang jujur untuk akun yang
-  // benar-benar baru — nol di semua statistik, bukan angka tebakan.
+  // benar-benar baru. Nol di semua statistik, bukan angka tebakan.
   await expect(page.getByRole("heading", { name: /Halo, Dian\./ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Lihat deal aktif/ })).toBeVisible();
   await expect(page.locator(".admin-stats article", { hasText: "Sample Request" }).locator("strong")).toHaveText("0");
@@ -114,7 +114,7 @@ test("kreator baru wajib menyelesaikan onboarding sebelum dashboard terbuka, lal
     await expect(page.locator(".mobile-nav a")).toHaveCount(5);
     await expect(page.locator('.mobile-nav a[href="/dashboard"]')).toHaveAttribute("aria-current", "page");
   } else {
-    // Di desktop sidebar-nya tetap navigasi utama — penyembunyian di mobile
+    // Di desktop sidebar-nya tetap navigasi utama. Penyembunyian di mobile
     // tidak boleh diam-diam ikut menghilangkannya di sini.
     await expect(page.locator(".creator-sidebar")).toBeVisible();
   }
@@ -123,7 +123,7 @@ test("kreator baru wajib menyelesaikan onboarding sebelum dashboard terbuka, lal
   // ada lagi ajakan "Daftar" atau "Gabung sekarang" untuk orang yang sudah
   // masuk. ".nav-session" sengaja disembunyikan lewat CSS di bawah 600px
   // (digantikan navigasi bawah mobile), jadi diperiksa lewat atribut, bukan
-  // toBeVisible() — supaya berkas ini tetap benar dijalankan di proyek mobile.
+  // toBeVisible(), supaya berkas ini tetap benar dijalankan di proyek mobile.
   await page.goto("/deals");
   await expect(page.locator(".nav-session")).toHaveAttribute("href", "/dashboard");
   await expect(page.locator(".nav-session")).toContainText("Dian");
@@ -132,7 +132,7 @@ test("kreator baru wajib menyelesaikan onboarding sebelum dashboard terbuka, lal
 
   // Logout mengembalikan ke home publik, dan dashboard tidak lagi bisa diakses.
   // The "Keluar" button only exists inside /dashboard's own header, not on
-  // public pages like /deals — logout() needs to be called from there.
+  // public pages like /deals. Logout() needs to be called from there.
   await page.goto("/dashboard");
   await logout(page);
   await expect(page).toHaveURL(/\/$/);
@@ -191,7 +191,7 @@ test("/dashboard/sample: request sample tampil dengan status yang benar dan bisa
   await register(page, { name: "Sample Kreator", email, phone });
   await completeOnboarding(email);
   // checkSampleGate() (lib/requests.ts) requires BOTH a verified membership
-  // AND a complete address — completeCreatorProfileAndVerify() sets up both
+  // AND a complete address. CompleteCreatorProfileAndVerify() sets up both
   // in one direct-Prisma write, same pattern auth-operations.spec.ts uses
   // for the sample lifecycle test.
   await completeCreatorProfileAndVerify(email);
@@ -226,7 +226,7 @@ test("/dashboard/sample: request sample tampil dengan status yang benar dan bisa
 });
 
 test("link request sample dari halaman deal dan dari modal katalog membawa brand yang sama", async ({ page }) => {
-  // Publik murni — hasil href-nya tidak bergantung pada sesi, jadi tidak
+  // Publik murni. Hasil href-nya tidak bergantung pada sesi, jadi tidak
   // perlu akun kreator untuk membuktikannya (beda dari test-test di atas).
   const expectedHref = `/request-sample?brand=${encodeURIComponent(fixtures.single.displayName)}&platform=TikTok`;
 
@@ -238,7 +238,7 @@ test("link request sample dari halaman deal dan dari modal katalog membawa brand
   await expect(page.locator("section.panel").getByRole("link", { name: "Request sample" })).toHaveAttribute("href", expectedHref);
 
   // Dari modal katalog untuk brand yang sama (app/components/CampaignSheet.tsx)
-  // — brand dan platform harus ikut terisi otomatis di halaman tujuan juga.
+  //. Brand dan platform harus ikut terisi otomatis di halaman tujuan juga.
   await page.goto("/deals");
   await page.getByLabel("Cari brand atau campaign").fill(fixtures.single.displayName);
   await page.locator(".deal-card").filter({ hasText: fixtures.single.displayName }).getByRole("button", { name: /Dapatkan komisi/ }).click();

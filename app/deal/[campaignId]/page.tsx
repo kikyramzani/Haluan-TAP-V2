@@ -69,7 +69,7 @@ export default async function DealDetail({ params }: DealPageProps) {
   const user = await getCurrentUser().catch(() => null);
 
   // Bookmarking (SavedCampaign) keys off the real Prisma Campaign.id, not the
-  // slug this route uses — resolved once here, cheaply, alongside whether
+  // slug this route uses. Resolved once here, cheaply, alongside whether
   // this viewer already saved this exact campaign.
   let savedCampaignState: { campaignId: string; initialSaved: boolean } | null = null;
   try {

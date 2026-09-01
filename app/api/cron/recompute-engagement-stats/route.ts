@@ -3,7 +3,7 @@ import { recordCronRun } from "../../../../lib/cron-status";
 import { recomputeAllCampaignEngagementStats } from "../../../admin/(dashboard)/campaign/engagement-stats";
 
 /**
- * The only path that computes Hot Deals badges — unlike BrandPlatformStat,
+ * The only path that computes Hot Deals badges. Unlike BrandPlatformStat,
  * nothing recomputes this synchronously on mutation. A 24h-stale "trending"
  * rail is normal (see engagement-stats.ts's own comment); this is the
  * primary path, not a safety net.

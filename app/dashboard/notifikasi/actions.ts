@@ -5,8 +5,8 @@ import { requireUser } from "../../../lib/auth";
 import { prisma } from "../../../lib/db";
 
 /**
- * Marks a single notification read. Scoped to `id` AND `userId` together —
- * never `id` alone — so a creator can never mark another creator's
+ * Marks a single notification read. Scoped to `id` AND `userId` together,
+ * never `id` alone. So a creator can never mark another creator's
  * notification as read via a guessed id.
  */
 export async function markNotificationRead(id: string) {

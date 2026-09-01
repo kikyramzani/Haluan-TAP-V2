@@ -1,5 +1,5 @@
 /**
- * Tunable thresholds for the "Hot Deals" ranking — see the recompute logic
+ * Tunable thresholds for the "Hot Deals" ranking. See the recompute logic
  * in app/admin/(dashboard)/campaign/engagement-stats.ts. Every number here
  * is a floor against noise, not a target to fabricate: a badge that never
  * fires because real traffic hasn't reached the floor is the correct
@@ -15,12 +15,12 @@ export const TRENDING_TOP_FRACTION = 0.1; // top decile of campaigns with clicks
 /** "Tinggi konversi": floor prevents 1-sample/1-click = "100%" noise. */
 export const CONVERSION_MIN_CLICKS_30D = 20;
 /** Must beat the real, same-run, site-wide 30-day conversion rate by this
- *  multiplier — not a guessed absolute percentage. */
+ *  multiplier. Not a guessed absolute percentage. */
 export const CONVERSION_RATE_MULTIPLIER = 1.5;
 /** Absolute floor in case the site-wide rate itself is near zero. */
 export const CONVERSION_RATE_FLOOR_PCT = 5;
 
-/** "Banyak peminat": SampleRequest is an authenticated, deliberate action —
+/** "Banyak peminat": SampleRequest is an authenticated, deliberate action,
  *  even single digits are meaningful this early. */
 export const DEMAND_MIN_SCORE = 5; // savedCount + sampleRequests30d
 
@@ -34,12 +34,12 @@ export type HotBadgeInput = {
   savedCount: number;
   /** Lowest clicks7d that still lands in the top decile this run, or Infinity when nothing has clicks yet. */
   trendingRankCutoff: number;
-  /** max(siteWideRate × multiplier, floor) — computed from real site-wide data, not hardcoded. */
+  /** max(siteWideRate × multiplier, floor). Computed from real site-wide data, not hardcoded. */
   conversionBar: number;
 };
 
 /**
- * The whole ranking rule, pure so it can be unit-tested without a database —
+ * The whole ranking rule, pure so it can be unit-tested without a database,
  * same split as lib/recommendation.ts / lib/sample-gate.ts.
  *
  * First match wins; one badge per campaign, never stacked. Returning null is

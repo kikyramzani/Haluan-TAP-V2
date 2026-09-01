@@ -5,7 +5,9 @@ import type { Campaign } from "../../lib/catalog";
 import { classifyExpiry, isActionable } from "../../lib/campaign-flags";
 import BrandCard from "./BrandCard";
 import CampaignSheet from "./CampaignSheet";
-import Icon, { type IconName } from "./Icon";
+import Icon from "./Icon";
+import CategoryIcon from "./CategoryIcon";
+import Illustration from "./Illustration";
 import { HOT_BADGE_LABEL, HOT_BADGE_ICON, HOT_BADGE_ORDER, liveHotBadge } from "./HotBadge";
 import type { HotBadge as HotBadgeId } from "../../lib/hot-deals-config";
 
@@ -26,23 +28,6 @@ const SORTS = [
 ] as const;
 
 type SortId = (typeof SORTS)[number]["id"];
-
-/**
- * Ikon per kategori, dikunci ke nama kategori persis. Admin bisa menambah
- * kategori kapan saja lewat /admin/kategori, jadi yang tidak dikenal jatuh ke
- * ikon tag generik — bukan ikon kosong, bukan error.
- */
-const CATEGORY_ICON: Record<string, IconName> = {
-  "Beauty & Health": "sparkle",
-  Tech: "device-mobile",
-  "Home & Living": "couch",
-  Fashion: "t-shirt",
-  "Mom & Baby": "baby",
-  "Food & FMCG": "fork-knife",
-  Sports: "barbell",
-};
-
-const categoryIcon = (name: string): IconName => CATEGORY_ICON[name] ?? "tag";
 
 /** Menyamakan huruf besar-kecil dan diakritik supaya "L'Oréal" cocok dengan "loreal". */
 function normalize(value: string) {
@@ -149,7 +134,7 @@ export default function CampaignCatalog({
   }, [campaigns, query, category, band, sampleOnly, sort, popular]);
 
   // Halaman kembali ke awal setiap kali filter berubah. Disesuaikan saat render
-  // — bukan lewat useEffect — supaya tidak ada render perantara yang sempat
+  //, bukan lewat useEffect - supaya tidak ada render perantara yang sempat
   // menampilkan potongan daftar dengan panjang lama.
   const filterKey = `${query}|${category}|${band}|${sampleOnly}|${sort}|${popular}`;
   const [lastFilterKey, setLastFilterKey] = useState(filterKey);
@@ -194,6 +179,20 @@ export default function CampaignCatalog({
 
   const hasFilters = Boolean(query || category || band || sampleOnly || popular);
 
+  /**
+   * Di layar ponsel keempat baris facet di bawah ini dilipat di balik satu
+   * tombol, dan hanya di sana. CSS-nya yang memutuskan, bukan React, sehingga
+   * desktop tetap merender persis seperti sebelumnya.
+   *
+   * Alasannya bukan sekadar tinggi: sebelumnya ada tiga deretan chip yang
+   * masing-masing menggulir HORIZONTAL di dalam halaman yang menggulir
+   * vertikal. Nested scroll region seperti itu membuat chip di ujung kanan
+   * praktis tidak pernah ditemukan. Saat dibuka, chip-nya membungkus (lihat
+   * catalog.css), jadi tidak ada satu pun nilai yang tersembunyi.
+   */
+  const [facetsOpen, setFacetsOpen] = useState(false);
+  const activeFacets = [category, band, popular].filter(Boolean).length + (sampleOnly ? 1 : 0);
+
   return (
     <>
       {!isPreview ? (
@@ -223,11 +222,27 @@ export default function CampaignCatalog({
             )}
           </div>
 
+          <button
+            className="facet-toggle"
+            type="button"
+            aria-expanded={facetsOpen}
+            aria-controls="catalog-facets"
+            onClick={() => setFacetsOpen((value) => !value)}
+          >
+            <span>Filter</span>
+            {activeFacets > 0 ? <span className="facet-toggle-count">{activeFacets}</span> : null}
+            {/* Satu ikon diputar, bukan dua entri baru: Icon.tsx sudah di ambang
+                ~40 entri yang komentarnya sendiri tetapkan, dan glyph dekoratif
+                tidak sepadan dengan pemecahan berkas itu. */}
+            <Icon name="arrow-down" className="facet-toggle-caret" />
+          </button>
+
+          <div className="catalog-facets" id="catalog-facets" data-open={facetsOpen}>
           {badgedTotal > 0 ? (
             <div className="filter-row">
               <div className="filter-chips" role="group" aria-label="Filter popularitas">
                 {/* "Paling populer" hanya muncul kalau ada lebih dari satu jenis
-                    badge — dengan satu jenis, hasilnya identik dengan chip jenis
+                    badge, dengan satu jenis, hasilnya identik dengan chip jenis
                     itu sendiri, jadi chip keduanya cuma beban. */}
                 {badgeCounts.size > 1 ? (
                   <button
@@ -268,7 +283,7 @@ export default function CampaignCatalog({
                   aria-pressed={category === name}
                   onClick={() => setCategory(category === name ? "" : name)}
                 >
-                  <Icon name={categoryIcon(name)} /> {name} <span className="chip-count">{count}</span>
+                  <CategoryIcon category={name} /> {name} <span className="chip-count">{count}</span>
                 </button>
               ))}
             </div>
@@ -318,6 +333,7 @@ export default function CampaignCatalog({
               ) : null}
             </div>
           </div>
+          </div>
         </div>
       ) : null}
 
@@ -336,6 +352,7 @@ export default function CampaignCatalog({
         </div>
       ) : (
         <div className="state-panel">
+          <Illustration scene="empty" />
           <h3>Belum ada deal yang cocok</h3>
           <p>Coba ubah kata pencarian atau lepas sebagian filter kamu.</p>
           <button className="btn btn-secondary" type="button" onClick={clearFilters}>

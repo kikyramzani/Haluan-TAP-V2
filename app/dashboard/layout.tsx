@@ -8,9 +8,9 @@ import { logoutAction } from "../logout-action";
 import DashboardNav from "./DashboardNav";
 
 /**
- * Shared shell for every /dashboard/* route (Phase 5 of the rebuild plan —
+ * Shared shell for every /dashboard/* route (Phase 5 of the rebuild plan,
  * see /Users/macbook/.claude/plans/kamu-lihat-dari-bagian-purrfect-hopcroft.md).
- * Gates on both being signed in AND having finished /daftar/lengkapi —
+ * Gates on both being signed in AND having finished /daftar/lengkapi,
  * per the doc, onboarding is blocked "bukan cuma di halaman login, tapi juga
  * di layout dashboard itu sendiri."
  */

@@ -3,8 +3,8 @@
  *
  * A green suite proves something about a SHA; it says nothing about which SHA the
  * domain in front of you is serving. Vercel exposes the commit that triggered the
- * build, so the two can be tied together from outside — by an operator, a smoke
- * check, or a promotion workflow — instead of being assumed to match.
+ * build, so the two can be tied together from outside. By an operator, a smoke
+ * check, or a promotion workflow. Instead of being assumed to match.
  */
 export const dynamic = "force-dynamic";
 

@@ -4,7 +4,7 @@ import { conversionRatePct } from "../../../../lib/site-conversion-rate";
 /**
  * Read-only 30-day performance view: clicks, sample requests, top
  * campaigns/creators, platform split, and a click → sample → approved
- * funnel. Gated by requireAdmin() in app/admin/layout.tsx — no mutations
+ * funnel. Gated by requireAdmin() in app/admin/layout.tsx. No mutations
  * happen on this page.
  */
 
@@ -166,7 +166,7 @@ export default async function AdminAnalitikPage() {
           <small>klik dari kreator unik</small>
         </article>
         <article>
-          <span>KONVERSI KLIK → SAMPLE</span>
+          <span>KONVERSI KLIK KE SAMPLE</span>
           <strong>{conversionRate === null ? "—" : `${conversionRate.toFixed(1)}%`}</strong>
           <small>request / klik</small>
         </article>
@@ -265,7 +265,7 @@ export default async function AdminAnalitikPage() {
         <div className="panel-heading">
           <div>
             <span>FUNNEL</span>
-            <h2>Klik → Request → Approved</h2>
+            <h2>Klik, Request, Approved</h2>
           </div>
         </div>
         {funnelStages.map((stage) => (

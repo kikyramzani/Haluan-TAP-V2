@@ -13,18 +13,18 @@ import {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
- * Recomputes the "Hot Deals" badge for every non-hidden campaign — see
+ * Recomputes the "Hot Deals" badge for every non-hidden campaign. See
  * lib/hot-deals-config.ts for the thresholds and priority order. Called
  * nightly by /api/cron/recompute-engagement-stats, the same
  * cache-table-recomputed-on-a-schedule pattern as
  * app/admin/(dashboard)/campaign/stats.ts's recomputeBrandPlatformStat, just
- * across the whole catalog at once instead of per-mutation — a 24h-stale
+ * across the whole catalog at once instead of per-mutation. A 24h-stale
  * "trending" concept is normal (the same way a "Trending" shelf anywhere
  * else updates daily, not per click), so this doesn't need the synchronous
  * on-mutation recompute BrandPlatformStat has.
  *
  * Every non-hidden campaign is visited, not just ones with existing
- * activity — a campaign whose badge should CLEAR this week (clicks dried
+ * activity. A campaign whose badge should CLEAR this week (clicks dried
  * up, brand un-featured) must still get its stale badge overwritten to
  * null, not skipped.
  */

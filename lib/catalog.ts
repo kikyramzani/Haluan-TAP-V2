@@ -19,7 +19,7 @@ export type Campaign = {
   /** Komisi yang ditampilkan: nilai TERKECIL dari seluruh tier brand ini. */
   commission: number | null;
   /**
-   * Komisi tiap campaign, urut sesuai baris di sheet — indeksnya sejajar dengan
+   * Komisi tiap campaign, urut sesuai baris di sheet. Indeksnya sejajar dengan
    * daftar TAP link di endpoint privat. Hanya berisi angka persen, tidak pernah
    * URL partner, sehingga aman ikut ke response publik.
    */
@@ -42,7 +42,7 @@ export type Campaign = {
   newSku: boolean;
   /**
    * Diisi getCampaignCatalog() (lib/catalog-db.ts) dari cron malam
-   * CampaignEngagementStat, dan hanya untuk campaign berstatus ACTIVE —
+   * CampaignEngagementStat, dan hanya untuk campaign berstatus ACTIVE,
    * bukan dihitung ulang di sini. Baca lewat liveHotBadge()
    * (app/components/HotBadge.tsx), yang juga menyaring tanggal kedaluwarsa,
    * supaya badge di kartu dan hitungan di chip tidak pernah berbeda.
@@ -108,7 +108,7 @@ function expiryColumn(headers: string[]) {
 
 /**
  * Format ringkasan: satu CSV memuat TikTok dan Shopee sekaligus lewat kolom
- * "Platform", dengan komisi yang sudah menjadi angka terkecil per brand —
+ * "Platform", dengan komisi yang sudah menjadi angka terkecil per brand,
  * bukan satu baris per tier mentah seperti sheet asli. Dipakai saat sumber
  * datanya bukan sheet operasional TAP, tapi rekap yang sudah dirapikan.
  *
@@ -125,7 +125,7 @@ function isSummaryFormat(headers: string[]) {
 
 /**
  * Format link Shopee: khusus Shopee, satu baris per campaign, dengan brand
- * dan link affiliate sudah jadi kolom sendiri-sendiri — beda dengan sheet
+ * dan link affiliate sudah jadi kolom sendiri-sendiri. Beda dengan sheet
  * asli yang menggabungkan keduanya dalam satu sel ("Brand : url").
  *
  * Terdeteksi lewat "Status Kadaluarsa", kolom yang tidak pernah ada di sheet
@@ -140,7 +140,7 @@ function isShopeeLinkFormat(headers: string[]) {
 
 /**
  * Satu brand yang muncul di beberapa baris berarti brand itu punya lebih
- * dari satu link/campaign — sample dan harga live khusus digabung lewat OR,
+ * dari satu link/campaign. Sample dan harga live khusus digabung lewat OR,
  * supaya satu baris yang bilang "Ya" tidak pernah kalah oleh baris lain yang
  * kosong untuk brand yang sama.
  */
@@ -186,7 +186,7 @@ function buildShopeeLinkCampaigns(csv: string): Campaign[] {
   );
 }
 
-/** "Ya"/"Tidak" jadi boolean; kosong tetap `null` — bukan berarti "Tidak". */
+/** "Ya"/"Tidak" jadi boolean; kosong tetap `null`, bukan berarti "Tidak". */
 function yesNo(value: string): boolean | null {
   const clean = value.trim().toLowerCase();
   if (clean === "ya" || clean === "yes") return true;
@@ -196,7 +196,7 @@ function yesNo(value: string): boolean | null {
 
 /**
  * Format ringkasan tidak punya kolom link affiliate sama sekali, jadi setiap
- * campaign lahir tanpa TAP link. Itu tidak membuat brand hilang dari katalog —
+ * campaign lahir tanpa TAP link. Itu tidak membuat brand hilang dari katalog,
  * baru terlihat saat creator membuka detail brand dan link belum tersedia
  * (jalur yang sama dengan link yang gagal dimuat karena sebab lain).
  */
@@ -232,7 +232,7 @@ function buildSummaryCampaigns(csv: string): { tiktok: Campaign[]; shopee: Campa
       category: cell(iCategory) || "Lainnya",
       platform: isShopee ? "Shopee Affiliate" : "TikTok Shop",
       commission,
-      // Hanya angka gabungan yang diketahui, bukan pecahan per tier — mengisi
+      // Hanya angka gabungan yang diketahui, bukan pecahan per tier. Mengisi
       // seluruh array dengan angka yang sama akan mengklaim tahu sesuatu yang
       // sebetulnya tidak diketahui.
       tierCommissions: [commission],
@@ -379,7 +379,7 @@ export function buildCampaignCatalog(csv: string, resolveMetric?: MetricResolver
   }).sort(compareCampaigns);
 
   // Brand dengan link valid tetap ditampilkan walau komisinya belum terbaca.
-  // Angkanya dirender sebagai "—", bukan ditebak atau disembunyikan.
+  // Angkanya dirender sebagai "-", bukan ditebak atau disembunyikan.
   return { campaigns, issues };
 }
 

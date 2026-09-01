@@ -14,8 +14,8 @@ const MAX_SHOWN = 8;
 /**
  * Baris SKU baru.
  *
- * Penandanya dipasang admin lewat CMS — tidak ada kolom "New SKU" di sheet mana
- * pun — sehingga daftar ini kosong sampai ada yang benar-benar ditandai. Saat
+ * Penandanya dipasang admin lewat CMS. Tidak ada kolom "New SKU" di sheet mana
+ * pun, sehingga daftar ini kosong sampai ada yang benar-benar ditandai. Saat
  * kosong, sectionnya tidak dirender sama sekali: sebuah baris kosong berlabel
  * "SKU baru" akan terbaca seperti data yang gagal dimuat.
  *

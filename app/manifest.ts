@@ -4,7 +4,7 @@ import type { MetadataRoute } from "next";
  * Manifest PWA.
  *
  * Sengaja tanpa service worker. Katalog memuat komisi dan status sample, dan
- * angka semacam itu tidak boleh pernah tampil dari cache basi — jadi aplikasi
+ * angka semacam itu tidak boleh pernah tampil dari cache basi, jadi aplikasi
  * ini bisa dipasang ke home screen dan berjalan standalone, tapi tetap selalu
  * mengambil data dari jaringan.
  */
@@ -21,8 +21,9 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait",
     lang: "id",
     dir: "ltr",
-    background_color: "#ffffff",
-    theme_color: "#ffffff",
+    // Paper brand (#fcfcfc), bukan putih murni. Lihat BRAND-SYSTEM.md §2.1.
+    background_color: "#fcfcfc",
+    theme_color: "#fcfcfc",
     categories: ["business", "shopping", "productivity"],
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },

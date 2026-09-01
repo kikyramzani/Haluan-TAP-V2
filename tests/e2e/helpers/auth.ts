@@ -5,9 +5,9 @@ const EMAIL_SERVER_URL = `http://127.0.0.1:${process.env.MOCK_EMAIL_PORT ?? 6390
 /**
  * AUTH_EMAIL_MODE=local (see playwright.config.ts) makes the app POST every
  * verification/reset code to tests/e2e/helpers/mock-email-server.mjs for
- * real — this reads it back. (AUTH_EMAIL_MODE=test's debugCode-in-response
+ * real. This reads it back. (AUTH_EMAIL_MODE=test's debugCode-in-response
  * shortcut looked simpler, but is silently inert under `next start`, which
- * always forces NODE_ENV=production — see playwright.config.ts's own comment
+ * always forces NODE_ENV=production. See playwright.config.ts's own comment
  * for the full explanation.)
  */
 async function latestCodeFor(email: string): Promise<string> {
@@ -34,7 +34,7 @@ export async function register(page: Page, input: { name: string; email: string;
   await page.getByRole("button", { name: "Verifikasi email" }).click();
   // A brand-new account has not finished /daftar/lengkapi yet, so the
   // /dashboard layout's onboarding gate (app/dashboard/layout.tsx) redirects
-  // the very first visit there instead of rendering dashboard content —
+  // the very first visit there instead of rendering dashboard content -
   // verified against the running app: register + verify, then a real request
   // for /dashboard 307s to /daftar/lengkapi until onboardingCompletedAt is
   // set. Completing onboarding is a deliberate separate step for callers
@@ -59,5 +59,5 @@ export async function logout(page: Page) {
   await page.getByRole("button", { name: "Keluar" }).click();
 }
 
-/** ADMIN_EMAILS in playwright.config.ts's webServer is the allowlist gate — this email is the only one that becomes an admin on registration. */
+/** ADMIN_EMAILS in playwright.config.ts's webServer is the allowlist gate. This email is the only one that becomes an admin on registration. */
 export const ADMIN_EMAIL = "admin@tap.test";

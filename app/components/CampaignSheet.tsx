@@ -26,7 +26,7 @@ type Props = {
 /**
  * Detail brand.
  *
- * Hanya satu link yang ditawarkan — tier dengan komisi terkecil — jadi creator
+ * Hanya satu link yang ditawarkan. Tier dengan komisi terkecil - jadi creator
  * tidak perlu memilih apa pun. Linknya ditampilkan apa adanya supaya bisa
  * disalin, bukan disembunyikan di balik tombol.
  *

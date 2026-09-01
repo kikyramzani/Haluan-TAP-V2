@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Data langganan push tidak lengkap." }, { status: 400 });
     }
 
-    // `endpoint` is globally unique — a browser re-subscribing (e.g. after
+    // `endpoint` is globally unique. A browser re-subscribing (e.g. after
     // clearing its push registration) lands on the same row instead of a
     // duplicate, and re-points it at whichever account enabled it this time.
     await prisma.pushSubscription.upsert({

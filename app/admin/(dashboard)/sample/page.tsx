@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listSampleRequests } from "../../../../lib/requests";
 import { STATUS_LABELS, STATUS_ORDER, formatDate, type SampleRequestStatus } from "./labels";
+import Icon from "../../../components/Icon";
 
 type Props = { searchParams: Promise<{ q?: string; status?: string; page?: string }> };
 
@@ -13,7 +14,7 @@ function isStatus(value: string): value is SampleRequestStatus {
 export default async function AdminSamplePage({ searchParams }: Props) {
   const params = await searchParams;
   const q = (params.q ?? "").trim();
-  // Queue auto-filters to "Menunggu" (PENDING) when no ?status= is present —
+  // Queue auto-filters to "Menunggu" (PENDING) when no ?status= is present -
   // that's the work admins actually need to act on. "all" (rendered as
   // "Semua status") is the explicit opt-out.
   const statusParam = params.status ?? "PENDING";
@@ -40,8 +41,8 @@ export default async function AdminSamplePage({ searchParams }: Props) {
 
       <form className="admin-filterbar" role="search">
         <label>
-          ⌕
-          <input type="search" name="q" defaultValue={q} placeholder="Cari brand, username, atau nomor resi…" />
+          <Icon name="magnifying-glass" />
+          <input aria-label="Cari brand, username, atau nomor resi" type="search" name="q" defaultValue={q} placeholder="Cari brand, username, atau nomor resi…" />
         </label>
         <select name="status" defaultValue={status}>
           <option value="all">Semua status</option>
@@ -96,13 +97,13 @@ export default async function AdminSamplePage({ searchParams }: Props) {
 
       <div className="admin-pagination">
         <Link aria-disabled={page <= 1} href={`/admin/sample?q=${encodeURIComponent(q)}&status=${status}&page=${page - 1}`}>
-          ← Sebelumnya
+          <Icon name="arrow-left" /> Sebelumnya
         </Link>
         <span>
           Halaman {page} dari {pages} · {total} request
         </span>
         <Link aria-disabled={page >= pages} href={`/admin/sample?q=${encodeURIComponent(q)}&status=${status}&page=${page + 1}`}>
-          Berikutnya →
+          Berikutnya <Icon name="arrow-right" />
         </Link>
       </div>
     </>

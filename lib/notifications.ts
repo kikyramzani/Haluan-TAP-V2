@@ -3,7 +3,7 @@ import { SAMPLE_STATUS_LABEL } from "./sample-status.ts";
 import type { NotificationType, Prisma } from "@prisma/client";
 
 /**
- * Every notification here is targeted at a specific, computed audience — never
+ * Every notification here is targeted at a specific, computed audience. Never
  * a broadcast to all creators. Each function below is its own targeting rule;
  * see the doc's "notifikasi" section for why (a new campaign only reaches
  * creators whose category matches, not everyone).
@@ -67,7 +67,7 @@ export async function notifyProfileRejected(userId: string, reason: string): Pro
   });
 }
 
-/** Targets VERIFIED creators whose content category matches the campaign's brand category. Skipped entirely if the brand has no category — there's nothing to match against. */
+/** Targets VERIFIED creators whose content category matches the campaign's brand category. Skipped entirely if the brand has no category. There's nothing to match against. */
 export async function notifyNewCampaign(campaignId: string): Promise<void> {
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
@@ -87,7 +87,7 @@ export async function notifyNewCampaign(campaignId: string): Promise<void> {
   });
 }
 
-/** Targets VERIFIED creators who saved or previously clicked this campaign — not a blast to everyone. Marks the campaign notified so the nightly cron doesn't repeat this every night. */
+/** Targets VERIFIED creators who saved or previously clicked this campaign. Not a blast to everyone. Marks the campaign notified so the nightly cron doesn't repeat this every night. */
 export async function notifyCampaignEndingSoon(campaignId: string): Promise<void> {
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },

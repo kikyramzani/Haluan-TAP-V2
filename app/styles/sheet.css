@@ -1,6 +1,6 @@
 /**
  * Detail campaign. Di desktop tampil sebagai drawer kanan, di mobile sebagai
- * lembar penuh dari bawah — pola yang sama, ukuran yang berbeda.
+ * lembar penuh dari bawah. Pola yang sama, ukuran yang berbeda.
  */
 
 .sheet-backdrop {
@@ -15,7 +15,7 @@
   animation: sheet-fade var(--duration-normal) var(--ease-out);
 }
 
-/* Tirai penutup. Mengisi sisa layar di luar panel dan tidak ikut urutan Tab —
+/* Tirai penutup. Mengisi sisa layar di luar panel dan tidak ikut urutan Tab,
    Escape dan tombol tutup adalah jalur keyboard yang sebenarnya. */
 .sheet-scrim {
   position: absolute;
@@ -92,7 +92,7 @@
   /* Centered, not top-packed: a Shopee sheet (no commission tile, often a
      single tier) is short enough that "start" left a large dead gap between
      the link field and the footer. Long content still scrolls the same way
-     either way — this only redistributes genuinely leftover space. */
+     either way. This only redistributes genuinely leftover space. */
   align-content: center;
 }
 

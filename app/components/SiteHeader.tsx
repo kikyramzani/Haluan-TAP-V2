@@ -10,7 +10,7 @@ type Props = {
   variant?: "home" | "subpage";
   /**
    * Sesi pemilik, dibaca oleh Server Component pemanggil lewat `getCurrentUser()`
-   * dan diteruskan sebagai prop — bukan diambil lewat fetch klien di sini.
+   * dan diteruskan sebagai prop, bukan diambil lewat fetch klien di sini.
    *
    * Header ini dipasang per halaman (beranda, /deals, /deal/[id]), bukan di
    * app/layout.tsx, sehingga berpindah di antara ketiganya benar-benar

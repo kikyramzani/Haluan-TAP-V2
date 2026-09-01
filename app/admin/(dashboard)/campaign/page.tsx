@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../../lib/db";
 import { commissionRangeLabel, minMaxCommission } from "../../../../lib/commission-display";
+import Icon from "../../../components/Icon";
 
 type Props = { searchParams: Promise<{ q?: string; platform?: string; status?: string; page?: string }> };
 
@@ -73,8 +74,8 @@ export default async function AdminCampaignPage({ searchParams }: Props) {
 
       <form className="admin-filterbar" role="search">
         <label>
-          ⌕
-          <input type="search" name="q" defaultValue={q} placeholder="Cari nama brand…" />
+          <Icon name="magnifying-glass" />
+          <input aria-label="Cari nama brand" type="search" name="q" defaultValue={q} placeholder="Cari nama brand…" />
         </label>
         <select name="platform" defaultValue={params.platform === "tiktok" || params.platform === "shopee" ? params.platform : "all"}>
           <option value="all">Semua platform</option>
@@ -135,7 +136,7 @@ export default async function AdminCampaignPage({ searchParams }: Props) {
           aria-disabled={page <= 1}
           href={`/admin/campaign?q=${encodeURIComponent(q)}&platform=${params.platform ?? "all"}&status=${params.status ?? "all"}&page=${page - 1}`}
         >
-          ← Sebelumnya
+          <Icon name="arrow-left" /> Sebelumnya
         </Link>
         <span>
           Halaman {page} dari {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} campaign
@@ -144,7 +145,7 @@ export default async function AdminCampaignPage({ searchParams }: Props) {
           aria-disabled={page >= Math.ceil(total / PAGE_SIZE)}
           href={`/admin/campaign?q=${encodeURIComponent(q)}&platform=${params.platform ?? "all"}&status=${params.status ?? "all"}&page=${page + 1}`}
         >
-          Berikutnya →
+          Berikutnya <Icon name="arrow-right" />
         </Link>
       </div>
     </>

@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 /**
  * A raw IP must never reach persistent storage (LinkClick.ipHash,
- * RateLimitBucket.identity) — this is the one place that boundary is
+ * RateLimitBucket.identity). This is the one place that boundary is
  * enforced. Salted so a hash alone can't be reversed by a rainbow table even
  * given the small IPv4 address space.
  */

@@ -4,6 +4,7 @@ import { requireAdmin } from "../../../../../lib/auth";
 import { prisma } from "../../../../../lib/db";
 import { recordAudit } from "../../../../../lib/audit";
 import CreatorMembershipActions from "./CreatorMembershipActions";
+import Icon from "../../../../components/Icon";
 
 const MEMBERSHIP_LABEL: Record<string, string> = {
   PENDING: "Pending",
@@ -45,7 +46,7 @@ export default async function AdminCreatorDetailPage({ params }: { params: Promi
   if (!creator) notFound();
 
   // Every time a creator's detail page is opened, opening their address is
-  // itself an audited action — deliberately separate from editing it.
+  // itself an audited action. Deliberately separate from editing it.
   await recordAudit({ actorId: admin.id, action: "creator_address.view", targetId: creator.id });
 
   const address = creator.address;
@@ -59,7 +60,7 @@ export default async function AdminCreatorDetailPage({ params }: { params: Promi
           <h1>{creator.user.name}</h1>
         </div>
         <Link className="btn btn-ghost" href="/admin/creator">
-          ← Kembali
+          <Icon name="arrow-left" /> Kembali
         </Link>
       </div>
 

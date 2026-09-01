@@ -4,7 +4,7 @@ import { computeProfileCompleteness } from "../../../lib/profile-completeness";
 import ProfilTabs from "./ProfilTabs";
 
 /**
- * /dashboard/profil — Phase 5 creator profile: four independently-saved
+ * /dashboard/profil. Phase 5 creator profile: four independently-saved
  * tabs (Data Pribadi, Alamat, Social Media, Kategori), each backed by its
  * own Server Action in ./actions.ts. Auth + onboarding gating already
  * happens in app/dashboard/layout.tsx; this page only needs requireUser()

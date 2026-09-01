@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     if (result.status === "rejected") return Response.json({ error: "Kode salah atau sudah kedaluwarsa." }, { status: 400 });
     // The address or the number is held by another account now, so verifying would
     // move somebody else's identity onto this one. The code is untouched, but a
-    // retry cannot fix this — only support can.
+    // retry cannot fix this. Only support can.
     if (result.status === "claim_conflict") {
       const detail = result.claim === "phone"
         ? "Nomor WhatsApp di akun ini sudah dipakai akun lain."

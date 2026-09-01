@@ -17,7 +17,7 @@ const CANDIDATES = ["png", "webp", "avif", "jpg"];
  *
  * Gambarnya dipasang tim Haluan di `public/hero/`. Keberadaannya diperiksa saat
  * render, dan selama berkasnya belum ada halaman ini kembali memakai panel
- * "Tersedia di" — jadi kolom kanan hero tidak pernah kosong dan tidak pernah
+ * "Tersedia di", jadi kolom kanan hero tidak pernah kosong dan tidak pernah
  * menampilkan gambar rusak.
  */
 function heroImage() {
@@ -39,15 +39,15 @@ export default function HeroVisual({ tiktokBrands, tiktokCampaigns, shopeeBrands
   return (
     <Parallax className="hero-visual">
       {/*
-        `alt` sengaja kosong: gambarnya dekoratif. Isi yang dibawanya — TikTok
-        Shop dan Shopee — sudah dinyatakan sebagai teks di headline dan di proof
+        `alt` sengaja kosong: gambarnya dekoratif. Isi yang dibawanya. TikTok
+        Shop dan Shopee. Sudah dinyatakan sebagai teks di headline dan di proof
         bar, jadi mendeskripsikannya lagi hanya menambah kebisingan bagi
         pengguna pembaca layar.
 
         `priority` karena ini kandidat LCP halaman depan, dan dimensinya ditulis
         eksplisit supaya tidak ada pergeseran layout saat gambarnya tiba.
       */}
-      <Image src={image} alt="" width={944} height={823} priority sizes="(max-width: 900px) 80vw, 420px" />
+      <Image src={image} alt="" width={944} height={823} priority sizes="(max-width: 900px) 78vw, 420px" />
     </Parallax>
   );
 }

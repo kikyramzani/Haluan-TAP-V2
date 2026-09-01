@@ -1,5 +1,5 @@
 /**
- * The 5 typed reasons a sample request can be blocked, checked in order —
+ * The 5 typed reasons a sample request can be blocked, checked in order,
  * the first one that applies is the one reported. Pure function (no I/O) so
  * it can be unit-tested against fixtures independent of Prisma/Next.js; the
  * caller is responsible for gathering the inputs (profile completeness,

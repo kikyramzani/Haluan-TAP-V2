@@ -58,7 +58,7 @@ const LOCAL_LOGO_ALIASES: Array<[RegExp, string]> = [
   [/^zuma(?:\s+indonesia)?$/i, "zuma-indonesia"],
   [/^2r\s*(?:&|and)?\s*memey\s*cosmetic$/i, "2r-memey-cosmetic"],
   // The same brand under a longer shop name. One asset, several spellings in the
-  // catalog — an alias rather than a second copy of the same image.
+  // catalog. An alias rather than a second copy of the same image.
   [/^cimol\s*bojot\.?\s*aa$/i, "cimol-bojot-aa"],
   [/^elvicto/i, "elvicto"],
   [/^goojodoq/i, "goojodoq"],

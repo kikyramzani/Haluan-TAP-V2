@@ -4,7 +4,7 @@
  * sample tersedia, +1 komisi di kuartil teratas, -2 kalau campaign berakhir
  * dalam 7 hari.
  *
- * Pure function — the caller precomputes the "is this in the top quartile
+ * Pure function. The caller precomputes the "is this in the top quartile
  * of active commissions" flag (needs the whole distribution, which doesn't
  * belong inside a per-campaign scoring function) and the "days until this
  * campaign ends" number.
@@ -30,7 +30,7 @@ export function scoreCampaignForCreator(input: RecommendationInput): number {
   return score;
 }
 
-/** The 75th-percentile commission value in a set of active rates — campaigns at or above this are "top quartile". Returns null when there's nothing to rank against. */
+/** The 75th-percentile commission value in a set of active rates. Campaigns at or above this are "top quartile". Returns null when there's nothing to rank against. */
 export function topQuartileThreshold(commissions: readonly number[]): number | null {
   if (!commissions.length) return null;
   const sorted = [...commissions].sort((a, b) => a - b);

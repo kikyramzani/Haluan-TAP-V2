@@ -13,11 +13,11 @@ export async function GET(request: Request) {
   try {
     const removed = await cleanupExpiredPendingUsers();
     // Postgres transactions never leave a phone/email claim orphaned or a
-    // challenge commit half-settled the way the old Redis primitives could —
+    // challenge commit half-settled the way the old Redis primitives could -
     // both reconciliation sweeps that used to run here are gone, not just
     // skipped. Expired sessions are routine housekeeping, not correctness.
     const expiredSessions = await prisma.session.deleteMany({ where: { expiresAt: { lt: new Date() } } });
-    // Rate-limit buckets (Phase 7, now on Postgres — see lib/rate-limit.ts)
+    // Rate-limit buckets (Phase 7, now on Postgres. See lib/rate-limit.ts)
     // are equally routine: a stale bucket is inert, this just reclaims space.
     const expiredRateLimits = await prisma.rateLimitBucket.deleteMany({ where: { expiresAt: { lt: new Date() } } });
     await recordCronRun({

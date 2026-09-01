@@ -3,11 +3,11 @@ import { brandKey as computeBrandKey } from "../../../lib/brand-key.ts";
 
 /**
  * E2E runs against the SAME real dev Postgres every other part of this
- * project uses — not a separate database, not CSV fixtures. That means two
+ * project uses. Not a separate database, not CSV fixtures. That means two
  * hard rules for every helper in this file:
  *
  * 1. NEVER create, update, or delete a Brand/Campaign/CampaignTier/CampaignLink
- *    row that isn't prefixed `e2e-` (brandKey) — the real migrated catalog
+ *    row that isn't prefixed `e2e-` (brandKey). The real migrated catalog
  *    (691 brands) is the one thing this whole rebuild was never allowed to touch.
  * 2. Every throwaway User/Creator/Session/SampleRequest a spec creates must be
  *    cleaned up by that spec (usually in a `finally` or after the assertions),
@@ -22,8 +22,8 @@ export type CatalogFixtures = Awaited<ReturnType<typeof seedCatalogFixtures>>;
 /**
  * A small, deliberate set of brands covering the same edge cases the old
  * CSV-fixture suite used to exercise: single-tier, multi-tier (lowest-tier
- * link selection), sample support, a null-commission tier (the "—" display
- * path — no longer a parse failure, since Postgres never stores an unparsed
+ * link selection), sample support, a null-commission tier (the "-" display
+ * path. No longer a parse failure, since Postgres never stores an unparsed
  * cell, but the same display rule still needs coverage), an expired
  * campaign, a "new SKU" flag, and a Shopee (KETENTUAN_PLATFORM) brand.
  */
@@ -53,7 +53,7 @@ export async function seedCatalogFixtures() {
     include: { campaigns: { include: { tiers: true, links: true } } },
   });
 
-  // Lowest-commission tier must be the one whose link is offered — never the
+  // Lowest-commission tier must be the one whose link is offered. Never the
   // most expensive one, and never just "the first row".
   const multiTierName = `E2E MultiTier ${suffix}`;
   const multiTier = await prisma.brand.create({
@@ -87,7 +87,7 @@ export async function seedCatalogFixtures() {
     include: { campaigns: { include: { tiers: true, links: true } } },
   });
 
-  // A tier with no commission on an otherwise-numeric campaign — the "—"
+  // A tier with no commission on an otherwise-numeric campaign. The "-"
   // display path. (Admin UI forbids this combination at creation time; a
   // direct Prisma write is the only way to reach it, and reaching it is
   // exactly what this fixture is for.)
@@ -178,7 +178,7 @@ export async function seedCatalogFixtures() {
 }
 
 /**
- * Rate-limit buckets (Phase 7 moved these onto Postgres — see lib/rate-limit.ts)
+ * Rate-limit buckets (Phase 7 moved these onto Postgres. See lib/rate-limit.ts)
  * persist across separate test runs, not just within one. Re-running a spec
  * file repeatedly against the same real dev Postgres while debugging can
  * exhaust a shared IP-scoped bucket (e.g. "catalog-public") well before the
@@ -191,7 +191,7 @@ export async function resetRateLimitScope(scope: string) {
 
 export async function cleanupCatalogFixtures() {
   // brandKey is computed from displayName via the real brandKey() (see the
-  // fix below — a manually-prefixed brandKey that doesn't match
+  // fix below. A manually-prefixed brandKey that doesn't match
   // brandKey(displayName) breaks every real lookup-by-brand-name flow, e.g.
   // resolveCampaignId() in lib/requests.ts), so fixtures are identified by
   // their "E2E " displayName prefix instead.
@@ -214,7 +214,7 @@ export async function cleanupCatalogFixtures() {
 
 /**
  * A featured brand with one live campaign, plus its already-resolved
- * CampaignEngagementStat row — written directly instead of running the
+ * CampaignEngagementStat row. Written directly instead of running the
  * nightly cron, because a spec must never depend on real click/save volume
  * existing in the shared database.
  */
@@ -258,7 +258,7 @@ export async function seedHotDealFixture() {
  * Deletes a throwaway account by email. Most child rows cascade from User/Creator
  * automatically (see prisma/schema.prisma), but LinkClick.creator has no cascade
  * (it must survive a creator's deletion for aggregate stats), so it's cleared
- * explicitly first — otherwise a creator who visited a /go/ link during the test
+ * explicitly first. Otherwise a creator who visited a /go/ link during the test
  * would leave the delete blocked on a foreign key. Safe to call even if the
  * account never existed.
  */
@@ -274,17 +274,17 @@ export async function cleanupUsersByEmails(emails: string[]) {
 }
 
 /**
- * SUPER_ADMIN has no allowlist env var (see lib/auth.ts) — it can only be
+ * SUPER_ADMIN has no allowlist env var (see lib/auth.ts). It can only be
  * granted by an existing super admin via /admin/pengguna, which is a
  * chicken-and-egg problem for a fresh e2e database. Same direct-Prisma-write
  * pattern used to seed the first real super admin in earlier phases of this
  * rebuild (see the plan's Phase 4 progress log).
  *
- * There's deliberately no equivalent promoteToAdmin() — plain ADMIN is
+ * There's deliberately no equivalent promoteToAdmin(). Plain ADMIN is
  * reconciled against ADMIN_EMAILS on every single admin-gated request
  * (lib/auth.ts's reconcileAdminRole), and a role that doesn't match the
  * allowlist is immediately demoted back to CREATOR with its session
- * invalidated (`sessionsInvalidBefore: new Date()`) — verified by hitting
+ * invalidated (`sessionsInvalidBefore: new Date()`). Verified by hitting
  * this directly. A direct-Prisma role write survives exactly zero requests.
  * The only way to get real ADMIN access here is the allowlisted ADMIN_EMAIL
  * account itself (register-or-login into it, matching admin-workspace.spec.ts).
@@ -295,7 +295,7 @@ export async function promoteToSuperAdmin(email: string) {
 
 /**
  * Fills a real wilayah chain + the rest of the 9 fields
- * computeProfileCompleteness() checks, and verifies membership — the two
+ * computeProfileCompleteness() checks, and verifies membership. The two
  * preconditions checkSampleGate() enforces before a sample request can be
  * created. Driving the full /dashboard/profil cascading-select UI just to
  * reach this precondition would test that UI, not the sample lifecycle this
@@ -306,7 +306,7 @@ export async function promoteToSuperAdmin(email: string) {
  * (see app/daftar/lengkapi/actions.ts's completeOnboarding): sets
  * Creator.onboardingCompletedAt and attaches one category. This is the ONE
  * gate app/dashboard/layout.tsx checks before any /dashboard/* route renders
- * — completeCreatorProfileAndVerify() below does not touch it, since that
+ *. CompleteCreatorProfileAndVerify() below does not touch it, since that
  * helper exists for the separate sample-request membership gate. A spec that
  * only cares about a /dashboard/* sub-route's own behavior (not the
  * onboarding form itself, which the main creator-journey test drives for

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "../../../../lib/db";
 import BrandTable from "./BrandTable";
+import Icon from "../../../components/Icon";
 
 type Props = { searchParams: Promise<{ q?: string; status?: string; page?: string }> };
 
@@ -51,8 +52,8 @@ export default async function AdminBrandPage({ searchParams }: Props) {
 
       <form className="admin-filterbar" role="search">
         <label>
-          ⌕
-          <input type="search" name="q" defaultValue={q} placeholder="Cari brand…" />
+          <Icon name="magnifying-glass" />
+          <input aria-label="Cari brand" type="search" name="q" defaultValue={q} placeholder="Cari brand…" />
         </label>
         <select name="status" defaultValue={status}>
           <option value="all">Semua status</option>
@@ -66,13 +67,13 @@ export default async function AdminBrandPage({ searchParams }: Props) {
 
       <div className="admin-pagination">
         <Link aria-disabled={page <= 1} href={`/admin/brand?q=${encodeURIComponent(q)}&status=${status}&page=${page - 1}`}>
-          ← Sebelumnya
+          <Icon name="arrow-left" /> Sebelumnya
         </Link>
         <span>
           Halaman {page} dari {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} brand
         </span>
         <Link aria-disabled={page >= Math.ceil(total / PAGE_SIZE)} href={`/admin/brand?q=${encodeURIComponent(q)}&status=${status}&page=${page + 1}`}>
-          Berikutnya →
+          Berikutnya <Icon name="arrow-right" />
         </Link>
       </div>
     </>

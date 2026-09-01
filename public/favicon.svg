@@ -1,13 +1,39 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TAP by Haluan">
-  <defs>
-    <linearGradient id="hMark" x1="77" y1="77" x2="435" y2="435" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#d81280" />
-      <stop offset="0.5" stop-color="#a855f7" />
-      <stop offset="1" stop-color="#66d7e8" />
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="112" ry="112" fill="#08080a" />
-  <rect x="77" y="77" width="72" height="358" rx="36" ry="36" fill="url(#hMark)" />
-  <rect x="363" y="77" width="72" height="358" rx="36" ry="36" fill="url(#hMark)" />
-  <rect x="77" y="220" width="358" height="72" rx="36" ry="36" fill="url(#hMark)" />
+  <!--
+    Ikon TAP by Haluan.
+
+    Tiga hal berubah dari versi sebelumnya, semuanya karena ukuran render
+    sebenarnya adalah 16px di bilah tab:
+
+    1. Gradasi tiga warna (#d81280 → #a855f7 → #66d7e8) dihapus. Ketiganya warna
+       palet lama yang sudah pensiun, dan tiga perhentian dalam 16px tidak pernah
+       terbaca sebagai gradasi — hanya jadi bubur keabuan. Isian kini rata.
+    2. "H" dari tiga kapsul rx=36 diganti heksagon: itu bentuk marka Haluan yang
+       sebenarnya, dan siluet bersudut jauh lebih mudah dikenali di ukuran kecil
+       daripada huruf bergaris tipis.
+    3. H-nya DIKERUK dari heksagon, bukan ditumpuk di atasnya. Takiknya sengaja
+       menembus tepi atas dan bawah: versi tertutup terbaca sebagai "θ" atau
+       angka 8, bukan H. Marka Haluan aslinya juga H terbuka — puncak heksagonnya
+       terbelah jadi dua bahu bersudut, dan itu yang ditiru di sini.
+
+    Marka ini turunan yang disederhanakan, bukan salinan persis logo korporat —
+    berkas master public/haluan-logo.png tidak disentuh (BRAND-SYSTEM.md §7).
+  -->
+  <rect width="512" height="512" rx="116" ry="116" fill="#fb007f" />
+
+  <!--
+    Heksagon: sisi kiri dan kanan vertikal, puncak di atas dan bawah.
+    Titik: (256,74) (414,163) (414,349) (256,438) (98,349) (98,163).
+  -->
+  <path d="M256 74 414 163v186l-158 89-158-89V163z" fill="#090a0a" />
+
+  <!--
+    Dua takik mengeruk H-nya, menembus tepi atas dan bawah heksagon. Lebar takik
+    116 menyisakan dua lengan bersudut selebar ~100, dengan palang tengah setinggi
+    52 di antaranya — cukup tebal untuk tetap terlihat di 16px.
+  -->
+  <g fill="#fb007f">
+    <path d="M198 40h116v190H198z" />
+    <path d="M198 282h116v190H198z" />
+  </g>
 </svg>

@@ -11,7 +11,7 @@ export type CancelSampleState = { error: string } | { success: true } | null;
  * Wraps lib/requests.ts's cancelOwnSampleRequest, which already implements
  * the race-safe "creator boleh membatalkan sendiri selama masih PENDING"
  * check (re-reads status inside the same transaction an admin's approval
- * would use) — this action only resolves the caller's creatorId and turns
+ * would use). This action only resolves the caller's creatorId and turns
  * the two typed failure modes into a message for the form.
  */
 export async function cancelSampleRequest(_prevState: CancelSampleState, formData: FormData): Promise<CancelSampleState> {

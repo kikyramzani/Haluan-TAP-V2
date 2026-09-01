@@ -1,5 +1,5 @@
 /**
- * The canonical origin for absolute URLs — canonical tags, sitemap, OG.
+ * The canonical origin for absolute URLs. Canonical tags, sitemap, OG.
  *
  * The official domain is the default, not an env override waiting to be set. Two
  * live hosts serving identical content with a canonical pointing at the *secondary*

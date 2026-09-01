@@ -3,12 +3,13 @@ import { notFound } from "next/navigation";
 import { prisma } from "../../../../../lib/db";
 import { STATUS_LABELS, formatDate } from "../labels";
 import SampleActionForms from "../SampleActionForms";
+import Icon from "../../../../components/Icon";
 
 type Props = { params: Promise<{ id: string }> };
 
 /**
  * addressSnapshot is a raw JSON copy of the CreatorAddress row taken at
- * approval time (see lib/requests.ts's updateSampleRequest) — it only holds
+ * approval time (see lib/requests.ts's updateSampleRequest). It only holds
  * the wilayah foreign keys, not the human-readable names, so this page
  * resolves them separately below rather than dumping the raw JSON.
  */
@@ -59,7 +60,7 @@ export default async function AdminSampleDetailPage({ params }: Props) {
           <h1>{brandName}</h1>
         </div>
         <Link className="btn btn-ghost" href="/admin/sample">
-          ← Kembali
+          <Icon name="arrow-left" /> Kembali
         </Link>
       </div>
 

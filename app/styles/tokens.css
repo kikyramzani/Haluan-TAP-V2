@@ -1,38 +1,103 @@
 /**
- * Token desain TAP.
+ * Token desain TAP. Mengikuti BRAND-SYSTEM.md.
  *
- * Gelap adalah tema bawaan, mengikuti hcommerce.id. Terang tetap ada sebagai
- * pilihan, bukan sebagai pembalikan warna: kontras, bayangan, dan kekuatan
- * aksennya ditulis ulang supaya keduanya terasa disengaja.
+ * Urutan kebenaran: BRAND-SYSTEM.md → berkas ini → STITCH-DESIGN-SPEC.md §2.
+ * Kalau ketiganya berbeda, dokumen brand yang menang.
+ *
+ * Gelap tetap tema bawaan. Terang bukan pembalikan warna: kontras, bayangan,
+ * dan kekuatan aksennya ditulis ulang supaya keduanya terasa disengaja.
+ *
+ * Warna brand core di §2.1 dipakai sebagai SUMBER, dan token semantik di
+ * bawahnya menunjuk ke sana lewat var(). Sebelumnya --brand* dideklarasikan
+ * tapi tidak pernah dirujuk sama sekali (BRAND-SYSTEM.md §10 menyebutnya
+ * "palet mati"); menyambungkannya begini mencegah hal itu terulang.
  */
 
+/* Poppins tidak variable di Google Fonts, jadi tiap bobot berkas sendiri.
+   latin dan latin-ext dipisah dengan unicode-range: latin-ext hanya terunduh
+   kalau memang ada karakternya, jadi jalur kritisnya tetap dua berkas. */
 @font-face {
-  font-family: Archivo;
-  src: url("/archivo.woff2") format("woff2");
+  font-family: Poppins;
+  src: url("/poppins-600.woff2") format("woff2");
+  font-weight: 600;
   font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: Inter;
-  src: url("/inter.woff2") format("woff2");
+  font-family: Poppins;
+  src: url("/poppins-600-ext.woff2") format("woff2");
+  font-weight: 600;
   font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url("/poppins-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url("/poppins-700-ext.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Open Sans memang variable (wght 300–800), jadi satu berkas menutup 400–600. */
+@font-face {
+  font-family: "Open Sans";
+  src: url("/open-sans.woff2") format("woff2");
+  font-weight: 400 600;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  src: url("/open-sans-ext.woff2") format("woff2");
+  font-weight: 400 600;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 :root {
-  /**
-   * Palet hcommerce.id, diambil dari design token situsnya:
-   * ink #08080a, ink-1 #0c0c11, ink-2 #121219, paper #f2f0ea,
-   * pink #eb1487 / deep #d81280 / press #cf0f79, cyan #66d7e8, acid #d8ff36.
-   *
-   * hcommerce adalah situs gelap, jadi gelap pula yang jadi bawaan di sini.
-   */
   color-scheme: dark;
 
+  /**
+   * Brand core. BRAND-SYSTEM.md §2.1, diekstrak dari Haluan Creator Deck.
+   * Bukan lagi palet warisan hcommerce.id.
+   */
+  --brand-magenta: #fb007f;
+  --brand-magenta-deep: #ec008c;
+  --brand-magenta-bright: #ff209d;
+  --brand-violet: #d226c7;
+  --brand-pink-tint: #ffd5ea;
+  --brand-cyan: #00bef3;
+  --brand-ink: #090a0a;
+  --brand-paper: #fcfcfc;
+
   /* Permukaan */
-  --bg: #08080a;
-  --surface: #0c0c11;
-  --surface-sunken: #0a0a0e;
-  --surface-raised: #121219;
+  --bg: var(--brand-ink);
+  --surface: #0e0e13;
+  --surface-sunken: #060607;
+  --surface-raised: #14141b;
   --line: rgba(255, 255, 255, 0.1);
   --line-strong: rgba(255, 255, 255, 0.18);
 
@@ -40,32 +105,63 @@
   --text: #ffffff;
   --text-muted: rgba(255, 255, 255, 0.74);
   --text-subtle: rgba(255, 255, 255, 0.58);
-  --text-inverse: #08080a;
+  --text-inverse: var(--brand-ink);
 
   /**
-   * Cyan membawa elemen interaktif karena kontrasnya 11,86 di atas ink.
-   *
-   * Tombol utama memakai pink-deep, bukan pink terang: label putih di atas
-   * #eb1487 hanya 4,21 dan gagal AA, sedangkan di atas #d81280 mencapai 4,86.
-   * hcommerce sendiri mengisi tombolnya dengan pink-deep.
+   * Cyan membawa elemen interaktif di tema gelap: 9,12 di atas ink.
+   * Di tema terang cyan hanya 2,12 dan tidak pernah membawa teks (§2.5).
    */
-  --brand: #eb1487;
-  --brand-deep: #d81280;
-  --brand-press: #cf0f79;
-  --brand-acid: #d8ff36;
-  --brand-cyan: #66d7e8;
-  --accent: #66d7e8;
-  --accent-strong: #8fe5f2;
-  --accent-soft: rgba(102, 215, 232, 0.14);
-  --accent-line: rgba(102, 215, 232, 0.3);
-  --accent-contrast: #08080a;
+  --accent: var(--brand-cyan);
+  --accent-strong: #7fdcf8;
+  --accent-soft: rgba(0, 190, 243, 0.14);
+  --accent-line: rgba(0, 190, 243, 0.3);
+  --accent-contrast: var(--brand-ink);
 
-  /* Tombol utama */
-  --cta: #d81280;
-  --cta-hover: #cf0f79;
+  /**
+   * SEMUA isian berwarna membawa label PUTIH. Keputusan produk, dan ia
+   * menggantikan aturan "hot pink + ink" di BRAND-SYSTEM.md §6.1.
+   *
+   * Konsekuensinya isian harus lebih PEKAT, bukan sekadar teksnya diputihkan:
+   * putih di atas #fb007f cuma 3,88 dan GAGAL AA, jadi memutihkan label di atas
+   * magenta penuh justru membuatnya LEBIH sulit dibaca daripada ink (5,10) yang
+   * dipakai sebelumnya. Ramp di bawah hue-nya sama, luminance-nya diturunkan
+   * sampai putih lolos: 5,17 / 5,73 / 6,27.
+   *
+   * Ini sekaligus menghapus pembagian "≥15px hot pink / ≤14px action ramp"
+   * (§6.1). Sekarang hanya ada satu ramp tombol, jadi tidak ada lagi dua warna
+   * tombol yang harus dipilih berdasarkan ukuran label.
+   *
+   * #fb007f tetap warna brand: ia masih memimpin gradasi, sapuan sudut kartu,
+   * dan pink tint. Yang berubah hanya perannya sebagai isian pembawa teks.
+   */
+  --cta: #d60069;
+  --cta-hover: #c90063;
+  --cta-press: #be005e;
   --cta-contrast: #ffffff;
 
-  /* Status */
+  /* Ramp padat kini identik dengan ramp tombol. Namanya dipertahankan karena
+     dipakai kontrol rapat (tombol kartu, pil hitungan filter, baris tabel
+     admin), dan nama tersendiri menjaga maksudnya tetap terbaca. */
+  --action: var(--cta);
+  --action-hover: var(--cta-hover);
+  --action-press: var(--cta-press);
+  --action-contrast: var(--cta-contrast);
+
+  /**
+   * Focus ring TIDAK diturunkan dari --accent lagi. Di tema terang --accent
+   * kini magenta, dan ring magenta di atas tombol magenta praktis hilang.
+   *
+   * WCAG 1.4.11 menuntut ≥3,0 terhadap komponen DAN latar sekelilingnya
+   * sekaligus, dan tidak ada warna brand yang lolos keduanya di atas tombol.
+   * Hanya netral ekstrem yang lolos: putih 5,17 terhadap tombol #d60069 dan
+   * 19,82 terhadap --bg.
+   *
+   * Dipakai sebagai outline dengan outline-offset, bukan box-shadow menempel,
+   * supaya ring duduk di latar halaman dan tidak tertelan isian tombol.
+   */
+  --focus-ring: #ffffff;
+
+  /* Status. Tidak diubah, semuanya sudah lolos AA (§2.4). */
   --positive: #5fd3a0;
   --positive-soft: rgba(95, 211, 160, 0.13);
   --warning: #e8b45e;
@@ -74,33 +170,81 @@
   --danger-soft: rgba(240, 133, 124, 0.13);
 
   /**
-   * Aksen platform (garis tepi tipis di kartu katalog saja, bukan isian).
-   * Bukan pink/cyan brand asli TikTok — keduanya nyaris sama dengan
-   * --cta/--accent milik situs sendiri, jadi kartu TikTok akan terbaca
-   * seperti kartu berstatus "aktif/hover" alih-alih penanda platform.
+   * Aksen platform. Tidak diubah (§2.4). Sengaja BUKAN warna asli
+   * TikTok/Shopee: pink dan cyan asli TikTok nyaris sama dengan warna aksi
+   * situs sendiri, jadi kartu TikTok akan terbaca seperti kartu berstatus
+   * aktif alih-alih penanda platform. Dengan --cta kini magenta pekat #d60069,
+   * alasan itu makin kuat.
    */
   --platform-tiktok: #1fd8d1;
   --platform-shopee: #f2652f;
-  /* Isian solid (bukan garis tepi tipis) butuh oranye lebih pekat supaya teks
-     putih di atasnya tetap ≥4.5:1 — satu nilai saja, dipakai sama di kedua
-     tema (tidak ditimpa ulang di blok tema terang) karena isian solid ini
-     bukan permukaan netral yang harus ikut berbalik terang/gelap. */
+  /* Isian solid butuh oranye lebih pekat supaya teks putih tetap ≥4,5:1. Satu
+     nilai untuk kedua tema. Isian ini bukan permukaan netral yang ikut
+     berbalik terang/gelap. */
   --platform-shopee-solid: #c2410c;
+  /**
+   * Isian TikTok: HITAM, warna brand TikTok yang sebenarnya. Putih di atasnya 21.
+   *
+   * Ini tidak melanggar §2.4. Aturan itu melarang memakai warna asli TikTok
+   * karena pink dan cyan-nya nyaris sama dengan --cta/--accent milik situs,
+   * sehingga kartu TikTok akan terbaca sebagai kartu ber-state aktif. Hitam
+   * tidak punya masalah itu. Ia tidak bertabrakan dengan warna apa pun di
+   * sistem ini.
+   *
+   * Yang berubah HANYA isian solid ini. Garis tepi tipis kartu katalog tetap
+   * memakai --platform-tiktok (teal), karena di sana alasan §2.4 masih berlaku
+   * penuh: garis hitam di kartu tidak akan terbaca sebagai penanda platform.
+   */
+  --platform-tiktok-solid: #000000;
+
+  /**
+   * Isian kartu berwarna. Ketiganya adalah PERHENTIAN --gradient-hot yang sudah
+   * diverifikasi, dipakai sebagai warna solid tersendiri: putih di atasnya 5,17
+   * / 6,28 / 7,67.
+   *
+   * Solid, bukan gradasi, dan itu bukan kompromi. §3.4 membatasi satu Haluan Hot
+   * per viewport (sudah dipakai .join-banner) dan melarang dua bidang bergradasi
+   * bersentuhan, sedangkan .info-card sebelumnya membawa --gradient-wash. Isian
+   * solid justru MENGURANGI jumlah gradasi di halaman.
+   *
+   * Magenta brand mentah tidak bisa dipakai di sini: putih di atas #fb007f cuma
+   * 3,88, #ec008c 4,25, #d226c7 4,34. Ketiganya gagal AA.
+   *
+   * Dinamai menurut perannya (permukaan), bukan menurut hue-nya, supaya tidak
+   * tertukar dengan --brand-* yang tidak boleh membawa teks putih.
+   */
+  --surface-magenta: #d60069;
+  --surface-magenta-deep: #b8007f;
+  --surface-violet: #8b1a9e;
 
   /* Bayangan */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.55);
   --shadow-lg: 0 20px 52px rgba(0, 0, 0, 0.7);
-  /* Khusus kartu deal — --shadow-md dipakai bareng modal/sheet, terlalu berat
+  /* Khusus kartu deal. --shadow-md dipakai bareng modal/sheet, terlalu berat
      untuk hover kartu yang cuma naik 2px. */
   --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.32);
 
-  /* Gradasi. Dua saja, dan hanya untuk dua jenis permukaan: isian utama yang
-     memuat teks putih, dan sapuan lembut di sudut kartu. Setiap perhentian
-     --gradient-cta bergerak makin GELAP, tidak pernah makin terang: putih di
-     atas #eb1487 hanya 4.21:1, di bawah ambang AA untuk label 14px. */
-  --gradient-cta: linear-gradient(135deg, var(--cta) 0%, #a8166f 55%, #8b1a9e 100%);
-  --gradient-wash: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--cta) 14%, transparent) 0%, transparent 62%);
+  /**
+   * --gradient-hot kini WHITE-SAFE, mengikuti keputusan "semua label putih".
+   * Perhentian lamanya (#fb007f → #ec008c → #d226c7) memberi putih hanya
+   * 3,88 / 4,25 / 4,34. Gagal AA di SELURUH sapuan. Versi ini hue-nya sama,
+   * luminance-nya turun: putih 5,17 / 6,28 / 7,67, terburuk 5,17.
+   *
+   * --gradient-soft tetap berlabel ink (8,92). Ia latar pucat, bukan isian.
+   *
+   * --gradient-hot dipakai di TEPAT SATU permukaan: join banner. §3.4 membatasi
+   * satu Haluan Hot per viewport, dan katalog memuat ~24 kartu sekaligus,
+   * memberi gradasi ke tombol kartu berarti 24 gradasi dalam satu layar. Jadi
+   * tombol memakai isian solid --cta, bukan gradasi.
+   */
+  --gradient-hot: linear-gradient(135deg, #d60069 0%, #b8007f 50%, #8b1a9e 100%);
+  --gradient-soft: linear-gradient(160deg, #fffafd 0%, #ffe1f3 38%, #fec2e5 72%, #f585ec 100%);
+  --gradient-wash: radial-gradient(
+    120% 90% at 100% 0%,
+    color-mix(in srgb, var(--brand-magenta) 12%, transparent) 0%,
+    transparent 62%
+  );
 
   /* Jarak. Dua langkah setengah ada khusus untuk padding badge dan chip, yang
      terlihat terlalu tinggi bila dipaksa ke kelipatan 4. */
@@ -119,7 +263,7 @@
   --space-32: 128px;
   --space-section: clamp(56px, 4vw + 40px, 112px);
 
-  /* Ukuran ikon. Satu keluarga, empat langkah — disetel lewat font-size
+  /* Ukuran ikon. Satu keluarga, empat langkah. Disetel lewat font-size
      karena ikon Phosphor default-nya 1em (lihat app/components/Icon.tsx). */
   --icon-sm: 16px;
   --icon-md: 20px;
@@ -140,13 +284,18 @@
   --radius-pill: 999px;
 
   /**
-   * Tipografi. Archivo untuk display, sama seperti hcommerce.
+   * Tipografi. Poppins untuk display, Open Sans untuk isi (§4.1).
    *
-   * Teks isi mendahulukan font sistem: di iOS dan macOS yang terpakai SF Pro,
-   * dan Inter tidak pernah diunduh sama sekali.
+   * Display deck sebenarnya Agrandir Wide Heavy. Karakter "lebar" itu hilang
+   * dan tidak bisa dikembalikan; yang boleh dilakukan cuma menaikkan bobot ke
+   * 700 dan merapatkan tracking (§4.2). scaleX() dan font-stretch dilarang.
+   *
+   * Open Sans sengaja mendahului font sistem meski itu membatalkan penghematan
+   * unduhan di iOS/macOS (~20–30 KB): SF Pro terlihat jelas berbeda, dan
+   * konsistensi huruf adalah inti dari brand system ini (§4.5).
    */
-  --font-display: Archivo, "SF Pro Display", system-ui, sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif;
+  --font-display: Poppins, system-ui, sans-serif;
+  --font-body: "Open Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
   --text-display: clamp(40px, 6vw, 76px);
   --text-h1: clamp(32px, 4.2vw, 52px);
@@ -158,15 +307,22 @@
   --text-sm: 14px;
   --text-xs: 12px;
 
-  /* Empat bobot. Selisih 50 tidak terbaca oleh mata. */
+  /**
+   * Bobot kelipatan 100. Poppins di Google Fonts TIDAK variable, jadi 550/650/
+   * 750 yang dipakai sebelumnya akan dibulatkan browser dengan hasil yang
+   * berbeda antar mesin (§4.4). Open Sans variable, tapi skalanya disamakan
+   * supaya tidak ada dua sistem bobot berdampingan.
+   */
   --weight-regular: 400;
-  --weight-medium: 550;
-  --weight-semibold: 650;
-  --weight-display: 750;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-display: 700;
 
-  --tracking-display: -0.035em;
-  --tracking-tight: -0.018em;
-  --tracking-wide: 0.06em;
+  /* Poppins geometris terasa renggang di ukuran display, dan uppercase-nya
+     butuh lebih banyak ruang daripada Archivo. */
+  --tracking-display: -0.03em;
+  --tracking-tight: -0.015em;
+  --tracking-wide: 0.08em;
 
   /* Gerak */
   --duration-fast: 150ms;
@@ -180,39 +336,52 @@
 }
 
 /**
- * Tema terang memakai paper krem hcommerce, bukan putih murni.
+ * Tema terang memakai paper #fcfcfc dari deck, bukan krem warisan hcommerce.
  *
- * Acid dan cyan tidak pernah membawa teks di sini: kontrasnya 1,01 dan 1,48 di
- * atas paper, praktis tidak terlihat. Keduanya hanya dipakai sebagai bidang.
- * Aksen teks pindah ke pink-press, satu-satunya pink yang lolos AA di latar
- * terang (4,61).
+ * Cyan tidak pernah membawa teks di sini (2,12 di atas paper). Hanya bidang
+ * dan garis. Aksen teks pindah ke magenta gelap #c90063 (5,59).
  */
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg: #ffffff;
+  --bg: var(--brand-paper);
   --surface: #ffffff;
-  --surface-sunken: #f4f3f0;
+  --surface-sunken: #f9f9f9;
   --surface-raised: #ffffff;
-  --line: rgba(8, 8, 10, 0.12);
-  --line-strong: rgba(8, 8, 10, 0.2);
+  --line: rgba(9, 10, 10, 0.12);
+  --line-strong: rgba(9, 10, 10, 0.2);
 
-  --text: #08080a;
+  --text: var(--brand-ink);
   --text-muted: #4a4a55;
-  /* Harus lolos 4,5 di ketiga permukaan terang, termasuk sunken #eae7de yang
-     dipakai kartu campaign yang sudah berakhir. */
+  /* Harus lolos 4,5 di ketiga permukaan terang, termasuk sunken #f9f9f9. */
   --text-subtle: #63636e;
   --text-inverse: #ffffff;
 
-  --accent: #cf0f79;
-  --accent-strong: #b00c68;
-  --accent-soft: #fdeaf4;
-  --accent-line: rgba(207, 15, 121, 0.26);
+  --accent: #c90063;
+  --accent-strong: #b3005a;
+  --accent-soft: var(--brand-pink-tint);
+  --accent-line: rgba(201, 0, 99, 0.26);
   --accent-contrast: #ffffff;
 
-  --cta: #cf0f79;
-  --cta-hover: #b00c68;
+  /* Kalau tema terang butuh aksen dingin yang membawa teks, ini nilainya
+     (5,92 di atas paper). Cyan brand tidak bisa dipakai untuk itu (§2.5). */
+  --accent-cool-text: #046b87;
+
+  /* Tombol utama identik di kedua tema: kontras label diukur terhadap isian
+     tombol, bukan terhadap latar halaman, jadi nilainya tidak berubah. */
+  --cta: #d60069;
+  --cta-hover: #c90063;
+  --cta-press: #be005e;
   --cta-contrast: #ffffff;
+
+  --action: var(--cta);
+  --action-hover: var(--cta-hover);
+  --action-press: var(--cta-press);
+  --action-contrast: var(--cta-contrast);
+
+  /* Ink: 3,84 terhadap tombol #d60069 dan 19,32 terhadap paper. Keduanya di
+     atas ambang 3,0 yang WCAG 1.4.11 tuntut untuk komponen DAN latarnya. */
+  --focus-ring: var(--brand-ink);
 
   --positive: #0d7a52;
   --positive-soft: #e3f4ec;
@@ -224,14 +393,11 @@
   --platform-tiktok: #0a8f88;
   --platform-shopee: #ee4d2d;
 
-  --shadow-sm: 0 1px 2px rgba(8, 8, 10, 0.06);
-  --shadow-md: 0 4px 14px rgba(8, 8, 10, 0.08);
-  --shadow-lg: 0 18px 48px rgba(8, 8, 10, 0.14);
-  --shadow-card: 0 2px 10px rgba(8, 8, 10, 0.05);
-
-  /* Tema terang mengambil versi blush dari referensi: putih ke merah muda
-     dengan sedikit ungu di sudut. Di tema gelap sapuan putih tidak berarti
-     apa-apa, jadi di sana bentuknya sama tapi berupa angkatan merah muda tipis. */
-  --gradient-cta: linear-gradient(135deg, var(--cta) 0%, #a80f63 55%, #7d1690 100%);
-  --gradient-wash: radial-gradient(120% 90% at 100% 0%, #fdeaf4 0%, color-mix(in srgb, #a855f7 6%, transparent) 45%, transparent 70%);
+  /* Hanya bayangan tema TERANG yang ditulis ulang: warnanya diturunkan dari
+     ink, dan ink berubah dari #08080a ke #090a0a. Bayangan tema gelap memakai
+     rgba(0,0,0,...) murni, jadi tidak terpengaruh. */
+  --shadow-sm: 0 1px 2px rgba(9, 10, 10, 0.06);
+  --shadow-md: 0 4px 14px rgba(9, 10, 10, 0.08);
+  --shadow-lg: 0 18px 48px rgba(9, 10, 10, 0.14);
+  --shadow-card: 0 2px 10px rgba(9, 10, 10, 0.05);
 }

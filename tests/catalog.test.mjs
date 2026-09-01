@@ -59,7 +59,7 @@ test("baris tanpa link dan berstatus Unavailable tidak masuk katalog", () => {
 
 test("brand tetap tampil walau komisinya tidak terbaca, dan alasannya dilaporkan", () => {
   // Menghapus brand karena satu sel kotor menyembunyikan campaign yang sah.
-  // Yang benar adalah menampilkan "—" dan melaporkan barisnya ke ops.
+  // Yang benar adalah menampilkan "-" dan melaporkan barisnya ke ops.
   const { campaigns, issues } = buildCampaignCatalog(
     csv(row({ no: "1", brand: "Raecca", category: "Beauty", rate: "raecca", url: link("a") })),
   );
@@ -185,7 +185,7 @@ test("format ringkasan: satu CSV gabungan TikTok+Shopee terbaca lewat kolom Plat
   const skintific = tiktok.find((item) => item.brand === "Skintific");
   assert.equal(skintific?.commission, 8);
   assert.equal(skintific?.campaignCount, 6);
-  // Jumlah tier tidak ikut mengklaim tahu komisi tiap tier — hanya satu angka
+  // Jumlah tier tidak ikut mengklaim tahu komisi tiap tier. Hanya satu angka
   // gabungan yang benar-benar diketahui.
   assert.deepEqual(skintific?.tierCommissions, [8]);
 
@@ -198,7 +198,7 @@ test("format ringkasan: satu CSV gabungan TikTok+Shopee terbaca lewat kolom Plat
   assert.equal(tiktok.find((item) => item.brand === "Heasel")?.hasSample, null);
   assert.equal(shopee.find((item) => item.brand === "Advan")?.hasSample, false);
 
-  // SKU baru dan berlaku hingga BOLEH datang dari format ini — beda dengan
+  // SKU baru dan berlaku hingga BOLEH datang dari format ini. Beda dengan
   // sheet asli yang sama sekali tidak punya kolom itu.
   const newLaunch = tiktok.find((item) => item.brand === "New Launch");
   assert.equal(newLaunch?.newSku, true);
@@ -209,7 +209,7 @@ test("format ringkasan: satu CSV gabungan TikTok+Shopee terbaca lewat kolom Plat
   assert.equal(shopee.find((item) => item.brand === "Anua")?.specialLivePrice, true);
   assert.equal(shopee.find((item) => item.brand === "Advan")?.specialLivePrice, false);
 
-  // Tanpa kolom link, setiap campaign lahir tanpa TAP link — bukan berarti
+  // Tanpa kolom link, setiap campaign lahir tanpa TAP link, bukan berarti
   // brand-nya hilang dari katalog.
   assert.equal(tiktok.every((item) => typeof item.id === "string" && item.id.length > 0), true);
 });
@@ -220,7 +220,7 @@ test("format ringkasan tidak pernah salah terbaca dari sheet asli, dan sebalikny
   const { campaigns } = buildCampaignCatalog(readFileSync("tests/fixtures/tiktok.csv", "utf8"));
   assert.equal(campaigns.length > 0, true);
 
-  // Sebaliknya, format ringkasan tidak boleh dibaca seolah sheet asli —
+  // Sebaliknya, format ringkasan tidak boleh dibaca seolah sheet asli -
   // baris TikTok-nya tidak pernah mengandung link, jadi kalau sempat lewat
   // jalur lama, seluruh baris akan tertolak dan katalognya kosong.
   const { campaigns: summaryCampaigns } = buildCampaignCatalog(readFileSync("tests/fixtures/summary.csv", "utf8"));
@@ -243,7 +243,7 @@ test("format link Shopee: brand dan link affiliate sudah jadi kolom sendiri-send
   const baseus = shopee.find((item) => item.brand === "Baseus");
   assert.equal(baseus?.campaignCount, 2);
   // Sample "Tidak" di baris pertama tidak boleh mengalahkan "Ya" di baris
-  // kedua — brand yang sama, jadi hasil akhirnya digabung lewat OR.
+  // kedua. Brand yang sama, jadi hasil akhirnya digabung lewat OR.
   assert.equal(baseus?.hasSample, true);
   assert.equal(baseus?.specialLivePrice, true);
   assert.equal(baseus?.category, "Tech");
@@ -274,7 +274,7 @@ test("format link Shopee tidak pernah salah terbaca dari sheet asli maupun forma
   const summaryShopee = buildShopeeCampaigns(readFileSync("tests/fixtures/summary.csv", "utf8"));
   assert.equal(summaryShopee.length, 3);
 
-  // Sebaliknya: format link Shopee tidak pernah dibaca lewat jalur TikTok —
+  // Sebaliknya: format link Shopee tidak pernah dibaca lewat jalur TikTok -
   // tidak ada "TAP LINK"/"CREATOR COMMISSION" di sini, jadi katalog TikTok-nya
   // harus kosong, bukan diam-diam salah membaca kolom Link sebagai TAP link.
   const { campaigns: tiktokRead } = buildCampaignCatalog(readFileSync("tests/fixtures/shopee-links.csv", "utf8"));

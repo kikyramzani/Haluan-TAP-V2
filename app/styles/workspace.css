@@ -100,7 +100,7 @@
   padding: var(--space-8);
   display: grid;
   /* Explicit minmax(0, 1fr), not the implicit "auto" a bare single-column
-     grid falls back to — "auto" track sizing can still grow to fit a wide
+     grid falls back to. "auto" track sizing can still grow to fit a wide
      child's max-content (e.g. .admin-table's min-width: 720px) even though
      the child itself has min-width: 0, pushing this track past the viewport
      at narrow widths instead of letting the child's own overflow-x scroll. */
@@ -138,7 +138,7 @@
   gap: var(--space-3);
 }
 
-/* Satu-satunya jalan kembali ke dashboard creator dari dalam admin — sebelumnya
+/* Satu-satunya jalan kembali ke dashboard creator dari dalam admin. Sebelumnya
    hanya logo brand yang menuju home publik. */
 .admin-profile a {
   font-size: var(--text-sm);
@@ -199,13 +199,30 @@
     grid-template-columns: 1fr;
   }
 
+  /* Menggulir horizontal, bukan membungkus. Dengan 9 link (12 untuk super admin)
+     setinggi 42px, `flex-wrap: wrap` menumpuk 4–5 baris. Sekitar 210–250px
+     navigasi di atas SETIAP halaman admin di ponsel 390px. Satu baris yang bisa
+     digeser mengembalikan seluruh ruang itu ke isinya. */
   .admin-sidebar {
     position: static;
     height: auto;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: var(--space-2);
     border-right: 0;
     border-bottom: 1px solid var(--line);
+  }
+
+  .admin-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Tanpa ini tiap link menyusut dan labelnya terpotong di dalam penggulir. */
+  .admin-sidebar .nav-link {
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
 
   .admin-sidebar .brand,
@@ -284,7 +301,7 @@
 }
 
 /* Blok penjelasan singkat untuk pengisi non-teknis (mis. panduan kolom CSV
-   import) — beda dari .admin-panel-empty (khusus status "belum ada data") dan
+   import). Beda dari .admin-panel-empty (khusus status "belum ada data") dan
    .field-hint (satu baris di bawah satu input saja). */
 .admin-note {
   padding: var(--space-4) var(--space-5);
@@ -375,7 +392,7 @@
 
 /* Petak aksi cepat: sasaran besar berisi ikon dan label, bukan daftar tautan
    teks. Ini yang menggantikan baris chip dashboard yang sekarang disembunyikan
-   di mobile. Sengaja terpisah dari .admin-stats — selektor itu dipakai bersama
+   di mobile. Sengaja terpisah dari .admin-stats. Selektor itu dipakai bersama
    oleh /dashboard/performa dan ruang kerja admin, jadi mengubah kartunya jadi
    tautan akan merembet ke permukaan yang tidak ada hubungannya dengan ini. */
 .quick-actions {
@@ -430,7 +447,7 @@
   }
 }
 
-/* admin.css duplicates this stat-tile job as .kpi-grid/.kpi — check there
+/* admin.css duplicates this stat-tile job as .kpi-grid/.kpi. Check there
    before adding a third variant of the same component. */
 .admin-stats,
 .hda-kpis,
@@ -507,7 +524,7 @@
 
 /*
  * Berbeda dari input pencarian, select filter tidak dibungkus label
- * berbingkai — jadi bingkainya ditaruh langsung di sini. `min-width:0` yang
+ * berbingkai, jadi bingkainya ditaruh langsung di sini. `min-width:0` yang
  * sebelumnya dipakai bersama input membuat select ini menyusut sampai 1px
  * saat barisnya penuh di layar sempit, karena tidak ada batas bawah lebar
  * sebelum flex-wrap memindahkannya ke baris baru.
@@ -525,7 +542,7 @@
   font-size: var(--text-sm);
 }
 
-/* admin.css duplicates this table job as .table-wrap/.admin-table — check
+/* admin.css duplicates this table job as .table-wrap/.admin-table. Check
    there before adding a third variant of the same component. */
 .admin-table-wrap {
   /* Grid/flex items default to min-width: auto, so without this the wrapper
@@ -537,9 +554,13 @@
   border-radius: var(--radius-md);
 }
 
+/* Tanpa min-width. .admin-table-wrap hanya dipakai /dashboard/performa, yang
+   tabelnya DUA kolom. Memaksanya 760px membuat halaman itu menggulir
+   horizontal di setiap ponsel tanpa alasan. Tabel admin yang memang lebar
+   memakai .table-wrap + .admin-table (min-width 720px di admin.css), dan itu
+   tidak tersentuh. */
 .admin-table-wrap table {
   width: 100%;
-  min-width: 760px;
   border-collapse: collapse;
   font-size: var(--text-sm);
 }
@@ -834,7 +855,7 @@
  * Setiap pemakaian nyata dari .checkbox duduk di dalam salah satu 4 pembungkus
  * form ini, dan aturan umum ".admin-request-form label"/".form-panel label"
  * dkk. (di bawah) punya spesifisitas lebih tinggi (kelas+elemen) daripada
- * .checkbox sendirian (satu kelas) — tanpa digabung begini, checkbox-nya
+ * .checkbox sendirian (satu kelas). Tanpa digabung begini, checkbox-nya
  * menumpuk vertikal alih-alih sebaris dengan labelnya, sama seperti masalah
  * .auth-consent yang sudah pernah diperbaiki di bawah.
  */
@@ -926,7 +947,7 @@
 
 /* Dulu content: "✓" lewat ::before. Pseudo-element tidak bisa memuat ikon
    React, dan menyisakan satu glyph Unicode di sini akan melanggar aturan satu
-   keluarga ikon — jadi tandanya sekarang elemen sungguhan di markup. */
+   keluarga ikon, jadi tandanya sekarang elemen sungguhan di markup. */
 .auth-point-mark {
   width: 22px;
   height: 22px;
@@ -1160,7 +1181,10 @@
   grid-template-columns: 232px minmax(0, 1fr);
   gap: var(--space-12);
   align-items: start;
-  padding-block: var(--space-10, var(--space-8)) var(--space-16);
+  /* --space-10 tidak pernah ada di tokens.css, jadi baris ini selalu jatuh ke
+     fallback-nya. Ditulis langsung supaya tidak terbaca seolah ada langkah
+     40px di skala spasi. */
+  padding-block: var(--space-8) var(--space-16);
 }
 
 .creator-sidebar {
@@ -1459,10 +1483,16 @@
   text-transform: capitalize;
 }
 
+/* text-align WAJIB direset. Blok .admin-panel-empty/.dashboard-empty di atas
+   (spesifisitas sama, urutan lebih awal) menyetel `text-align: center`, dan blok
+   ini tidak pernah membatalkannya. Akibatnya item grid dirapatkan ke kiri
+   sementara teks di dalamnya rata tengah begitu membungkus dua baris. Seseorang
+   sudah pernah menambalnya dengan inline style di /admin/pengguna. */
 .dashboard-empty {
   display: grid;
   gap: var(--space-2);
   justify-items: start;
+  text-align: left;
   padding: var(--space-8);
   border: 1px dashed var(--line-strong);
   border-radius: var(--radius-lg);
@@ -1855,7 +1885,7 @@
 /* ── Kelas yang dibentuk dari nilai data ─────────────────────────────── */
 
 /* `membership-${...}`, `verification-${...}`, dan `status-${...}` dibangun dari
-   nilai record, jadi warnanya dipetakan per nilai — bukan lewat satu kelas. */
+   nilai record, jadi warnanya dipetakan per nilai, bukan lewat satu kelas. */
 .membership-verified,
 .verification-code,
 .verification-google {
@@ -1914,7 +1944,7 @@ main:has(> .form-panel) {
   max-width: 52ch;
 }
 
-/* Daftar langkah. Nomor di kiri, judul sebagai barisnya sendiri — tanpa ini
+/* Daftar langkah. Nomor di kiri, judul sebagai barisnya sendiri. Tanpa ini
    "01" dan judulnya menempel ke kalimat berikutnya. */
 .steps {
   display: grid;
@@ -1922,9 +1952,11 @@ main:has(> .form-panel) {
   margin-top: var(--space-8);
 }
 
+/* Tiga kolom sekarang: ubin ikon, nomor, lalu teks. Ubinnya `auto` supaya baris
+   tanpa ikon (kalau ada) tetap sejajar. */
 .steps > div {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto auto minmax(0, 1fr);
   gap: var(--space-3);
   align-items: start;
 }
@@ -2253,7 +2285,7 @@ main:has(> .form-panel) {
 }
 
 /* REJECTED/CANCELLED are branch states, not a continuation of the linear
-   happy path above — rendered as their own note instead of a stepper. */
+   happy path above. Rendered as their own note instead of a stepper. */
 .sample-branch-note {
   padding: var(--space-4);
   border-radius: var(--radius-md);

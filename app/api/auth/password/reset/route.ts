@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     // A reset settles the account's claims too, so it can be refused for the same
     // reason a verification can: the address or the number now belongs to another
     // account. Nothing was written, the code is untouched, and no session is
-    // issued — the change the caller asked for did not happen.
+    // issued. The change the caller asked for did not happen.
     if (result.status === "claim_conflict") {
       const detail = result.claim === "phone"
         ? "Nomor WhatsApp di akun ini sudah dipakai akun lain."

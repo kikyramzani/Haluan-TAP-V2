@@ -2,12 +2,14 @@ import Link from "next/link";
 import { getCampaignCatalog } from "../lib/catalog-db";
 import type { Campaign } from "../lib/catalog";
 import { getCurrentUser } from "../lib/auth";
+import { resolveArt } from "../lib/art-slot";
 import SiteHeader from "./components/SiteHeader";
 import SiteFooter from "./components/SiteFooter";
 import CampaignCatalog from "./components/CampaignCatalog";
 import HeroVisual from "./components/HeroVisual";
 import NewSkuHighlight from "./components/NewSkuHighlight";
 import Icon from "./components/Icon";
+import ArtSlot from "./components/ArtSlot";
 
 // Katalog berubah setiap kali sheet disinkronkan, jadi halaman tidak dibekukan
 // menjadi cuplikan kosong saat build.
@@ -31,6 +33,8 @@ export default async function HomePage() {
   const withSample = tiktok.filter((item) => item.hasSample === true).length;
   const totalCampaigns = tiktok.reduce((sum, item) => sum + item.campaignCount, 0);
   const catalogReady = tiktok.length > 0;
+  const joinArt = resolveArt("join-banner");
+  const leadArt = resolveArt("kenapa-lead");
   // Kedua platform ikut, karena penandanya dipasang admin per platform dan
   // creator tidak sedang memilih platform saat melihat baris ini.
   const newSku = [...tiktok, ...shopee].filter((item) => item.newSku);
@@ -87,23 +91,107 @@ export default async function HomePage() {
         ) : null}
 
         <section className="shell section" id="cara-kerja">
-          <p className="eyebrow">Dari scroll ke sales</p>
-          <h2 style={{ fontSize: "var(--text-h2)", marginTop: "var(--space-2)" }}>
-            Tiga langkah. Tanpa chat satu-satu.
-          </h2>
+          <div className="catalog-head">
+            <div>
+              <p className="eyebrow">Dari scroll ke sales</p>
+              <h2>Tiga langkah. Tanpa chat satu-satu.</h2>
+            </div>
+          </div>
           <div className="step-grid">
             <div className="step">
+              <i className="icon-tile"><Icon name="user-circle" /></i>
               <h3>Gabung MCN Haluan</h3>
               <p>Daftar dan hubungkan akun affiliate kamu dengan network Haluan.</p>
             </div>
             <div className="step">
+              <i className="icon-tile"><Icon name="storefront" /></i>
               <h3>Buka akses campaign</h3>
               <p>Pilih campaign, akses link khusus, dan request sample jika tersedia.</p>
             </div>
             <div className="step">
+              <i className="icon-tile"><Icon name="trend-up" /></i>
               <h3>Buat konten &amp; jual</h3>
               <p>Publish konten seperti biasa. Komisi mengikuti ketentuan campaign.</p>
             </div>
+          </div>
+        </section>
+
+        {/*
+          Empat ubin + tiga kartu manfaat. SEMUA klaimnya sudah dinyatakan di
+          tempat lain pada situs ini. Extra commission dinegosiasikan (hero),
+          gratis (/daftar), link etalase terbuka tanpa login (kepala katalog),
+          request sample diperiksa tim (/request-sample). Tidak ada capability
+          baru yang dikarang; GENERAL-WRITING-COPY-STYLE.md §9 melarangnya.
+
+          Angka "500+ creator" dan deretan avatar dari mockup sengaja TIDAK
+          dipakai: angkanya tidak terverifikasi dan wajahnya akan dikarang.
+          Bukti angka di halaman ini tetap proof-bar di atas, yang dihitung dari
+          database.
+        */}
+        <section className="shell section" id="kenapa-tap">
+          <div className="catalog-head">
+            <div>
+              <p className="eyebrow">Kenapa lewat TAP</p>
+              <h2>Yang kamu dapat sebagai creator Haluan.</h2>
+            </div>
+          </div>
+
+          <div className="tile-grid">
+            <div className="tile">
+              <i className="icon-tile icon-tile-sm"><Icon name="percent" /></i>
+              <b>Extra commission</b>
+              <span>Dinegosiasikan langsung dengan brand.</span>
+            </div>
+            <div className="tile">
+              <i className="icon-tile icon-tile-sm"><Icon name="gift" /></i>
+              <b>Request sample</b>
+              <span>Untuk brand yang membukanya.</span>
+            </div>
+            <div className="tile">
+              <i className="icon-tile icon-tile-sm"><Icon name="link-simple" /></i>
+              <b>Link etalase</b>
+              <span>Bisa dibuka tanpa login.</span>
+            </div>
+            <div className="tile">
+              <i className="icon-tile icon-tile-sm"><Icon name="shield-check" /></i>
+              <b>Gratis</b>
+              <span>Tanpa biaya admin atau potongan.</span>
+            </div>
+          </div>
+
+          {/*
+            Bobot bertingkat, mengikuti referensi: satu kartu unggulan melebar
+            penuh dengan ilustrasi, lalu dua kartu biasa di bawahnya. Isiannya
+            SOLID. §3.4 melarang dua bidang bergradasi bersentuhan, dan
+            .info-card sebelumnya membawa --gradient-wash.
+          */}
+          <div className="info-grid">
+            <article className="info-card info-card--filled info-card--lead">
+              <div className="info-card-copy">
+                <i className="icon-tile"><Icon name="crown-simple" /></i>
+                <h3>Deal yang tidak ada di open plan</h3>
+                <p>
+                  Campaign dan rate yang dibuka brand khusus untuk network Haluan, bukan yang tersedia untuk publik.
+                </p>
+              </div>
+              <ArtSlot src={leadArt} scene="exclusive" className="info-card-art" />
+            </article>
+            <article className="info-card info-card--filled info-card--deep">
+              <i className="icon-tile"><Icon name="chart-line-up" /></i>
+              <h3>Komisi terendah yang ditampilkan</h3>
+              <p>
+                Satu brand bisa punya beberapa campaign. Angka di kartu selalu yang paling kecil, supaya tidak lebih
+                besar daripada yang kamu terima.
+              </p>
+            </article>
+            <article className="info-card info-card--filled info-card--violet">
+              <i className="icon-tile"><Icon name="users" /></i>
+              <h3>Diperiksa tim sebelum dikirim</h3>
+              <p>
+                Request sample dicek profil, brief, dan kuotanya lebih dulu, lalu statusnya bisa kamu pantau di
+                dashboard.
+              </p>
+            </article>
           </div>
         </section>
 
@@ -158,11 +246,13 @@ export default async function HomePage() {
         ) : null}
 
         <section className="shell section" id="faq">
-          <p className="eyebrow">Sebelum mulai</p>
-          <h2 style={{ fontSize: "var(--text-h2)", marginTop: "var(--space-2)" }}>Yang perlu kamu tahu.</h2>
-          <p className="section-lede" style={{ marginTop: "var(--space-3)" }}>
-            Jawaban singkat tentang komisi, akses link, dan request sample di TAP.
-          </p>
+          <div className="catalog-head">
+            <div>
+              <p className="eyebrow">Sebelum mulai</p>
+              <h2>Yang perlu kamu tahu.</h2>
+              <p>Jawaban singkat tentang komisi, akses link, dan request sample di TAP.</p>
+            </div>
+          </div>
           <div className="faq-list">
             <details>
               <summary>Kenapa komisinya ditulis &ldquo;mulai dari&rdquo;?</summary>
@@ -205,12 +295,30 @@ export default async function HomePage() {
 
         <section className="shell">
           <div className="join-banner">
-            <p className="eyebrow">Creator advantage starts here</p>
-            <h2>Sudah bikin konten. Sekarang naikkan rate-nya.</h2>
-            <p>Gabung bersama creator Haluan dan akses deal yang tidak tersedia di open plan.</p>
-            <Link className="btn btn-primary" href="/daftar">
-              Gabung sekarang <Icon name="arrow-up-right" />
-            </Link>
+            <div className="join-banner-copy">
+              <p className="eyebrow">
+                Creator advantage <em>starts here</em>
+              </p>
+              <h2>
+                Sudah bikin konten. <em>Sekarang naikkan</em> rate-nya.
+              </h2>
+              <p className="join-lede">Gabung bersama creator Haluan dan akses deal yang tidak tersedia di open plan.</p>
+              <Link className="btn btn-primary" href="/daftar">
+                Gabung sekarang <Icon name="arrow-up-right" />
+              </Link>
+              {/*
+                Referensinya menaruh "500+ creator sudah bergabung" beserta deretan
+                avatar di sini. Angka itu tidak terverifikasi dan wajahnya akan
+                dikarang, jadi tempatnya diisi fakta yang memang sudah dinyatakan
+                situs ini: gratis, tanpa biaya admin.
+              */}
+              <p className="join-trust">
+                <Icon name="check" /> Gratis untuk creator Haluan, tanpa biaya admin.
+              </p>
+            </div>
+            {/* Vektor sekarang, foto begitu tim menaruhnya di public/art/,
+                lihat public/art/README.md. Tidak perlu ubah kode. */}
+            <ArtSlot src={joinArt} scene="join" className="join-art" />
           </div>
         </section>
       </main>

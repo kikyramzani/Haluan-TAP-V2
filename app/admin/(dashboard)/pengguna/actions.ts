@@ -10,7 +10,7 @@ type ActionState = { error: string } | { success: true } | null;
 
 /**
  * The layout's requireAdmin() already gates /admin/*, but role changes are
- * sensitive enough that the action itself must not trust the page shell —
+ * sensitive enough that the action itself must not trust the page shell,
  * a direct POST to this action from a non-super-admin session must be
  * refused here too, not just hidden from the UI.
  */
@@ -46,7 +46,7 @@ export async function demoteToCreator(_prevState: ActionState, formData: FormDat
   const targetId = String(formData.get("userId") ?? "").trim();
   if (!targetId) return { error: "Pengguna tidak ditemukan." };
 
-  // A Super Admin must not be able to demote their own row — checked here,
+  // A Super Admin must not be able to demote their own row. Checked here,
   // not just by omitting the control in the UI, since this action can be
   // invoked directly.
   if (targetId === admin.id) return { error: "Anda tidak dapat menurunkan peran akun Anda sendiri." };
@@ -56,7 +56,7 @@ export async function demoteToCreator(_prevState: ActionState, formData: FormDat
   if (target.role !== "SUPER_ADMIN") return { error: "Hanya Super Admin yang dapat diturunkan dari sini." };
 
   // Straight to CREATOR is deliberate: if the email is still in ADMIN_EMAILS,
-  // reconcileAdminRole() re-promotes to ADMIN on their next request anyway —
+  // reconcileAdminRole() re-promotes to ADMIN on their next request anyway -
   // there is no reliable way (or need) to guess ADMIN vs CREATOR here.
   const updated = await prisma.user.update({ where: { id: targetId }, data: { role: "CREATOR" } });
   await recordAudit({

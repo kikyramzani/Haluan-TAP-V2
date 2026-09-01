@@ -9,6 +9,14 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /**
+   * WCAG 2.2 AA 2.4.11 Focus Not Obscured: header lengket (64px) dan bottom nav
+   * di ponsel keduanya menutupi elemen yang baru saja menerima fokus keyboard.
+   * Tanpa dua baris ini, menekan Tab menggulirkan tombol tepat ke balik header
+   * dan pengguna keyboard kehilangan jejak fokusnya.
+   */
+  scroll-padding-top: calc(var(--header-height) + var(--space-3));
+  scroll-padding-bottom: var(--bottom-nav-inset);
 }
 
 body {
@@ -46,16 +54,50 @@ button {
   cursor: pointer;
 }
 
+/**
+ * Menghapus jeda ~300ms yang dipakai browser sentuh untuk menunggu double-tap
+ * zoom. Sengaja `manipulation`, bukan `none`: `none` ikut mematikan pinch-zoom
+ * halaman, dan itu kegagalan aksesibilitas. Sama seperti user-scalable=no.
+ */
+:where(a, button, summary, [role="button"], input[type="checkbox"], input[type="radio"]) {
+  touch-action: manipulation;
+}
+
 img,
 svg {
   max-width: 100%;
 }
 
-/* Archivo cuma untuk h1 — dipakai di setiap heading, di layar mobile dengan
-   5+ heading bertumpuk (hero, proof-bar, SKU baru, kepala katalog, FAQ)
-   ketebalan geometrisnya berulang dan malah saling bersaing, bukan menonjol
-   sekali seperti mestinya. */
+/**
+ * h1 memakai bobot display 700 dan tracking display. §4.2 menuntut display
+ * selalu 700 untuk mengompensasi lebar Agrandir yang tidak bisa ditiru Poppins.
+ */
 h1 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
+  margin: 0;
+  text-wrap: balance;
+}
+
+/**
+ * h2 dan h3 IKUT memakai Poppins; hanya h4 yang tetap di font isi.
+ *
+ * Aturan lama membatasi font display ke h1 saja, dan itu benar di masa Archivo:
+ * di layar ponsel dengan 5+ heading bertumpuk (hero, proof-bar, SKU baru, kepala
+ * katalog, FAQ), ketebalan geometris Archivo berulang dan saling bersaing.
+ *
+ * BRAND-SYSTEM.md §4.3 menandai ini [VERIFY] dan menduga Poppins 600 cukup ramah
+ * untuk tumpukan itu. Dibandingkan langsung di layar 390px pada bagian "Tiga
+ * langkah". Yang punya satu h2 dan tiga h3 berurutan - dugaan itu benar:
+ * Poppins 600 tidak menebal seperti Archivo, dan headingnya justru terbaca lebih
+ * jelas sebagai suara brand alih-alih teks isi yang dibesarkan.
+ *
+ * h4 tidak ikut: ia dipakai sebagai label di dalam kartu dan tabel, bukan sebagai
+ * judul bagian, jadi tempatnya memang di font isi.
+ */
+h2,
+h3 {
   font-family: var(--font-display);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-tight);
@@ -63,8 +105,6 @@ h1 {
   text-wrap: balance;
 }
 
-h2,
-h3,
 h4 {
   font-family: var(--font-body);
   font-weight: var(--weight-semibold);
@@ -113,9 +153,13 @@ p {
 }
 
 /* Cincin fokus sengaja dideklarasikan dengan :where() agar tetap kalah spesifik
-   dari komponen, tapi tidak pernah bisa dihapus oleh `outline: 0` lokal. */
+   dari komponen, tapi tidak pernah bisa dihapus oleh `outline: 0` lokal.
+   Warnanya dilepas dari --accent: di tema terang --accent kini magenta, dan ring
+   magenta di atas tombol magenta praktis tidak terlihat. Hanya netral ekstrem
+   yang lolos WCAG 1.4.11 terhadap tombol DAN latar sekaligus. Ink 3,84/19,32 di
+   tema terang, putih 5,17/19,82 di tema gelap. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
@@ -159,7 +203,12 @@ p {
   min-height: 44px;
   padding: 0 var(--space-6);
   border-radius: var(--radius-pill);
-  font-size: var(--text-sm);
+  /* 16px, bukan 14px. Awalnya dinaikkan untuk memenuhi ambang ≥15px §6.1; ambang
+     itu kini tidak ada lagi karena semua tombol memakai satu ramp berlabel putih.
+     Ukurannya tetap 16px karena alasan yang berdiri sendiri: ini CTA tunggal yang
+     lapang (header, hero, join banner, submit), dan 16px membuatnya terbaca jelas
+     di ponsel tanpa mengorbankan apa pun. */
+  font-size: var(--text-body);
   font-weight: var(--weight-semibold);
   letter-spacing: -0.01em;
   border: 1px solid transparent;
@@ -173,16 +222,29 @@ p {
   transform: scale(0.98);
 }
 
-/* Gradasi yang sama dengan .deal-cta — keduanya tombol utama, dan memberi
-   gradasi ke salah satunya saja akan membuat CTA header terlihat beda dari
-   CTA kartu. */
+/**
+ * Isian magenta pekat dengan label PUTIH (5,17). Isiannya sengaja bukan magenta
+ * penuh #fb007f: putih di atasnya hanya 3,88 dan gagal AA, jadi memutihkan label
+ * tanpa memekatkan isian akan membuat tombol ini lebih sulit dibaca, bukan lebih
+ * jelas. Lihat catatan --cta di tokens.css.
+ *
+ * Solid, bukan gradasi: §3.4 membatasi satu Haluan Hot per viewport, sedangkan
+ * tombol ini muncul di header setiap halaman dan di setiap kartu katalog.
+ * --gradient-hot hanya dipakai di join banner.
+ *
+ * Hover dan press makin pekat (5,73 dan 6,27). Kontrasnya naik, tidak turun.
+ */
 .btn-primary {
-  background: var(--gradient-cta);
+  background: var(--cta);
   color: var(--cta-contrast);
 }
 
 .btn-primary:hover {
   background: var(--cta-hover);
+}
+
+.btn-primary:active {
+  background: var(--cta-press);
 }
 
 .btn-secondary {
@@ -249,11 +311,19 @@ p {
   border-color: var(--line);
 }
 
-/* Memakai aksen, bukan warna status: SKU baru itu kabar, bukan peringatan.
-   Kontras terverifikasi 8,30 di gelap dan 4,57 di terang. */
+/**
+ * Memakai aksen, bukan warna status: SKU baru itu kabar, bukan peringatan.
+ *
+ * Labelnya --accent-strong, BUKAN --accent. Setelah --accent-soft di tema terang
+ * menjadi brand pink tint #ffd5ea (lebih pekat dari #fdeaf4 sebelumnya),
+ * --accent #c90063 di atasnya cuma 4,36 dan gagal AA. Axe menangkapnya.
+ * --accent-strong #b3005a mencapai 5,21. Ini juga pola yang sudah dipakai
+ * .search-suggestions dan pil aktif .mobile-nav: teks di atas --accent-soft
+ * selalu --accent-strong.
+ */
 .badge-new-sku {
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--accent-strong);
   border-color: var(--accent-line);
 }
 
@@ -269,13 +339,14 @@ p {
   border-color: color-mix(in srgb, var(--danger) 26%, transparent);
 }
 
-/* Hot Deals — semua sudah dipakai/diverifikasi kontrasnya di tempat lain
+/* Hot Deals. Semua sudah dipakai/diverifikasi kontrasnya di tempat lain
    (badge-new-sku, badge-warning, badge-sample, badge-danger), cuma dipasang
    ulang di sini untuk keempat kategori badge yang dihasilkan cron
    CampaignEngagementStat. */
+/* Sama seperti .badge-new-sku: --accent-strong, bukan --accent (4,36 di terang). */
 .badge-hot-top-brand {
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--accent-strong);
   border-color: var(--accent-line);
 }
 
@@ -302,7 +373,7 @@ p {
   right: var(--space-4);
   bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
   /* Di bawah .mobile-nav (55), bukan di atasnya. Kalau perhitungan jaraknya
-     pernah meleset lagi, tombol ini masuk ke balik bar — bukan menutupinya. */
+     pernah meleset lagi, tombol ini masuk ke balik bar, bukan menutupinya. */
   z-index: 54;
   width: 44px;
   height: 44px;
@@ -340,4 +411,189 @@ p {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/**
+ * Ilustrasi vektor (app/components/Illustration.tsx).
+ *
+ * Warnanya diturunkan dari --text-subtle, jadi ia ikut berbalik sendiri di tema
+ * gelap dan tidak pernah bersaing dengan teks di dekatnya. Aksen magenta di
+ * dalam SVG-nya memakai --brand-magenta langsung karena itu memang titik yang
+ * harus ditangkap mata lebih dulu.
+ *
+ * Lebar dibatasi supaya ia tetap jadi pendamping, bukan tokoh utama: gambar yang
+ * lebih besar dari judulnya akan membalik hierarki halaman.
+ */
+.illustration {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  color: var(--text-subtle);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .illustration {
+    transition: color var(--duration-normal) var(--ease-out);
+  }
+}
+
+/**
+ * ── Primitif kartu dan ubin ikon ──────────────────────────────────────────
+ *
+ * Tiga kelas di bawah adalah generalisasi dari pola yang SUDAH terbukti di
+ * tempat lain, bukan sistem baru:
+ *   .icon-tile  ← resep .sample-access-icon (workspace.css)
+ *   .tile-grid  ← bentuk grid .proof-bar (home.css)
+ *   .info-card  ← permukaan + sapuan sudut .deal-card (catalog.css)
+ */
+
+/**
+ * Ubin ikon. Warnanya sengaja diturunkan dari --accent-soft/--accent-strong,
+ * bukan dari token pink baru: keduanya sudah sadar tema (pink #ffd5ea/#b3005a
+ * di terang, cyan di gelap), dan cyan MEMANG aksen tema gelap situs ini. Token
+ * pink tetap akan menyalakan satu-satunya bidang pink di halaman gelap.
+ *
+ * Ukuran ikon di dalamnya datang dari font-size, karena ikon Phosphor default
+ * 1em (lihat app/components/Icon.tsx).
+ */
+.icon-tile {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: var(--icon-lg);
+}
+
+.icon-tile-sm {
+  width: 36px;
+  height: 36px;
+  font-size: var(--icon-md);
+}
+
+.icon-tile-lg {
+  width: 56px;
+  height: 56px;
+  font-size: var(--icon-xl);
+}
+
+/* Ambang 150px sama dengan .proof-bar: empat kolom di desktop, dua di ponsel,
+   tanpa media query dan tanpa satu ubin yatim di baris terakhir. */
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+/**
+ * Kartu isi. Sapuannya --gradient-wash, BUKAN --gradient-soft: yang terakhir
+ * cuma dideklarasikan sekali di :root sebagai sapuan pucat dan tidak pernah
+ * ditulis ulang untuk tema terang, jadi memakainya akan menempelkan blok nyaris
+ * putih ke halaman gelap. --gradient-wash sudah sadar tema dan sudah dipakai
+ * .deal-card.
+ */
+.info-card {
+  background: var(--gradient-wash), var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  min-width: 0;
+}
+
+.info-card h3 {
+  font-size: var(--text-h3);
+}
+
+.info-card p {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+/**
+ * Varian berisi warna.
+ *
+ * Isian SOLID, bukan gradasi, dan sapuan --gradient-wash dari aturan dasar
+ * ditimpa habis. Dua alasan, keduanya dari §3.4: satu Haluan Hot per viewport
+ * sudah dipakai .join-banner, dan dua bidang bergradasi tidak boleh bersentuhan
+ *. Kartu-kartu ini bersebelahan.
+ *
+ * Seluruh teksnya putih penuh, TIDAK ada opacity. Menurunkan opacity putih di
+ * atas magenta menjatuhkan kontrasnya di bawah AA; hierarki dibawa ukuran dan
+ * bobot huruf. Pelajaran yang sama sudah tercatat di .join-banner.
+ */
+.info-card--filled {
+  background: var(--surface-magenta);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.info-card--deep {
+  background: var(--surface-magenta-deep);
+}
+
+.info-card--violet {
+  background: var(--surface-violet);
+}
+
+.info-card--filled h3,
+.info-card--filled p {
+  color: #ffffff;
+}
+
+/**
+ * Ubin ikon di atas isian berwarna. Aturan dasarnya menurunkan warna dari
+ * --accent-soft/--accent-strong, yang berarti cyan di tema gelap dan pink tint
+ * di tema terang. Tidak satu pun terbaca di atas magenta.
+ */
+.info-card--filled .icon-tile {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+/* Ubin ringkas di dalam .tile-grid: ikon di atas, label tebal, keterangan kecil. */
+.tile {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  min-width: 0;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.tile b {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.tile span {
+  font-size: var(--text-xs);
+  color: var(--text-subtle);
+}
+
+/* Hanya ubin yang benar-benar tautan yang bereaksi; ubin statis tidak boleh
+   terlihat bisa diklik. */
+a.tile:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+}
+
+/* Aset asli yang menggantikan vektor lewat <ArtSlot>. Batas lebarnya disamakan
+   dengan .illustration supaya pergantian vektor → foto tidak mengubah layout. */
+.page-art {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
 }

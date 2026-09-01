@@ -33,7 +33,7 @@ test("admin yang alamatnya dipegang akun lain tidak pernah dianggap aman", () =>
 });
 
 test("alamat yang tidak dipegang siapa pun dilaporkan sebagai slot terbuka", () => {
-  // Nobody holds it, so the next signup takes it — the case an operator closes by
+  // Nobody holds it, so the next signup takes it. The case an operator closes by
   // registering or removing the address.
   const empty = auditAdmins({ allowlist: ["admin@tap.test"], users: [], claims: {} });
   assert.deepEqual(empty.openSlots, ["admin@tap.test"]);

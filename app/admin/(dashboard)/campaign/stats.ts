@@ -5,7 +5,7 @@ import { minMaxCommission } from "../../../../lib/commission-display";
 /**
  * BrandPlatformStat is a read cache for the public catalog (min/max commission
  * + tier count per brand+platform). It must be recomputed every time a
- * campaign's tiers change for that brand+platform — nothing recomputes it on
+ * campaign's tiers change for that brand+platform. Nothing recomputes it on
  * a schedule.
  *
  * campaignCount here intentionally means "tier count", not "Campaign row

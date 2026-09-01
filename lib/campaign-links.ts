@@ -21,7 +21,7 @@ function campaignLinkSource() {
 
 /**
  * Sheet metrik bersifat opsional. Bila belum disinkronkan, katalog tetap tampil
- * lengkap — hanya status sample dan urutan rekomendasi yang tidak tersedia.
+ * lengkap. Hanya status sample dan urutan rekomendasi yang tidak tersedia.
  */
 async function loadBrandMetricsCsv() {
   if (process.env.BRAND_METRICS_CSV_URL) {
@@ -71,11 +71,11 @@ async function loadCampaignCsv(platform: "tiktok" | "shopee") {
  * Katalog publik: sheet → metrik brand.
  *
  * Kept only for scripts/migrate-catalog.mjs's ops-fallback re-migration path
- * (Phase 8 — every live page reads Postgres via lib/catalog-db.ts instead).
+ * (Phase 8. Every live page reads Postgres via lib/catalog-db.ts instead).
  * The admin-override merge layer that used to run last here is gone: the old
  * Redis-backed CampaignOverride CMS never had any real data (confirmed before
  * Phase 2's migration) and was fully replaced by the Postgres-backed
- * /admin/campaign, /admin/brand, etc. in Phase 4 — there is no longer any
+ * /admin/campaign, /admin/brand, etc. in Phase 4. There is no longer any
  * write path that could ever populate an override.
  */
 export async function getCampaignCatalog(platform: "tiktok" | "shopee") {
@@ -92,8 +92,8 @@ export async function getCampaignCatalog(platform: "tiktok" | "shopee") {
  * Satu link campaign beserta komisinya.
  *
  * Komisinya dibaca di sini, bukan diambil dari `tierCommissions` milik katalog.
- * Kedua daftar itu dibangun oleh dua parser berbeda dengan filter berbeda —
- * salah satunya menerima `http://`, satunya tidak — sehingga indeksnya bisa
+ * Kedua daftar itu dibangun oleh dua parser berbeda dengan filter berbeda,
+ * salah satunya menerima `http://`, satunya tidak, sehingga indeksnya bisa
  * bergeser dan link yang ditampilkan jadi bukan milik komisi yang dijanjikan.
  */
 export type TapLink = {
@@ -110,7 +110,7 @@ export type TapLink = {
  * yaitu angka yang sudah dijanjikan kartu brand.
  *
  * Seri diputus oleh baris yang lebih dulu muncul di sheet. Bila tidak ada
- * komisi sama sekali — seperti seluruh brand Shopee — link pertama yang dipakai.
+ * komisi sama sekali. Seperti seluruh brand Shopee - link pertama yang dipakai.
  */
 export function pickPrimaryLink(links: readonly TapLink[]): TapLink | null {
   if (!links.length) return null;
@@ -129,7 +129,7 @@ export async function getTapLinks(campaignId: string) {
   const expiryIndex = headers.findIndex((header) => ["berlaku hingga", "end date", "expiry date", "expired at", "campaign end"].includes(header.toLowerCase()));
   if (platform === "shopee") {
     // Format link Shopee: brand dan link affiliate sudah jadi kolom sendiri,
-    // satu baris per campaign — tidak seperti sheet asli yang menggabungkan
+    // satu baris per campaign. Tidak seperti sheet asli yang menggabungkan
     // keduanya dalam satu sel. Terdeteksi lewat "Status Kadaluarsa", supaya
     // sheet asli tidak pernah salah masuk jalur ini.
     if (headers.includes("Brand") && headers.includes("Link") && headers.includes("Status Kadaluarsa")) {

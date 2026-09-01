@@ -21,7 +21,7 @@ const RESEND_WINDOW_MS = 5 * 60 * 1000;
  * One active challenge per (account, purpose): a retried request within the
  * resend window is handed the same id instead of minting a second code,
  * mirroring the previous Redis behaviour. Unlike that version, no separate
- * reservation step is needed — Postgres already serializes the read+create
+ * reservation step is needed. Postgres already serializes the read+create
  * inside one request, and a rare double-send under true concurrency is a
  * minor nuisance, not a security issue (both codes would still require the
  * same rate-limited account to be entered correctly).
@@ -80,10 +80,10 @@ function escapeHtml(value: string) {
 /**
  * Proof that the caller is continuing a specific account's registration or
  * login, so a verify-code reissue can only be requested by someone who has
- * already shown they control that account — not merely typed its email
+ * already shown they control that account. Not merely typed its email
  * address. Stateless (HMAC-signed, no storage): unlike the Redis version's
  * stored token, there is nothing to expire-sweep, at the cost of not being
- * individually revocable before its own TTL — which nothing in this app
+ * individually revocable before its own TTL. Which nothing in this app
  * needs (a continuation only ever grants "may ask for one more code").
  */
 const CONTINUATION_TTL_MS = 24 * 60 * 60 * 1000;

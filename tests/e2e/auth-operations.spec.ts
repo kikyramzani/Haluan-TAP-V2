@@ -7,8 +7,8 @@ import { cleanupCatalogFixtures, cleanupUsersByEmails, completeCreatorProfileAnd
  * progress log for the full "keep vs. drop" reasoning). The pre-rebuild
  * version of this file (1321 lines) tested things that no longer exist in
  * any form: the single-page admin's tab UI, the deleted /api/admin/* REST
- * endpoints, the old 8-value SampleStatus vocabulary, and — the largest
- * chunk of it — the exact failure semantics of Redis CAS locks/leases/fault
+ * endpoints, the old 8-value SampleStatus vocabulary, and. The largest
+ * chunk of it. The exact failure semantics of Redis CAS locks/leases/fault
  * injection, which Postgres transactions made structurally impossible
  * (see Phase 1's progress log: "Postgres transactions never leave a
  * phone/email claim orphaned or a challenge commit half-settled the way the
@@ -17,12 +17,12 @@ import { cleanupCatalogFixtures, cleanupUsersByEmails, completeCreatorProfileAnd
  */
 
 // A browser.newContext() call (as opposed to the `page`/`request` fixtures)
-// does not inherit playwright.config.ts's `use.baseURL` automatically — every
+// does not inherit playwright.config.ts's `use.baseURL` automatically. Every
 // context created that way in this file passes this explicitly.
 const origin = `http://localhost:${process.env.E2E_PORT ?? 3101}`;
 
 // Phone numbers are unique per real account (see prisma/schema.prisma's
-// User.phone), same as email — a hardcoded literal reused across separate
+// User.phone), same as email. A hardcoded literal reused across separate
 // runs against this same real dev Postgres collides with whatever an
 // earlier debugging run already claimed and never got a chance to clean up,
 // blocking every future registration under that literal until it's freed by
@@ -30,7 +30,7 @@ const origin = `http://localhost:${process.env.E2E_PORT ?? 3101}`;
 let phoneCounter = 0;
 function uniquePhone() {
   // The LAST digits of Date.now() are what actually vary between calls a few
-  // ms apart (the leading digits are stable for the whole session) — slicing
+  // ms apart (the leading digits are stable for the whole session). Slicing
   // from the front instead, as an earlier version of this helper did, kept
   // the stable part and produced near-duplicate phones, which is the exact
   // collision this helper exists to avoid. A counter is layered on top since
@@ -47,9 +47,9 @@ test.beforeAll(async () => {
 });
 
 // register-ip (6/hour, IP-scoped) and verify-confirm-ip (10/hour, IP-scoped)
-// and register-account (3/hour, scoped by the EMAIL/PHONE itself — see
+// and register-account (3/hour, scoped by the EMAIL/PHONE itself. See
 // app/api/auth/register/route.ts) are all tight buckets, reasonable for real
-// traffic but easily exhausted by repeated local runs while debugging —
+// traffic but easily exhausted by repeated local runs while debugging -
 // register-account especially, since the shared admin@tap.test address is
 // reused across many separate test runs and isn't unique per run the way
 // every other email in this file is. Reset before every test rather than
@@ -73,7 +73,7 @@ test("registrasi ditolak duplikat, origin palsu ditolak, dan sesi baru mulai dar
   await register(page, { name: "Duplicate QA", email, phone: uniquePhone() });
   // register() lands on /dashboard directly only once onboarding is already
   // done; a brand-new account is redirected to /daftar/lengkapi first (see
-  // app/dashboard/layout.tsx) — complete it here to reach the dashboard's
+  // app/dashboard/layout.tsx). Complete it here to reach the dashboard's
   // own membership-status text.
   await completeOnboarding(email);
   await page.goto("/dashboard");
@@ -123,7 +123,7 @@ test("membership pending memblokir sample request; verified membuka akses", asyn
   await register(page, { name: "Membership QA", email, phone });
 
   // page.request (not the standalone `request` fixture) shares the browser
-  // context's cookies, so this POST carries the just-registered session —
+  // context's cookies, so this POST carries the just-registered session -
   // needed both to reach the membership gate at all (unauthenticated is 401,
   // not 409) and to pass the same-origin check every mutating route enforces.
   const blocked = await page.request.post("/api/sample-requests", {
@@ -177,13 +177,13 @@ test("sample request lifecycle: creator mengajukan, admin approve lalu ship, tra
   // Admin approves, then ships. ADMIN (unlike SUPER_ADMIN) has no direct-write
   // shortcut: reconcileAdminRole() (lib/auth.ts) re-checks every admin-gated
   // request against ADMIN_EMAILS and demotes-plus-invalidates-the-session
-  // anything that doesn't match — confirmed by trying exactly that. The only
+  // anything that doesn't match. Confirmed by trying exactly that. The only
   // real ADMIN account reachable here is the allowlisted ADMIN_EMAIL fixture
   // itself; registering it again just signs into the same account if a prior
   // spec in this run already created it.
   const adminContext = await browser.newContext({ baseURL: origin });
   const adminPage = await adminContext.newPage();
-  // Probing existence via a raw POST /api/auth/register is NOT safe here —
+  // Probing existence via a raw POST /api/auth/register is NOT safe here -
   // that endpoint has a real side effect (it creates the account on its very
   // first, "does it exist" call, leaving a half-registered, never-verified
   // row behind that then makes every later real register() attempt for the
@@ -193,7 +193,7 @@ test("sample request lifecycle: creator mengajukan, admin approve lalu ship, tra
     headers: { origin },
     data: { email: ADMIN_EMAIL, password: "Password2026" },
   });
-  // A successful login already set adminContext's session cookie — nothing
+  // A successful login already set adminContext's session cookie. Nothing
   // further needed. Only a genuinely new account goes through register().
   if (!loginProbe.ok()) await register(adminPage, { name: "Admin QA", email: ADMIN_EMAIL, phone: uniquePhone() });
 
@@ -212,7 +212,7 @@ test("sample request lifecycle: creator mengajukan, admin approve lalu ship, tra
   const invalidTransition = await adminContext.request.patch("/api/admin/sample-requests", {
     data: { id: requestId, status: "APPROVED" },
   }).catch(() => null);
-  // The old admin PATCH REST endpoint was deleted in Phase 4 — the only mutation
+  // The old admin PATCH REST endpoint was deleted in Phase 4. The only mutation
   // path is the Server Action, which the UI already proved above. This just
   // confirms the retired route is really gone, not silently resurrected.
   expect(invalidTransition === null || invalidTransition.status() === 404).toBeTruthy();

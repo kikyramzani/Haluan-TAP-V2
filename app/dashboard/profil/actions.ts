@@ -10,7 +10,7 @@ type ActionState = { error?: string; success?: boolean; completeness?: ProfileCo
 
 /**
  * Re-derives the completeness percentage from what is actually stored in
- * Postgres after a write, never from the submitted form values — per the
+ * Postgres after a write, never from the submitted form values. Per the
  * doc: "Tiap simpan otomatis menghitung ulang persentase kelengkapan profil
  * dari data yang benar-benar tersimpan di database, bukan dari input form
  * mentah." Shared by all four tab actions below.
@@ -72,7 +72,7 @@ export async function updateDataPribadi(_prevState: ActionState, formData: FormD
  * really belongs to that district, which really belongs to that regency,
  * which really belongs to that province) before it is persisted. The
  * client's cascading selects only ever offer valid combinations, but a
- * Server Action must not trust that — this is the same trust boundary as
+ * Server Action must not trust that. This is the same trust boundary as
  * any other public form submission.
  */
 async function validateWilayahChain(input: { provinceId: string | null; regencyId: string | null; districtId: string | null; villageId: string | null }) {

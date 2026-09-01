@@ -3,7 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 /**
  * Postgres client singleton (Vercel Postgres + Prisma, via the `pg` driver
- * adapter — Prisma 7 no longer takes a connection string from schema.prisma
+ * adapter. Prisma 7 no longer takes a connection string from schema.prisma
  * for the runtime client, only through an adapter passed here).
  *
  * This is additive infrastructure: nothing in the app reads or writes

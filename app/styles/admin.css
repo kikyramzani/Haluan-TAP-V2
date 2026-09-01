@@ -52,7 +52,7 @@
   border-bottom-color: var(--accent);
 }
 
-/* workspace.css duplicates this stat-tile job as .admin-stats/.kpi — check
+/* workspace.css duplicates this stat-tile job as .admin-stats/.kpi. Check
    there before adding a third variant of the same component. */
 .kpi-grid {
   display: grid;
@@ -104,12 +104,12 @@
   min-width: 220px;
 }
 
-/* Tabel. workspace.css duplicates this as .admin-table-wrap — check there
+/* Tabel. workspace.css duplicates this as .admin-table-wrap. Check there
    before adding a third variant of the same component. */
 .table-wrap {
   /* Grid/flex items default to min-width: auto, so without this the wrapper
      grows past the viewport to fit .admin-table's own min-width instead of
-     scrolling internally — the whole page becomes horizontally scrollable
+     scrolling internally. The whole page becomes horizontally scrollable
      at narrow widths instead of just the table. */
   min-width: 0;
   overflow-x: auto;
@@ -339,7 +339,7 @@
 /*
  * Baris metrik dengan bar proporsional (mis. /admin/analitik: top campaign,
  * top kreator, split platform, funnel). `.metric-line` sudah dipakai di
- * tempat lain hanya untuk warna/ukuran teks — aturan tata letak flex di
+ * tempat lain hanya untuk warna/ukuran teks. Aturan tata letak flex di
  * bawah ini yang sebelumnya belum ada sama sekali.
  */
 .metric-line {
@@ -354,8 +354,13 @@
   border-bottom: 0;
 }
 
+/* `flex: 0 1` + min-width, bukan `0 0 160px`. Panel ini duduk di kolom yang
+   diimbangi sidebar 248px sampai 900px, jadi di jendela 901–1100px lebar dalam
+   panelnya hanya ~240px: label 160 + angka 36 + jarak 24 menyisakan ~20px untuk
+   bilah grafiknya. Label boleh menyusut sampai 96px lebih dulu. */
 .metric-line b {
-  flex: 0 0 160px;
+  flex: 0 1 160px;
+  min-width: 96px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

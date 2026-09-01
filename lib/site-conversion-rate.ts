@@ -2,7 +2,7 @@ import { prisma } from "./db";
 import { SAMPLE_WINDOW_DAYS } from "./hot-deals-config";
 
 /**
- * The formula itself, pure — shared so app/admin/(dashboard)/analitik/page.tsx
+ * The formula itself, pure. Shared so app/admin/(dashboard)/analitik/page.tsx
  * (which already has clicks/sampleRequests in memory from its own 30-day
  * queries) and the Hot Deals cron (which fetches its own) always agree,
  * without either duplicating the arithmetic or forcing an extra round-trip

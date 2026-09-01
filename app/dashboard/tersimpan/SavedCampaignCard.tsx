@@ -17,7 +17,7 @@ type Props = {
 
 /**
  * Same .deal-grid/.deal-card cards as the public catalog and the dashboard
- * overview's "Untuk kamu" section (see app/dashboard/page.tsx) — no new card
+ * overview's "Untuk kamu" section (see app/dashboard/page.tsx). No new card
  * CSS. The remove control sits absolutely positioned inside the (already
  * `position: relative`) .deal-card, as a sibling of the link rather than
  * nested inside it, since a <button> may not nest inside an <a>. The link's
@@ -37,25 +37,17 @@ export default function SavedCampaignCard({ campaignId, slug, brandName, categor
   }
 
   return (
-    <div className="deal-card" style={{ position: "relative" }}>
+    <div className="deal-card">
+      {/* Gaya pindah ke .saved-remove di catalog.css: sebagai inline style ia
+          tidak bisa punya :hover, :focus-visible, maupun aturan media, dan
+          padding 4px membuat target sentuhnya cuma 24px. Di bawah ambang 44px
+          yang dipakai seluruh aplikasi. */}
       <button
+        className="saved-remove"
         type="button"
         onClick={remove}
         disabled={pending}
         aria-label={`Hapus ${brandName} dari tersimpan`}
-        style={{
-          position: "absolute",
-          top: "var(--space-3)",
-          right: "var(--space-3)",
-          zIndex: 1,
-          border: "1px solid var(--line-strong)",
-          background: "var(--surface)",
-          borderRadius: "var(--radius-sm)",
-          fontSize: "var(--text-xs)",
-          padding: "4px 8px",
-          cursor: pending ? "not-allowed" : "pointer",
-          color: "var(--text-muted)",
-        }}
       >
         {pending ? "…" : <><Icon name="x" /> Hapus</>}
       </button>

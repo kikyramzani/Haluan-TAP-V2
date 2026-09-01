@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "../../../../../lib/db";
 import BrandForm from "../BrandForm";
 import MergeForm from "./MergeForm";
+import Icon from "../../../../components/Icon";
 
 export default async function EditBrandPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -23,7 +24,7 @@ export default async function EditBrandPage({ params }: { params: Promise<{ id: 
           <h1>{brand.displayName}</h1>
         </div>
         <Link className="btn btn-ghost" href="/admin/brand">
-          ← Kembali
+          <Icon name="arrow-left" /> Kembali
         </Link>
       </div>
 
@@ -53,7 +54,7 @@ export default async function EditBrandPage({ params }: { params: Promise<{ id: 
                   <td>{campaign.status}</td>
                   <td className="numeric">{campaign.tiers.length}</td>
                   <td>
-                    <Link href={`/admin/campaign/${campaign.id}`}>Kelola →</Link>
+                    <Link href={`/admin/campaign/${campaign.id}`}>Kelola <Icon name="arrow-right" /></Link>
                   </td>
                 </tr>
               ))}

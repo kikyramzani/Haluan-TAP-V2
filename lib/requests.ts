@@ -7,18 +7,18 @@ import type { Prisma, $Enums } from "@prisma/client";
 type SampleRequestStatus = $Enums.SampleRequestStatus;
 
 /**
- * Sample requests on Postgres — no data was migrated here (per the 2026-08-27
+ * Sample requests on Postgres. No data was migrated here (per the 2026-08-27
  * decision, see the rebuild plan's progress log), so this starts empty. The
  * shape below is a deliberate bridge, not the target design: `campaignId` is
  * resolved from the free-text brand/platform the current /request-sample
  * form still submits, and several fields (username, profileUrl, commitment,
  * sow, picName/picPhone, recipientName/recipientPhone) exist only to keep
- * that form and the admin batch-create working — Phase 5 replaces the form
+ * that form and the admin batch-create working. Phase 5 replaces the form
  * with real campaign selection and profile-sourced address/contact info,
  * at which point those fields stop being written by new code.
  */
 
-// user: only a safe subset — never the full User row (passwordHash etc.).
+// user: only a safe subset. Never the full User row (passwordHash etc.).
 // This whole object is returned as an API response body (creator-facing
 // POST, admin GET/PATCH), so anything included here is public to whoever
 // can call those routes.
@@ -137,7 +137,7 @@ export async function updateSampleRequest(id: string, input: { status: SampleReq
     // address so a later profile edit can't retroactively change a shipment
     // already promised. Campaigns migrated from the sheets all have
     // sampleQuotaRemaining = null (no quota data existed in the sheets), so
-    // the check is skipped for those — only campaigns an admin has since
+    // the check is skipped for those. Only campaigns an admin has since
     // given a real quota to are actually guarded.
     if (input.status === "APPROVED" && request.campaignId) {
       const campaign = await tx.campaign.findUnique({ where: { id: request.campaignId } });
@@ -171,7 +171,7 @@ export async function updateSampleRequest(id: string, input: { status: SampleReq
 
 /**
  * Creator-initiated cancel (doc: "creator boleh membatalkan sendiri selama
- * masih PENDING"). Ownership is checked before `updateSampleRequest` runs —
+ * masih PENDING"). Ownership is checked before `updateSampleRequest` runs,
  * that function's own re-read-inside-the-transaction is what makes this
  * race-safe against a concurrent admin approval, exactly like an admin
  * status update, just gated to PENDING→CANCELLED and to the requester's

@@ -6,7 +6,7 @@ import { parseCsv } from "./catalog.ts";
  *
  * Dua hal diambil dari sana: status sample support (kolom boolean 0/1) dan GMV
  * TAP bulan berjalan. Angka GMV adalah data komersial internal, jadi nilainya
- * tidak pernah keluar dari modul ini — yang diekspor hanya peringkat relatif
+ * tidak pernah keluar dari modul ini. Yang diekspor hanya peringkat relatif
  * untuk mengurutkan katalog.
  */
 export type BrandMetric = {
@@ -28,7 +28,7 @@ function findColumn(headers: string[], candidates: string[]) {
 }
 
 /**
- * Baris header sheet ini tidak di baris pertama — ada baris banner bulan dan
+ * Baris header sheet ini tidak di baris pertama. Ada baris banner bulan dan
  * baris TOTAL di atasnya. Baris header dicari dari isinya, bukan posisinya.
  */
 function locateHeaderRow(rows: string[][]) {
@@ -108,7 +108,7 @@ const MIN_PREFIX_LENGTH = 5;
  * Kecocokan persis dicoba lebih dulu. Bila gagal, awalan dipakai sebagai
  * cadangan karena sheet metrik memakai handle toko yang lebih panjang
  * ("Oraimo" vs "oraimoaudiolab", "Kime" vs "kimeskincare"). Awalan hanya
- * diterima bila hasilnya tunggal — begitu ada dua kandidat, brand dianggap
+ * diterima bila hasilnya tunggal. Begitu ada dua kandidat, brand dianggap
  * tidak cocok daripada salah tempel ke brand lain.
  */
 export function lookupBrandMetric(brand: string, metrics: ReadonlyMap<string, BrandMetric>) {

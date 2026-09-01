@@ -6,7 +6,7 @@ import { cleanupCatalogFixtures, seedCatalogFixtures } from "./helpers/db";
 // fires on every run is a hole the gate would have to be taught to ignore. Both
 // Chromium projects hold the contract instead.
 
-// Nothing here reads `fixtures` — the test only needs *some* actionable
+// Nothing here reads `fixtures`. The test only needs *some* actionable
 // campaign to exist on /deals so "Dapatkan komisi" has a button to press.
 // The real catalog (691+ brands) already guarantees that today, but seeding
 // one `e2e-`-prefixed campaign keeps the guarantee independent of real
@@ -27,7 +27,7 @@ test("keyboard menjalankan detail campaign: buka, terkunci, tutup, fokus kembali
   test.skip(browserName === "webkit", "perangkat sentuh tidak punya tombol Tab");
   // `:focus-within` parity proved the appearance; this proves the operation. A
   // keyboard user has to be able to open the deal, stay inside it, leave it, and
-  // land back where they were — anything less makes the catalogue mouse-only.
+  // land back where they were. Anything less makes the catalogue mouse-only.
   await page.goto("/deals");
   const trigger = page.getByRole("button", { name: /Dapatkan komisi/ }).first();
   await trigger.focus();

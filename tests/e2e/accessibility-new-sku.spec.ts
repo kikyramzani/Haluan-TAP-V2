@@ -8,18 +8,18 @@ import { cleanupCatalogFixtures, seedCatalogFixtures, type CatalogFixtures } fro
  * That route is gone, and mutating real brands is against the one hard rule
  * of this whole rebuild anyway. `seedCatalogFixtures()` (helpers/db.ts)
  * already includes `fixtures.newSku`, an `e2e-`-prefixed, ACTIVE,
- * non-expired campaign with `newSku: true` — exactly what this file needs,
+ * non-expired campaign with `newSku: true`. Exactly what this file needs,
  * created and torn down without touching the real catalog.
  *
  * Two things are checked, and they are NOT the same DOM path:
  *
  * - `#new-sku` (app/components/NewSkuHighlight.tsx) is a dedicated homepage
  *   section fed by `[...tiktok, ...shopee].filter((c) => c.newSku)`
- *   (app/page.tsx) — any live newSku campaign, anywhere in the catalog, is
+ *   (app/page.tsx). Any live newSku campaign, anywhere in the catalog, is
  *   enough to make it render. The seeded fixture alone guarantees that,
  *   independent of how many real newSku brands exist right now.
  * - `.badge-new-sku` (app/components/BrandCard.tsx) is a per-card badge on
- *   the regular `.deal-card` grid — NewSkuHighlight itself renders its own
+ *   the regular `.deal-card` grid. NewSkuHighlight itself renders its own
  *   `.new-sku-card` markup and never emits `.badge-new-sku`. BrandCard only
  *   shows the top ~12 cards on `/` (sorted by commission, not by newSku), so
  *   the fixture is not guaranteed a slot there. Searching for the fixture's

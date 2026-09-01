@@ -35,8 +35,8 @@ export function brandKey(name: string) {
  * masih cukup panjang, supaya brand pendek tidak salah gabung.
  */
 /**
- * Katalog menempelkan keterangan pada nama brand — "Tavi (Paragon)",
- * "Aerostreet (Shirt)", "Avoskin new list" — sedangkan sheet metrik memakai
+ * Katalog menempelkan keterangan pada nama brand. "Tavi (Paragon)",
+ * "Aerostreet (Shirt)", "Avoskin new list", sedangkan sheet metrik memakai
  * nama polos. Keterangan itu dibuang sebelum kunci dibentuk.
  */
 function stripDescriptors(name: string) {

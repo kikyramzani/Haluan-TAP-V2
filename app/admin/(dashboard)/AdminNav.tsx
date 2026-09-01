@@ -3,23 +3,32 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import Icon, { type IconName } from "../../components/Icon";
 
-const MAIN_ITEMS: Array<[string, string, string]> = [
-  ["/admin", "▦", "Ringkasan"],
-  ["/admin/brand", "◎", "Brand"],
-  ["/admin/campaign", "⌁", "Campaign"],
-  ["/admin/produk", "▧", "Produk"],
-  ["/admin/link", "∞", "Link"],
-  ["/admin/kategori", "◐", "Kategori"],
-  ["/admin/creator", "☺", "Creator"],
-  ["/admin/sample", "+", "Sample"],
-  ["/admin/analitik", "△", "Analitik"],
+/**
+ * Ikon Phosphor lewat Icon.tsx, bukan glyph Unicode.
+ *
+ * Glyph lama (▦ ◎ ⌁ ▧ ∞ ◐ ☺ △ ◆ ▤ ⇩) adalah penyimpangan brand yang terlihat,
+ * BRAND-SYSTEM.md §6.4 menyebutnya langsung, dan juga masalah aksesibilitas:
+ * karakter itu punya nama Unicode sendiri, jadi pembaca layar melafalkannya
+ * ("kotak arsir", "lingkaran separuh") di samping label yang sudah benar.
+ */
+const MAIN_ITEMS: Array<[string, IconName, string]> = [
+  ["/admin", "squares-four", "Ringkasan"],
+  ["/admin/brand", "storefront", "Brand"],
+  ["/admin/campaign", "megaphone", "Campaign"],
+  ["/admin/produk", "package", "Produk"],
+  ["/admin/link", "link-simple", "Link"],
+  ["/admin/kategori", "tag", "Kategori"],
+  ["/admin/creator", "user-circle", "Creator"],
+  ["/admin/sample", "gift", "Sample"],
+  ["/admin/analitik", "chart-line-up", "Analitik"],
 ];
 
-const SUPER_ADMIN_ITEMS: Array<[string, string, string]> = [
-  ["/admin/pengguna", "◆", "Pengguna & Peran"],
-  ["/admin/audit", "▤", "Audit Log"],
-  ["/admin/import", "⇩", "Import Data"],
+const SUPER_ADMIN_ITEMS: Array<[string, IconName, string]> = [
+  ["/admin/pengguna", "users", "Pengguna & Peran"],
+  ["/admin/audit", "clipboard-text", "Audit Log"],
+  ["/admin/import", "arrow-down", "Import Data"],
 ];
 
 function isActive(pathname: string, href: string) {
@@ -38,7 +47,9 @@ export default function AdminNav({ isSuperAdmin }: { isSuperAdmin: boolean }) {
       <span className="sidebar-label">ADMIN WORKSPACE</span>
       {MAIN_ITEMS.map(([href, icon, label]) => (
         <Link key={href} href={href} className={`nav-link${isActive(pathname, href) ? " active" : ""}`} aria-current={isActive(pathname, href) ? "page" : undefined}>
-          <i>{icon}</i>
+          <i>
+            <Icon name={icon} />
+          </i>
           {label}
         </Link>
       ))}
@@ -47,14 +58,18 @@ export default function AdminNav({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           <span className="sidebar-label">SUPER ADMIN</span>
           {SUPER_ADMIN_ITEMS.map(([href, icon, label]) => (
             <Link key={href} href={href} className={`nav-link${isActive(pathname, href) ? " active" : ""}`} aria-current={isActive(pathname, href) ? "page" : undefined}>
-              <i>{icon}</i>
+              <i>
+                <Icon name={icon} />
+              </i>
               {label}
             </Link>
           ))}
         </>
       ) : null}
       <div className="admin-secure">
-        <i>◆</i>
+        <i>
+          <Icon name="shield-check" />
+        </i>
         <b>Protected workspace</b>
         <p>Data creator hanya tersedia untuk administrator terverifikasi.</p>
       </div>

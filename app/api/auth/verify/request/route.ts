@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       // A verification code activates one specific account, so the caller has to
       // name that account with proof: a token handed out when they created it, or
       // when they passed a password check on it. An email address only proves who
-      // reads the inbox, and more than one account can claim the same address —
+      // reads the inbox, and more than one account can claim the same address -
       // choosing whoever currently holds the email index let an inbox owner
       // activate a stranger's account while the password that stranger chose kept
       // working.

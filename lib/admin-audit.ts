@@ -3,8 +3,8 @@
  *
  * The counts are the point: a verdict of "safe" has to mean every way an account
  * can hold admin without owning the address that granted it is zero. Keeping this
- * pure is what lets the A/B case — two records carrying one allowlisted address,
- * the index naming one and admin sitting on the other — be tested without a live
+ * pure is what lets the A/B case. Two records carrying one allowlisted address,
+ * the index naming one and admin sitting on the other. Be tested without a live
  * datastore.
  */
 export type AuditUser = {
@@ -41,7 +41,7 @@ export type AdminAuditReport = {
    */
   openSlots: string[];
   /**
-   * Allowlisted addresses whose index points at something inconsistent — a record
+   * Allowlisted addresses whose index points at something inconsistent. A record
    * that is gone, or one whose own email says otherwise. These still block a
    * signup, so calling them "open" would misdescribe what an operator has to do:
    * the claim needs repairing, not just registering.
@@ -49,7 +49,7 @@ export type AdminAuditReport = {
   brokenClaims: Array<{ address: string; why: string; holderId: string | null }>;
   /** Admin roles the allowlist no longer names. */
   orphanAdmins: AuditUser[];
-  /** Admins whose address is held by a different account — or by nobody. */
+  /** Admins whose address is held by a different account. Or by nobody. */
   adminIndexMismatches: Array<{ id: string; address: string; holderId: string | null }>;
   /** More than one record carrying the same allowlisted address. */
   duplicateRecords: Array<{ address: string; ids: string[] }>;

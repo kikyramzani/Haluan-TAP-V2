@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { uploadBrandLogo } from "./actions";
 
 /**
- * The logoUrl text input stays the source of truth BrandForm submits (name="logoUrl") —
+ * The logoUrl text input stays the source of truth BrandForm submits (name="logoUrl"),
  * this just offers a second way to fill it. Typing a path/URL directly still works exactly
  * as before, for existing migrated logos.
  */

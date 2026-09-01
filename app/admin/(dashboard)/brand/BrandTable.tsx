@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { bulkUpdateBrands } from "./actions";
+import Icon from "../../../components/Icon";
 
 export type BrandRow = {
   id: string;
@@ -85,7 +86,7 @@ export default function BrandTable({ brands }: { brands: BrandRow[] }) {
                 </td>
                 <td className="row-brand">
                   <b>{brand.displayName}</b>
-                  {brand.featured ? <small>★ Unggulan</small> : null}
+                  {brand.featured ? <small><Icon name="star-fill" /> Unggulan</small> : null}
                 </td>
                 <td>{brand.categoryName}</td>
                 <td className="numeric">{brand.campaignCount}</td>

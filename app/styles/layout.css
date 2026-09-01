@@ -120,8 +120,8 @@
   }
 }
 
-/* Di layar sempit tautan sesi disembunyikan — "Akun" sudah ada di navigasi
-   bawah — dan CTA dipadatkan supaya header tidak melebihi lebar layar. */
+/* Di layar sempit tautan sesi disembunyikan. "Akun" sudah ada di navigasi
+   bawah, dan CTA dipadatkan supaya header tidak melebihi lebar layar. */
 @media (max-width: 600px) {
   .nav-session {
     display: none;
@@ -152,7 +152,7 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Kolom mengikuti jumlah tab — lima saat masuk, empat saat belum. Tidak ada
+/* Kolom mengikuti jumlah tab. Lima saat masuk, empat saat belum. Tidak ada
    repeat(n) yang ikut harus diubah setiap jumlah tabnya berubah. */
 .mobile-nav ul {
   display: grid;
@@ -180,7 +180,7 @@
 
 /* Pil di belakang ikon. Ini penanda aktif yang tidak bergantung pada warna:
    bentuk ikon berubah (garis → isian), permukaannya berubah, dan tebal
-   hurufnya naik — tiga sinyal sekaligus, bukan cuma satu warna. */
+   hurufnya naik. Tiga sinyal sekaligus, bukan cuma satu warna. */
 .mobile-nav-icon {
   width: 56px;
   height: 30px;

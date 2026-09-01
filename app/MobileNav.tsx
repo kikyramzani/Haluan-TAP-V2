@@ -20,7 +20,7 @@ const SIGNED_IN: Tab[] = [
 ];
 
 /**
- * Semua tab di sini bisa dibuka tanpa akun — tidak ada tab yang berujung ke
+ * Semua tab di sini bisa dibuka tanpa akun. Tidak ada tab yang berujung ke
  * dinding login. /request-sample tetap masuk karena halamannya punya keadaan
  * "masuk dulu" sendiri, bukan redirect. Tidak ada tab "Daftar" terpisah:
  * rutenya sama dengan Masuk, jadi dua tab akan sama-sama aktif di halaman itu.
@@ -45,7 +45,7 @@ function isActive(pathname: string, href: string) {
 export default function MobileNav({ isSignedIn }: { isSignedIn: boolean }) {
   const pathname = usePathname();
 
-  // Admin punya navigasinya sendiri (AdminNav.tsx) — tanpa penjagaan ini, bar
+  // Admin punya navigasinya sendiri (AdminNav.tsx). Tanpa penjagaan ini, bar
   // creator menutupi tiap halaman /admin di lebar mobile.
   if (pathname.startsWith("/admin")) return null;
   // /daftar/lengkapi adalah gerbang wajib: app/dashboard/layout.tsx memantulkan

@@ -6,7 +6,7 @@ import { recomputeBrandPlatformStat } from "../../../admin/(dashboard)/campaign/
 /**
  * Safety net, not the primary path: BrandPlatformStat is already recomputed
  * synchronously on every campaign/tier mutation (see app/admin/campaign/actions.ts).
- * This nightly sweep only catches drift — a stat row for a brand+platform
+ * This nightly sweep only catches drift. A stat row for a brand+platform
  * combo that never got recomputed (e.g. a direct DB fix) or one that no
  * longer has any campaigns and should be cleared.
  */

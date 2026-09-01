@@ -8,7 +8,7 @@ import { destroySession } from "../lib/auth";
  *
  * Kegagalan `destroySession()` (mis. Redis sedang bermasalah) tidak boleh
  * menjatuhkan seluruh halaman ke `global-error.tsx` untuk sekadar klik keluar
- * — cookie tetap dibersihkan bila memungkinkan, dan pengguna tetap diarahkan
+ *. Cookie tetap dibersihkan bila memungkinkan, dan pengguna tetap diarahkan
  * pulang. Pola yang sama seperti app/api/auth/logout/route.ts.
  */
 export async function logoutAction() {

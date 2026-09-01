@@ -6,7 +6,7 @@ import { hashIp } from "@/lib/hash-ip";
 
 export async function GET(request: Request, context: { params: Promise<{ campaignId: string }> }) {
   // Link etalase memang publik dan tetap berguna saat penghitung rate limit
-  // bermasalah, jadi jalur ini fail-open — sama seperti /api/campaigns. Rute
+  // bermasalah, jadi jalur ini fail-open. Sama seperti /api/campaigns. Rute
   // auth dan tulis tetap fail-closed di berkasnya masing-masing.
   try {
     const rate = await checkRateLimit("campaign-links-public", hashIp(clientIp(request)), 120, 300);

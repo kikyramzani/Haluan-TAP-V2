@@ -1,5 +1,5 @@
 /**
- * Split out of lib/rate-limit.ts so it stays a pure, DB-free import — that
+ * Split out of lib/rate-limit.ts so it stays a pure, DB-free import. That
  * file's checkRateLimit() now needs a live Postgres connection at import
  * time (lib/db.ts throws if unconfigured), which would otherwise drag every
  * test that only needs this formatting helper into requiring a database.

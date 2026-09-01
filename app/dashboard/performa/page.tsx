@@ -5,7 +5,7 @@ import { prisma } from "../../../lib/db";
  * Read-only performance view scoped to the signed-in creator's own clicks:
  * direct vs. referred (via ?ref=), top campaigns by click count, and a
  * recent-clicks table. Same read-only shape as /admin/analitik, just
- * filtered to one creator instead of the whole platform — no mutations
+ * filtered to one creator instead of the whole platform. No mutations
  * happen here.
  */
 

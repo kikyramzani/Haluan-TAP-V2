@@ -3,13 +3,13 @@ import { prisma } from "./db.ts";
 export { retryAfterMessage } from "./rate-limit-message.ts";
 
 /**
- * Fixed-window counter on Postgres (Phase 7 moved this off Redis — see the
+ * Fixed-window counter on Postgres (Phase 7 moved this off Redis. See the
  * rebuild plan's progress log for why). `identity` must already be safe to
  * persist indefinitely: callers hash any IP-derived identity first
  * (lib/hash-ip.ts) before it ever reaches this function.
  *
  * The upsert's ON CONFLICT DO UPDATE is what makes the increment atomic under
- * concurrent requests for the same bucket — same guarantee Redis INCR gave,
+ * concurrent requests for the same bucket. Same guarantee Redis INCR gave,
  * just expressed as a native Postgres upsert instead of a Lua-free atomic op.
  */
 export async function checkRateLimit(scope: string, identity: string, limit: number, windowSeconds: number) {

@@ -5,8 +5,8 @@ import Icon, { type IconName } from "./Icon";
 
 /**
  * Satu sumber kebenaran untuk badge popularitas: label, ikon, urutan, dan
- * aturan "masih berlaku". Tiga permukaan membacanya — badge di kartu, label
- * chip, dan hitungan chip — jadi memisahkannya akan membuat hitungan chip bisa
+ * aturan "masih berlaku". Tiga permukaan membacanya. Badge di kartu, label
+ * chip, dan hitungan chip, jadi memisahkannya akan membuat hitungan chip bisa
  * berbeda dari kartu yang ada di baliknya.
  *
  * Nilainya sendiri berasal dari cron malam (CampaignEngagementStat), bukan

@@ -6,12 +6,12 @@ import { prisma } from "../../../lib/db";
 
 /**
  * Bookmarking is per-campaign, not per-brand (`SavedCampaign` is keyed on
- * `[creatorId, campaignId]` — see prisma/schema.prisma). One toggle covers
+ * `[creatorId, campaignId]`. See prisma/schema.prisma). One toggle covers
  * both call sites: the star on the public /deal/[slug] page and the
  * "Hapus dari tersimpan" control on /dashboard/tersimpan itself.
  *
  * `campaignId` here is always the real Prisma `Campaign.id` (the FK
- * `SavedCampaign` points at), never the `slug` used in the URL — callers
+ * `SavedCampaign` points at), never the `slug` used in the URL. Callers
  * resolve the slug -> id themselves before invoking this.
  */
 export async function toggleSavedCampaign(campaignId: string): Promise<{ saved: boolean } | { error: string }> {

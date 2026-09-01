@@ -23,7 +23,7 @@ type Props = {
  *
  * - TikTok Shop punya kolom komisi, jadi komisi yang tampil, dan angkanya
  *   adalah nilai TERKECIL milik brand itu: janji lantai, bukan puncak.
- * - Shopee Affiliate tidak punya kolom komisi sama sekali. Menampilkan "—"
+ * - Shopee Affiliate tidak punya kolom komisi sama sekali. Menampilkan "-"
  *   besar di sana akan terbaca seperti data yang gagal dibaca, padahal
  *   angkanya memang tidak pernah ada. Kartunya memimpin dengan jumlah
  *   campaign, dan benefit yang membawa ceritanya.
@@ -39,7 +39,7 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
   const benefits = promotable
     ? [
         // Shopee tidak pernah menampilkan angka komisi (lihat komentar di atas
-        // deal-benefits di bawah), jadi badge ini yang menggantikan perannya —
+        // deal-benefits di bawah), jadi badge ini yang menggantikan perannya -
         // bukan data per campaign, selalu ada selama campaign-nya promotable.
         isShopee ? "Komisi Special" : null,
         campaign.hasSample === true ? "Sample tersedia" : null,

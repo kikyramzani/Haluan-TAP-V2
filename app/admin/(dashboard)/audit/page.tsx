@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireAdmin } from "../../../../lib/auth";
 import { listAuditEvents } from "../../../../lib/audit";
+import Icon from "../../../components/Icon";
 
 type Props = { searchParams: Promise<{ q?: string; page?: string }> };
 
@@ -29,8 +30,8 @@ export default async function AdminAuditPage({ searchParams }: Props) {
 
       <form className="admin-filterbar single" role="search">
         <label>
-          ⌕
-          <input type="search" name="q" defaultValue={q} placeholder="Cari berdasarkan aksi atau entitas…" />
+          <Icon name="magnifying-glass" />
+          <input aria-label="Cari berdasarkan aksi atau entitas" type="search" name="q" defaultValue={q} placeholder="Cari berdasarkan aksi atau entitas…" />
         </label>
         <button type="submit">Terapkan</button>
       </form>
@@ -80,13 +81,13 @@ export default async function AdminAuditPage({ searchParams }: Props) {
 
       <div className="admin-pagination">
         <Link aria-disabled={page <= 1} href={`/admin/audit?q=${encodeURIComponent(q)}&page=${page - 1}`}>
-          ← Sebelumnya
+          <Icon name="arrow-left" /> Sebelumnya
         </Link>
         <span>
           Halaman {page} dari {totalPages} · {total} log
         </span>
         <Link aria-disabled={page >= totalPages} href={`/admin/audit?q=${encodeURIComponent(q)}&page=${page + 1}`}>
-          Berikutnya →
+          Berikutnya <Icon name="arrow-right" />
         </Link>
       </div>
     </>

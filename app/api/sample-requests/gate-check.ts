@@ -9,9 +9,9 @@ import type { TapUser } from "../../../lib/models";
  * source of truth) and GET /api/sample-requests/gate (proactive pre-check
  * shown once a campaign is selected on /request-sample). Both need the same
  * five gate inputs gathered from Prisma before handing off to the pure
- * checkSampleGate() — kept in one place so the two call sites can't drift.
+ * checkSampleGate(). Kept in one place so the two call sites can't drift.
  *
- * A rejected or cancelled prior request must NOT block a new attempt — only
+ * A rejected or cancelled prior request must NOT block a new attempt. Only
  * an active/completed one does (see the "notIn" below).
  */
 export async function evaluateSampleGate(user: TapUser, brand: string, platform: string): Promise<{ result: SampleGateResult; campaignId: string | null }> {

@@ -12,7 +12,7 @@ type ActionState = { error?: string; success?: boolean } | null;
 /**
  * Shared apply+audit path for every stage transition below. Quota guarding
  * and legal-transition checks already live in updateSampleRequest() (see
- * lib/requests.ts) — this only translates its thrown error codes into the
+ * lib/requests.ts). This only translates its thrown error codes into the
  * same Indonesian messages the old admin route used, so the wording stays
  * consistent across both UIs while AdminClient.tsx is still around.
  */

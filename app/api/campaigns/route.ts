@@ -7,11 +7,11 @@ const CACHE_HEADERS = { "cache-control": "public, max-age=60, s-maxage=300, stal
 
 /**
  * Postgres-backed replacement for the old Sheets/Redis/override-CMS pipeline
- * (Phase 8 of the rebuild plan — see the plan's progress log). Response
+ * (Phase 8 of the rebuild plan. See the plan's progress log). Response
  * envelope kept identical to the original for the two real client consumers
  * (app/request-sample/page.tsx, app/components/CampaignSheet.tsx): CSV parse
  * quality fields (excludedInvalidRates/excludedInvalidBrands) are always 0
- * here since a Postgres row can't carry an unparseable commission cell —
+ * here since a Postgres row can't carry an unparseable commission cell,
  * that class of problem was resolved once, at Phase 2's migration.
  */
 export async function GET(request: Request) {

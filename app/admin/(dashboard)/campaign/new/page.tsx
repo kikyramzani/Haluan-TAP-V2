@@ -1,5 +1,6 @@
 import { prisma } from "../../../../../lib/db";
 import NewCampaignForm from "./NewCampaignForm";
+import Icon from "../../../../components/Icon";
 
 type Props = { searchParams: Promise<{ q?: string }> };
 
@@ -25,8 +26,8 @@ export default async function NewCampaignPage({ searchParams }: Props) {
 
       <form className="admin-filterbar" role="search">
         <label>
-          ⌕
-          <input type="search" name="q" defaultValue={query} placeholder="Cari nama brand…" />
+          <Icon name="magnifying-glass" />
+          <input aria-label="Cari nama brand" type="search" name="q" defaultValue={query} placeholder="Cari nama brand…" />
         </label>
         <button type="submit">Cari</button>
       </form>

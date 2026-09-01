@@ -13,7 +13,7 @@ type Props = {
  *
  * Ikon platform dipasang oleh tim Haluan di `public/platform/`. Keberadaannya
  * diperiksa saat render supaya halaman tidak menampilkan gambar rusak sebelum
- * berkasnya ada — tanpa ikon, panelnya tetap tampil sebagai inisial.
+ * berkasnya ada. Tanpa ikon, panelnya tetap tampil sebagai inisial.
  */
 function platformIcon(name: "tiktok" | "shopee") {
   for (const extension of ["png", "webp", "svg", "jpg"]) {

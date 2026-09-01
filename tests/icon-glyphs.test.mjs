@@ -6,16 +6,18 @@ import { join } from "node:path";
 /**
  * Glyph Unicode yang dulu dipakai sebagai ikon. Semuanya sudah diganti komponen
  * <Icon /> (app/components/Icon.tsx) karena pembaca layar membacakannya apa
- * adanya — "black diamond", "up-right arrow" — dan bentuknya berubah-ubah antar
+ * adanya. "black diamond", "up-right arrow" - dan bentuknya berubah-ubah antar
  * font dan platform. Test ini menahan mereka supaya tidak menyelinap kembali.
  *
- * app/admin/ dikecualikan: ruang kerja internal itu belum ikut migrasi ini.
+ * app/admin/ TIDAK lagi dikecualikan: AdminNav dan toggle kata sandi admin sudah
+ * ikut migrasi (BRAND-SYSTEM.md §6.4 menyebut glyph di sana sebagai penyimpangan
+ * brand). Glyph yang dulu hanya dipakai admin ikut masuk daftar ini.
  */
-const RETIRED = ["↗", "→", "←", "↓", "✓", "✕", "☆", "★", "◉", "◎", "⧉", "⌕", "↻", "◇", "☾", "☀", "◈", "＋", "◯", "⌂", "⌁", "△", "◔", "◆"];
+const RETIRED = ["↗", "→", "←", "↓", "✓", "✕", "☆", "★", "◉", "◎", "⧉", "⌕", "↻", "◇", "☾", "☀", "◈", "＋", "◯", "⌂", "⌁", "△", "◔", "◆", "▦", "▧", "▤", "◐", "☺", "⇩"];
 
 /**
- * Tanda baca sungguhan, bukan ikon — sengaja dibiarkan sebagai teks:
- * "·" pemisah, "…" pada tombol yang sedang memproses, "—" untuk nilai kosong,
+ * Tanda baca sungguhan, bukan ikon. Sengaja dibiarkan sebagai teks:
+ * "·" pemisah, "…" pada tombol yang sedang memproses, "-" untuk nilai kosong,
  * dan "⌘"/"K" di dalam <kbd> yang memang melambangkan tombol keyboard.
  */
 const ALLOWED_AS_TEXT = ["·", "…", "—", "⌘"];
@@ -25,7 +27,6 @@ function walk(dir) {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) {
-      if (entry === "admin") continue;
       files.push(...walk(full));
     } else if (entry.endsWith(".tsx")) {
       files.push(full);
@@ -34,7 +35,7 @@ function walk(dir) {
   return files;
 }
 
-test("tidak ada glyph Unicode yang dipakai sebagai ikon di luar app/admin", () => {
+test("tidak ada glyph Unicode yang dipakai sebagai ikon di seluruh app/", () => {
   const offenders = [];
   for (const file of walk("app")) {
     const lines = readFileSync(file, "utf8").split("\n");

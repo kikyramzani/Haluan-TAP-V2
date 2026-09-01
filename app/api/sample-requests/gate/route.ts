@@ -6,7 +6,7 @@ import { evaluateSampleGate } from "../gate-check";
 /**
  * Proactive pre-check for /request-sample: called once a campaign is picked
  * from the datalist, so the creator sees why they can't request before they
- * fill out the whole form — not just after submitting. This is a convenience
+ * fill out the whole form. Not just after submitting. This is a convenience
  * only; the POST handler below re-runs the same evaluateSampleGate() at
  * actual submission, which is what's actually enforced.
  */

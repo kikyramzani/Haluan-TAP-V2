@@ -10,7 +10,7 @@ type HappyPathStatus = "PENDING" | "APPROVED" | "SHIPPED" | "COMPLETED";
 /**
  * PENDING → APPROVED → SHIPPED → COMPLETED is the happy path, rendered as a
  * single linear stepper. REJECTED/CANCELLED are deliberately NOT points on
- * this line — they are separate branch states, rendered as their own note
+ * this line. They are separate branch states, rendered as their own note
  * instead of a stepper that looks like it "reached" some step and stopped.
  */
 const HAPPY_PATH: Array<{ status: HappyPathStatus; label: string }> = [

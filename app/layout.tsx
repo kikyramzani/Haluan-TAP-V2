@@ -48,9 +48,12 @@ export const viewport: Viewport = {
   // Terkunci di 5x, bukan dinonaktifkan: pembatasan zoom adalah kegagalan
   // aksesibilitas, tapi tanpa batas atas kontrol standalone jadi mudah tergeser.
   maximumScale: 5,
+  // Paper dan ink dari BRAND-SYSTEM.md §2.1. Nilainya sengaja dikutip literal
+  // karena viewport metadata dirender di server dan tidak bisa membaca token CSS;
+  // kalau --bg berubah, dua baris ini ikut diubah manual.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#08080a" },
+    { media: "(prefers-color-scheme: light)", color: "#fcfcfc" },
+    { media: "(prefers-color-scheme: dark)", color: "#090a0a" },
   ],
 };
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "../../../lib/db";
+import Icon from "../../components/Icon";
 
 export default async function AdminRingkasanPage() {
   const [brandCount, campaignCount, sampleWaiting, creatorWaiting] = await Promise.all([
@@ -38,7 +39,7 @@ export default async function AdminRingkasanPage() {
       </section>
 
       <Link className="btn btn-secondary" href="/admin/analitik">
-        Lihat analitik klik dan funnel campaign ↗
+        Lihat analitik klik dan funnel campaign <Icon name="arrow-up-right" />
       </Link>
     </>
   );

@@ -36,7 +36,7 @@ function adminEmails() {
 
 /**
  * With the `@prisma/adapter-pg` driver (required by Prisma 7's client-config
- * model — see lib/db.ts), a unique-constraint P2002 does NOT carry the
+ * model. See lib/db.ts), a unique-constraint P2002 does NOT carry the
  * classic `meta.target: string[]` shape; the offending index name instead
  * sits under `meta.driverAdapterError.cause.constraint.index` (e.g.
  * "User_email_key"). Both shapes are checked so this keeps working if a
@@ -208,7 +208,7 @@ export type ChallengeResult =
    * this rewrite never produces it: verify/reset never change which account
    * owns an email or phone, so the conflict this described (another account
    * grabbing the address between challenge creation and commit) can no
-   * longer arise structurally — Postgres's unique constraint is checked at
+   * longer arise structurally. Postgres's unique constraint is checked at
    * every write, not just at commit time the way the old Redis claim-keys
    * needed to be reconciled.
    */
@@ -255,7 +255,7 @@ export async function verifyEmailWithChallenge(challengeId: string, code: string
     });
   });
   if (!committed) {
-    // Not spendable now — either a wrong/expired code, or one already spent by
+    // Not spendable now. Either a wrong/expired code, or one already spent by
     // an earlier request that landed. Telling those apart means a legitimate
     // retry after a lost response is acknowledged, not told its still-valid
     // code was wrong.
@@ -289,7 +289,7 @@ export async function resetPasswordWithChallenge(challengeId: string, code: stri
         emailVerifiedAt: user.emailVerifiedAt ?? new Date(),
         verificationSource: verificationSourceToPrisma(nextSource),
         // Old sessions stop authenticating the instant this lands (getCurrentUser
-        // checks the session's createdAt against this cutoff) — nothing has to
+        // checks the session's createdAt against this cutoff). Nothing has to
         // be deleted before the commit for the change to be safe.
         sessionsInvalidBefore: new Date(),
       },
@@ -317,7 +317,7 @@ export async function cleanupExpiredPendingUsers(olderThan = Date.now() - PENDIN
 }
 
 /**
- * Dibungkus React cache(): satu permintaan bisa memanggil ini beberapa kali —
+ * Dibungkus React cache(): satu permintaan bisa memanggil ini beberapa kali,
  * /dashboard memanggilnya dari root layout, layout dashboard, dan halamannya
  * sendiri. Memoisasi per-permintaan membuat ketiganya jadi satu kueri. Aman
  * karena setiap pemanggil hanya bertanya "ini siapa" dan tidak menulis apa pun.

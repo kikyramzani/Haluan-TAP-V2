@@ -5,8 +5,8 @@ import { cleanupCatalogFixtures, seedCatalogFixtures, type CatalogFixtures } fro
 /**
  * Rewritten for Phase 9 of the rebuild plan: the old version of this file
  * pointed at a fixture-only page (`/deal/glow-better`) served by the now-deleted
- * mock catalog. There is no fixture-only deal page anymore — every deal page is
- * a real Brand/Campaign row — so this seeds one small `e2e-`-prefixed brand
+ * mock catalog. There is no fixture-only deal page anymore. Every deal page is
+ * a real Brand/Campaign row. So this seeds one small `e2e-`-prefixed brand
  * (see helpers/db.ts) purely to get a deal-page slug that exists deterministically,
  * and reads its own commission-tier/link content just like any other deal page.
  *

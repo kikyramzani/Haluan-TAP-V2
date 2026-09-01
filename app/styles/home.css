@@ -25,7 +25,7 @@
 }
 
 /* Di lebar ponsel naskah hero rata tengah, bukan rata kiri seperti versi
-   desktop — blok teks pendek terasa lebih setara dengan ilustrasi di
+   desktop. Blok teks pendek terasa lebih setara dengan ilustrasi di
    bawahnya yang juga tampil penuh lebar. */
 @media (max-width: 600px) {
   .hero-inner {
@@ -37,12 +37,19 @@
     margin-inline: auto;
   }
 
+  /* Ukuran teks isi, bukan --text-lead: paragraf hero di 390px membungkus jadi
+     lima baris (~124px) dan itu salah satu dari dua hal yang mendorong gambar
+     melewati lipatan. Diturunkan ke tiga baris. */
   .hero p {
     margin-inline: auto;
+    margin-top: var(--space-4);
+    max-width: 34ch;
+    font-size: var(--text-sm);
   }
 
   .hero-actions {
     justify-content: center;
+    margin-top: var(--space-6);
   }
 }
 
@@ -115,10 +122,34 @@
   counter-reset: step;
 }
 
+/**
+ * Kartu terang beraksen, bukan sekadar garis atas.
+ *
+ * Sebelumnya .step hanya `border-top` tanpa latar, radius, maupun padding
+ * samping. Di sebelah kartu berwarna di seksi berikutnya ia terbaca sebagai
+ * teks lepas, bukan kartu. Sekarang jadi permukaan penuh dengan garis aksen
+ * 3px di atasnya.
+ *
+ * Sengaja TIDAK ikut berisi warna: pilihan "bertingkat" menaruh bobot warna di
+ * #kenapa-tap, dan enam blok pekat dalam satu halaman akan saling meniadakan.
+ */
 .step {
   position: relative;
-  padding-top: var(--space-6);
-  border-top: 2px solid var(--line-strong);
+  padding: var(--space-6);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--surface-magenta);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+/* Tiap langkah mengambil satu warna dari set yang sama dengan #kenapa-tap,
+   sehingga kedua seksi terbaca sebagai satu keluarga. */
+.step:nth-child(2) {
+  border-top-color: var(--surface-magenta-deep);
+}
+
+.step:nth-child(3) {
+  border-top-color: var(--surface-violet);
 }
 
 .step::before {
@@ -203,13 +234,26 @@
   border-bottom: 1px solid var(--line);
 }
 
+/**
+ * FLEX, bukan absolute. Penanda "+" dulunya position:absolute right:0 top:50%,
+ * sehingga pada pertanyaan yang membungkus dua baris ia melayang di tengah blok
+ *. Jauh dari teksnya dan seolah tidak berhubungan. Sebagai item flex dengan
+ * align-items:flex-start ia selalu duduk sejajar baris pertama, berapa pun
+ * jumlah barisnya.
+ *
+ * Ukuran hurufnya juga jadi clamp(). Sebelumnya --text-lead 18px datar. Satu-
+ * satunya ukuran display di halaman ini yang tidak responsif, dan di 326px
+ * ruang isi, KELIMA pertanyaan membungkus dua baris.
+ */
 .faq-list summary {
-  padding: var(--space-6) var(--space-8) var(--space-6) 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding-block: var(--space-6);
   cursor: pointer;
   list-style: none;
-  position: relative;
   font-family: var(--font-display);
-  font-size: var(--text-lead);
+  font-size: clamp(16px, 0.6vw + 14px, 18px);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-tight);
 }
@@ -220,10 +264,10 @@
 
 .faq-list summary::after {
   content: "+";
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 28px;
+  text-align: center;
   font-size: 20px;
   font-weight: var(--weight-regular);
   color: var(--text-subtle);
@@ -231,51 +275,204 @@
 }
 
 .faq-list details[open] summary::after {
-  transform: translateY(-50%) rotate(45deg);
+  transform: rotate(45deg);
 }
 
+/* padding-top wajib: tanpanya jawaban menempel langsung ke padding bawah milik
+   summary dan pertanyaan seolah menyatu dengan jawabannya. */
 .faq-list details p {
+  padding-top: var(--space-1);
   padding-bottom: var(--space-6);
   color: var(--text-muted);
+  font-size: var(--text-sm);
   max-width: 68ch;
 }
 
 /* Ajakan bergabung */
+/**
+ * Latar INK, bukan gradasi magenta.
+ *
+ * Gradasi Haluan Hot pindah dari latar banner ke TOMBOLNYA, mengikuti referensi
+ * yang dipakai sebagai contoh. Hitungannya tetap sah: masih tepat satu Haluan
+ * Hot per viewport (§3.4), hanya berpindah tempat, dan sekarang ia menandai
+ * satu-satunya aksi di blok ini alih-alih seluruh bidangnya.
+ *
+ * Efek sampingnya bagus: teks kecil kini duduk di atas isian SOLID, sehingga
+ * larangan "tidak ada teks ≤14px di atas gradasi" tidak lagi mengikat di sini.
+ * Eyebrow-nya tidak perlu lagi jadi pil ink untuk menyiasatinya.
+ *
+ * Kontras di atas ink: putih 19,82, magenta terang #ff209d 5,61.
+ */
 .join-banner {
+  position: relative;
+  overflow: hidden;
   margin-top: var(--space-section);
-  padding: clamp(40px, 5vw, 72px);
+  padding: clamp(32px, 5vw, 72px);
   border-radius: var(--radius-2xl);
-  background: var(--text);
-  color: var(--bg);
+  background: var(--brand-ink);
+  color: var(--brand-paper);
   text-align: center;
 }
 
-/* Banner ini membalik warna, jadi eyebrow tidak boleh memakai --text-subtle
-   yang dirancang untuk latar halaman. */
-.join-banner .eyebrow {
+/**
+ * Sapuan magenta lembut di sudut kanan atas, meniru cahaya latar pada referensi.
+ * Pseudo-element di lapisan bawah, bukan `background` kedua pada elemennya:
+ * dengan begitu ia tidak dihitung sebagai bidang bergradasi yang bersentuhan
+ * dengan tombol bergradasi di dalamnya, dan tidak pernah menutupi teks.
+ */
+.join-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(
+    90% 70% at 100% 0%,
+    color-mix(in srgb, var(--brand-magenta) 26%, transparent) 0%,
+    transparent 62%
+  );
+  pointer-events: none;
+}
+
+.join-banner > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Dua nada pada eyebrow dan judul, seperti referensinya. Magenta terang dipakai
+   karena ia satu-satunya magenta yang lolos AA di atas ink (5,61). */
+.join-banner .eyebrow em,
+.join-banner h2 em {
+  font-style: normal;
+  color: var(--brand-magenta-bright);
+}
+
+/**
+ * Ilustrasi banner mewarisi warna induknya, tidak memakai --text-subtle seperti
+ * .illustration biasa: di atas gradasi magenta, abu-abu redup nyaris hilang.
+ * `inherit` membuatnya digambar dengan --brand-paper yang sama dengan teksnya.
+ */
+.join-art {
   color: inherit;
-  opacity: 0.72;
+  justify-self: center;
+  max-width: 320px;
+  width: 100%;
+}
+
+/* Di satu kolom ilustrasi turun ke bawah tombol dan diberi jarak dari CTA. */
+@media (max-width: 900px) {
+  .join-banner p.join-lede {
+    margin-inline: auto;
+  }
+
+  .join-art {
+    margin-top: var(--space-8);
+    margin-inline: auto;
+    max-width: 260px;
+  }
+}
+
+/**
+ * Pil ink-nya dibubarkan. Ia dulu ada semata untuk menyiasati larangan teks
+ * ≤14px di atas gradasi; latar banner sekarang solid, jadi siasat itu tidak
+ * diperlukan lagi dan eyebrow-nya kembali jadi teks biasa seperti di referensi.
+ */
+.join-banner .eyebrow {
+  color: var(--brand-paper);
 }
 
 .join-banner h2 {
   font-size: var(--text-h1);
   letter-spacing: var(--tracking-display);
+  /* 1,55 warisan body dirancang untuk teks isi; pada display 52px ia membuat
+     tiga baris judul terlihat saling berjauhan. */
+  line-height: 1.1;
 }
 
-.join-banner p {
-  margin: var(--space-4) auto 0;
+/* Tanpa opacity. Aturan ini juga mengenai .eyebrow, dan ink pada 76% di atas
+   magenta jatuh di bawah AA. Hierarki di banner ini sudah dibawa ukuran huruf,
+   bukan kepudaran warna. */
+/**
+ * Hanya paragraf lede. Sebelumnya selektor ini juga mengenai .eyebrow dan
+ * .join-trust. Keduanya <p> - sehingga eyebrow ikut memusat sendiri di tata
+ * letak dua kolom sementara judulnya rata kiri.
+ *
+ * `auto` juga dipindah ke blok satu kolom saja. Sebagai bagian dari aturan dasar
+ * ia butuh override di dua kolom, dan override itu ditulis LEBIH AWAL di berkas
+ * ini sehingga kalah urutan sumber dengan spesifisitas yang sama.
+ */
+.join-banner p.join-lede {
+  margin-top: var(--space-4);
   max-width: 48ch;
-  opacity: 0.76;
 }
 
+/**
+ * Di sinilah gradasi Haluan Hot sekarang tinggal, dipindahkan dari latar banner.
+ * Label putih lolos di seluruh sapuan (5,17 / 6,28 / 7,67).
+ *
+ * Tombolnya juga diperbesar: di referensi ia jelas jadi elemen paling menonjol
+ * di blok itu, dan di latar ink sekarang ia satu-satunya bidang berwarna.
+ */
 .join-banner .btn-primary {
-  margin-top: var(--space-8);
-  background: var(--bg);
-  color: var(--text);
+  margin-top: var(--space-6);
+  padding-inline: var(--space-8);
+  min-height: 52px;
+  background: var(--gradient-hot);
+  color: #ffffff;
 }
 
+/* Hover dan press tidak boleh mengganti gradasi dengan warna datar: perubahan
+   bidang penuh terbaca seperti tombol lain, bukan seperti tombol yang sama
+   sedang ditekan. Yang berubah kedalamannya. */
 .join-banner .btn-primary:hover {
-  background: var(--surface-sunken);
+  background: var(--gradient-hot);
+  filter: brightness(1.08);
+}
+
+.join-banner .btn-primary:active {
+  background: var(--gradient-hot);
+  filter: brightness(0.94);
+}
+
+/* Baris kepercayaan, menggantikan deretan avatar pada referensi. Blok tersendiri
+   di bawah tombol: sebagai inline-flex ia berdiri sebaris dengan tombolnya. */
+.join-trust {
+  /* Blok, bukan flex. Sebagai flex, ikon dan teks jadi dua item terpisah:
+     begitu teksnya membungkus dua baris di ponsel, teks memusat sendiri sementara
+     ikonnya tertinggal di tepi kiri baris. Sebagai aliran teks biasa keduanya
+     membungkus bersama dan mengikuti text-align induknya. */
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.join-trust .tap-icon {
+  margin-right: var(--space-2);
+  color: var(--brand-magenta-bright);
+  font-size: var(--icon-md);
+}
+
+/**
+ * Semua penyesuaian dua kolom dikumpulkan DI SINI, setelah seluruh aturan dasar
+ * banner. Ini bukan sekadar kerapian.
+ *
+ * Blok ini dulu ditulis di ATAS aturan dasarnya, dan karena media query tidak
+ * menambah spesifisitas, setiap override di dalamnya kalah urutan sumber
+ * terhadap aturan dasar berselektor sama. Dua bug lahir dari situ: paragraf dan
+ * baris kepercayaan tetap memusat padahal judulnya sudah rata kiri.
+ */
+@media (min-width: 901px) {
+  .join-banner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    gap: clamp(32px, 4vw, 64px);
+    align-items: center;
+    text-align: left;
+  }
+
+  .join-banner-copy {
+    min-width: 0;
+  }
+
 }
 
 /* Halaman sub seperti /deals dan legal */
@@ -431,10 +628,49 @@
   display: block;
 }
 
+/**
+ * Gambar hero DIBATASI TINGGINYA di ponsel, bukan cuma lebarnya.
+ *
+ * Keluhan "gambarnya kepotong" ternyata bukan crop. Tidak ada aspect-ratio,
+ * height, object-fit, maupun overflow di mana pun. Yang terjadi: tumpukan teks
+ * hero mendorong gambar sampai mulai di y≈530, tingginya 312px berakhir di
+ * y≈845 pada layar 844px, lalu bottom nav (64px + safe area ≈ 98px) menimpa
+ * sisanya. body { padding-bottom } tidak menolong. Ia menambah ruang di UJUNG
+ * dokumen, bukan di bawah hero.
+ *
+ * max-height dalam vh mengunci gambar ke ruang yang benar-benar ada, apa pun
+ * tinggi layarnya, jadi seluruh subjeknya terlihat tanpa menggulir.
+ */
 @media (max-width: 900px) {
   .hero-visual {
     justify-self: center;
-    max-width: 360px;
+    max-width: min(360px, 78vw);
+  }
+
+  .hero-visual img {
+    /* 28vh, diukur bukan dikira: pada 390x844 tumpukan teks menaruh puncak
+       gambar di y≈506 dan bottom nav mulai di y=778, jadi ruang nyatanya ~270px.
+       38vh (320px) masih menabrak nav 12px; 28vh (236px) menyisakan jarak. */
+    max-height: 28vh;
+    width: auto;
+    margin-inline: auto;
+  }
+}
+
+/**
+ * Layar yang terlalu pendek: ilustrasi hero disembunyikan sama sekali.
+ *
+ * Diukur pada 360x640. Tumpukan teks saja sudah menaruh puncak gambar di y≈543
+ * sementara bottom nav mulai di y=574, jadi hanya tersisa 31px. Tidak ada ukuran
+ * gambar yang muat di sana; menampilkannya berarti menampilkan sesobek gambar
+ * yang tertimpa nav, persis keluhan yang sedang diperbaiki.
+ *
+ * Aman dihilangkan karena gambarnya memang dekoratif (alt=""): TikTok Shop dan
+ * Shopee sudah disebut sebagai teks di headline dan proof bar.
+ */
+@media (max-width: 900px) and (max-height: 720px) {
+  .hero-visual {
+    display: none;
   }
 }
 
@@ -472,7 +708,7 @@
 }
 
 .new-sku-card:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -516,5 +752,64 @@
 
   .new-sku-card:hover {
     transform: none;
+  }
+}
+
+/* Grid kartu manfaat. Ambang 280px sama dengan .platform-grid: tiga kolom di
+   desktop, satu di ponsel, tanpa media query. */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+/* Ubin ikon di kepala tiap langkah "cara kerja". Nomor 01/02/03 tetap dibawa
+   .step::before, jadi ikon ini duduk di atasnya, bukan menggantikannya. */
+.step .icon-tile {
+  margin-bottom: var(--space-3);
+}
+
+/**
+ * Kartu unggulan melebar penuh di atas dua kartu lain, meniru irama referensi:
+ * satu blok besar berilustrasi, lalu dua blok biasa. Di bawah 900px ia turun
+ * jadi satu kolom seperti yang lain.
+ */
+@media (min-width: 901px) {
+  /* DUA kolom eksplisit, bukan auto-fit. Dengan `repeat(auto-fit, minmax(280px,
+     1fr))` grid ini membuat empat kolom di 1280px; kartu unggulan yang membentang
+     1/-1 mengisi keempatnya, lalu dua kartu sisanya hanya menempati kolom 1 dan 2
+     dan separuh kanan barisnya kosong. */
+  .info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .info-card--lead {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
+    align-items: center;
+    gap: var(--space-8);
+  }
+}
+
+.info-card-copy {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  min-width: 0;
+}
+
+/* Ilustrasi mewarisi warna kartunya (putih), bukan --text-subtle bawaan
+   .illustration yang akan hilang di atas magenta. */
+.info-card-art {
+  color: inherit;
+  justify-self: center;
+  max-width: 240px;
+}
+
+@media (max-width: 900px) {
+  .info-card-art {
+    max-width: 200px;
+    margin-inline: auto;
   }
 }

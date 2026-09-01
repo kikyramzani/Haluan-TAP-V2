@@ -4,16 +4,16 @@ import { login, register, ADMIN_EMAIL } from "./helpers/auth";
 import { cleanupUsersByEmails, resetRateLimitScope } from "./helpers/db";
 
 // Needed explicitly for the API-only login probe below, before any
-// page.goto() — page.url() is "about:blank" at that point, which does not
+// page.goto(). Page.url() is "about:blank" at that point, which does not
 // produce a usable Origin header for sameOrigin() (lib/security.ts).
 const origin = `http://localhost:${process.env.E2E_PORT ?? 3101}`;
 
 /**
  * `accessibility.spec.ts` only covers public routes reachable without a
- * session. Creator dashboard and admin workspace both need one — and the
+ * session. Creator dashboard and admin workspace both need one. And the
  * dashboard additionally needs onboarding completed, since
  * app/dashboard/layout.tsx redirects any signed-in account without a
- * finished /daftar/lengkapi there before it ever renders dashboard content —
+ * finished /daftar/lengkapi there before it ever renders dashboard content,
  * so both are audited here instead, each across every route its own nav
  * exposes (see app/dashboard/DashboardNav.tsx and app/admin/AdminNav.tsx),
  * in both themes. This is real expanded coverage: the pre-rebuild version of
@@ -24,7 +24,7 @@ const origin = `http://localhost:${process.env.E2E_PORT ?? 3101}`;
  * SUPER_ADMIN_ITEMS (/admin/pengguna, /admin/audit, /admin/import) need a
  * super-admin promotion (helpers/db.ts's promoteToSuperAdmin) this file has
  * no other reason to set up, and the shared admin shell
- * (app/admin/layout.tsx — sidebar, topbar, logout) wraps every /admin/*
+ * (app/admin/layout.tsx. Sidebar, topbar, logout) wraps every /admin/*
  * route regardless of role, so the main-nav set already exercises that
  * shell fully. Better to cover the routes this file has real confidence in
  * than guess at the super-admin-only ones.
@@ -39,12 +39,12 @@ test.beforeAll(async ({ browser }) => {
   await resetRateLimitScope("login-account");
   await resetRateLimitScope("login-ip");
   // admin@tap.test is the one address ADMIN_EMAILS (playwright.config.ts's
-  // webServer) allowlists — lib/auth.ts's reconcileAdminRole promotes it to
+  // webServer) allowlists. Lib/auth.ts's reconcileAdminRole promotes it to
   // ADMIN the moment its email is verified. Registered once here, outside
   // any single test, so both theme runs below can log into the same
   // already-promoted account instead of racing each other to register it.
   // Probing existence via a raw POST /api/auth/register is unsafe (it has a
-  // real side effect — see auth-operations.spec.ts's sample-lifecycle test
+  // real side effect. See auth-operations.spec.ts's sample-lifecycle test
   // for the full story), so /api/auth/login is the actual existence probe;
   // this file's own afterAll normally leaves nothing behind, but a crashed
   // prior run could.
@@ -68,7 +68,7 @@ async function violations(page: Page) {
 
 /**
  * register() lands a brand-new account at /daftar/lengkapi, never straight
- * at /dashboard (see helpers/auth.ts) — the dashboard layout's onboarding
+ * at /dashboard (see helpers/auth.ts). The dashboard layout's onboarding
  * gate redirects any first visit there. This drives the same fields
  * app/daftar/lengkapi/OnboardingForm.tsx renders: name and WhatsApp number
  * already arrive prefilled from registration, so a content category and

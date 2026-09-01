@@ -1,9 +1,28 @@
 /** Form auth, dashboard creator, dan pengajuan sample. */
 
+/**
+ * Dua kolom di layar lebar: naskah di kiri, formulir di kanan.
+ *
+ * Sebelumnya `place-items: start center` pada grid satu kolom, sehingga <aside
+ * class="form-intro"> dan .form-panel menumpuk vertikal dan masing-masing
+ * menyusut ke lebar isinya. Di layar 1280px hasilnya satu kolom sempit di
+ * tengah dengan ruang kosong lebar di kiri-kanan. Markup-nya sejak awal
+ * dirancang dua kolom, hanya CSS-nya yang tidak pernah menyusul.
+ */
 .form-page {
   padding-block: var(--space-16);
   display: grid;
-  place-items: start center;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: start;
+}
+
+/* Satu kolom penuh lebar di bawah 900px, bukan menyusut ke tengah, karena
+   formulir yang lebih sempit dari layarnya justru lebih sulit diisi. */
+@media (max-width: 900px) {
+  .form-page {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .form-card {
@@ -388,4 +407,77 @@
   font-weight: var(--weight-regular);
   color: var(--text-subtle);
   letter-spacing: normal;
+}
+
+/**
+ * Ilustrasi duduk di antara paragraf pembuka dan daftar langkah, bukan di ujung
+ * kolom. Ia menggambarkan alur yang langkah-langkah itu jelaskan, jadi tempatnya
+ * memang sebelum mereka.
+ *
+ * TETAP TAMPIL di ponsel. Versi sebelumnya menyembunyikannya di bawah 900px
+ * ketika gambarnya masih berada di ujung kolom. Di posisi itu ia memang hanya
+ * menjauhkan penjelasan dari formulirnya. Di posisi yang sekarang ia justru
+ * bagian dari penjelasan, dan mockup memintanya terlihat.
+ */
+.form-intro-art {
+  margin-block: var(--space-6);
+}
+
+@media (max-width: 900px) {
+  .form-intro-art {
+    max-width: 200px;
+    margin-inline: auto;
+  }
+}
+
+/* Ilustrasi kolom kiri halaman auth. Disembunyikan di bawah 900px: di sana
+   kolomnya menumpuk di atas formulir, dan gambar di antara janji dan formulir
+   hanya menjauhkan keduanya. */
+.auth-art {
+  margin-top: var(--space-8);
+}
+
+@media (max-width: 900px) {
+  .auth-art {
+    display: none;
+  }
+}
+
+/**
+ * Strip manfaat di bawah kedua kolom halaman request sample.
+ *
+ * `grid-column: 1 / -1` supaya ia membentang penuh di grid dua kolom .form-page,
+ * bukan menyempit ke salah satu kolomnya.
+ */
+.benefit-strip {
+  grid-column: 1 / -1;
+  list-style: none;
+  margin: var(--space-12) 0 0;
+  padding: var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--gradient-wash), var(--surface);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-6);
+}
+
+.benefit-strip li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.benefit-strip span {
+  display: grid;
+  gap: 2px;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  min-width: 0;
+}
+
+.benefit-strip b {
+  color: var(--text);
+  font-weight: var(--weight-semibold);
 }

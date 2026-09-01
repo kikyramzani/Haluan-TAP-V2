@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     if (!user || !(await verifyPassword(password, user.passwordHash))) return Response.json({ error: "Email atau kata sandi salah." }, { status: 401 });
     if (authEmailEnabled() && !user.emailVerifiedAt) {
       // The password just checked out against this record, which is proof of which
-      // account the verification belongs to — the one thing an email address on
+      // account the verification belongs to. The one thing an email address on
       // its own cannot establish.
       const continuation = await issueVerifyContinuation(user.id);
       return Response.json({ error: "Verifikasi email kamu sebelum masuk.", verificationRequired: true, continuation }, { status: 403 });

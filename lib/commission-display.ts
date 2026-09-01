@@ -16,7 +16,7 @@ export function minMaxCommission(tiers: readonly CommissionLike[]): { min: numbe
   return { min: Math.min(...values), max: Math.max(...values) };
 }
 
-/** Range label for a brand/campaign with several tiers — "9% – 12%", a single "9%", or "Ketentuan platform". */
+/** Range label for a brand/campaign with several tiers. "9% – 12%", a single "9%", or "Ketentuan platform". */
 export function commissionRangeLabel(input: { commissionType: CommissionType; min: number | null; max: number | null }): string {
   if (input.commissionType === "KETENTUAN_PLATFORM") return "Ketentuan platform";
   if (input.min === null) return "—";

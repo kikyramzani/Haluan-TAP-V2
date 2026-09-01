@@ -7,7 +7,7 @@ import type { Platform as PrismaPlatform } from "@prisma/client";
 
 /**
  * Postgres-backed replacement for lib/campaign-links.ts's public catalog
- * reads (Phase 2 of the rebuild plan — see
+ * reads (Phase 2 of the rebuild plan. See
  * /Users/macbook/.claude/plans/kamu-lihat-dari-bagian-purrfect-hopcroft.md).
  * Same function names/shapes as the Sheet-backed originals so the pages that
  * render /deals, /deal/[slug], and /go/[slug] only needed an import-path
@@ -41,7 +41,7 @@ const campaignInclude = {
  * Katalog saja. campaignInclude sengaja tidak ikut dilebarkan karena juga
  * dipakai getTapLinks dan halaman /deal/[slug], yang tidak butuh badge.
  * `select: { badge: true }` menjaga kolom metrik operasional (clicks7d,
- * conversionRatePct, dst.) tidak ikut terbaca tiap kali katalog dimuat — dan
+ * conversionRatePct, dst.) tidak ikut terbaca tiap kali katalog dimuat, dan
  * tidak ikut terkirim lewat /api/campaigns, yang menyerialkan Campaign[] apa
  * adanya.
  */
@@ -61,7 +61,7 @@ function toCampaign(row: NonNullable<CampaignRow>): Campaign {
     tierCommissions: rates,
     campaignCount: row.tiers.length,
     hasSample: row.hasSample,
-    // No brand-metrics sheet was migrated (none was available at Phase 2 —
+    // No brand-metrics sheet was migrated (none was available at Phase 2 -
     // see the plan's progress log), so GMV-based ranking is unavailable;
     // compareCampaigns() already treats a null gmvRank as "sort last by that
     // key", falling through to commission/alphabetical.
@@ -69,14 +69,14 @@ function toCampaign(row: NonNullable<CampaignRow>): Campaign {
     updated: row.updatedAt.toISOString(),
     campaign: row.brand.displayName,
     // The sheet's own Image URL column was empty for 100% of current brands
-    // (confirmed during migration) — brandLogo() local static lookup is the
+    // (confirmed during migration). BrandLogo() local static lookup is the
     // real, unchanged source BrandMark already falls back to.
     image: null,
     specialLivePrice: row.specialLivePrice,
     expiresAt: toSheetDate(row.validUntil),
     newSku: row.newSku,
     // Gerbang pertama: status. Katalog memakai `status: { not: "HIDDEN" }`
-    // sehingga campaign ENDED ikut tampil — dan campaign yang sudah berakhir
+    // sehingga campaign ENDED ikut tampil, dan campaign yang sudah berakhir
     // tidak boleh membawa badge. Menyempitkan `where` malah akan membuang
     // campaign berakhir dari /deals, yang bukan yang diminta.
     // Gerbang kedua adalah tanggal kedaluwarsa, di liveHotBadge()

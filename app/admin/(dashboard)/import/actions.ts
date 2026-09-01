@@ -36,7 +36,7 @@ function findColumn(headers: string[], candidates: string[]) {
 type RawRow = { rowNumber: number; name: string; categoryName: string; logoUrl: string; hidden: boolean; featured: boolean };
 
 /**
- * Recognizes name/category/logoUrl/hidden/featured only — the only columns
+ * Recognizes name/category/logoUrl/hidden/featured only. The only columns
  * that map onto the Brand model. A "slug" column (mentioned in the source
  * spec) is intentionally ignored: Brand has no slug field, only brandKey()
  * derived from the name. Any other unrecognized header is ignored too.
@@ -89,7 +89,7 @@ type PreviewOutcome =
       failedRows: Array<{ row: number; reason: string }>;
     };
 
-/** A true dry run — no Prisma write happens here, only reads. */
+/** A true dry run. No Prisma write happens here, only reads. */
 async function buildPreview(csv: string): Promise<PreviewOutcome> {
   const parsed = parseRows(csv);
   if ("error" in parsed) return { ok: false, error: parsed.error };

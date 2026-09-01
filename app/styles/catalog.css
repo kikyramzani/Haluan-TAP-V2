@@ -20,11 +20,20 @@
   max-width: 52ch;
 }
 
-/* Kontrol pencarian dan filter */
+/**
+ * Kontrol pencarian dan filter.
+ *
+ * TIDAK lengket, di lebar mana pun. Diukur langsung di browser: blok ini 326px
+ * di 950px maupun 1440px. Search + empat baris facet. Dipatok di bawah header
+ * 64px, itu 390px yang hilang permanen dari jendela 900px (43%), dan kartu yang
+ * baru menerima fokus keyboard bisa tergulir tepat ke baliknya (WCAG 2.4.11
+ * Focus Not Obscured). Perbaikan sebelumnya hanya melepas sticky di ≤600px
+ * dengan alasan yang sama; angkanya ternyata sama buruknya di desktop.
+ *
+ * Yang hilang: filter tidak lagi ikut menggulir. Yang didapat: seluruh tinggi
+ * layar untuk hasil, di setiap perangkat.
+ */
 .catalog-controls {
-  position: sticky;
-  top: var(--header-height);
-  z-index: 20;
   display: grid;
   /* Tanpa minmax(0, 1fr) jalur grid ikut melebar mengikuti lebar alami deretan
      chip, dan seluruh halaman jadi bisa digeser ke samping. */
@@ -112,6 +121,14 @@
   .search-hint {
     display: none;
   }
+
+  /* Petunjuk ⌘K disembunyikan di atas, jadi 96px ruang kanan yang disediakan
+     untuknya jadi padding mati. Yang tersisa hanya .search-clear selebar 28px.
+     Tanpa ini, kotak pencarian di ponsel 390px kehilangan ~68px ruang teks dan
+     placeholder-nya terpotong tanpa alasan. */
+  .search-field input {
+    padding-right: var(--space-12);
+  }
 }
 
 /* Saran pencarian */
@@ -153,6 +170,48 @@
   font-size: var(--text-xs);
 }
 
+/**
+ * Tombol pelipat facet. Hanya ada di layar ponsel. Di desktop facet-nya selalu
+ * terlihat dan tombol ini tidak punya pekerjaan.
+ */
+.facet-toggle {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.facet-toggle-count {
+  min-width: 20px;
+  padding: 0 var(--space-1-5);
+  border-radius: var(--radius-pill);
+  background: var(--action);
+  color: var(--action-contrast);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.facet-toggle-caret {
+  margin-left: auto;
+  color: var(--text-subtle);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.catalog-facets {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
 .filter-row {
   display: flex;
   align-items: center;
@@ -179,7 +238,7 @@
   flex-shrink: 0;
   min-height: 44px;
   /* Chip platform dirender sebagai <a>, chip kategori sebagai <button>. Tombol
-     memusatkan isinya sendiri, tautan tidak — tanpa aturan ini teks di chip
+     memusatkan isinya sendiri, tautan tidak. Tanpa aturan ini teks di chip
      platform menempel ke atas sementara chip kategori tampak pas. */
   display: inline-flex;
   align-items: center;
@@ -203,7 +262,10 @@
   border-color: var(--text-subtle);
 }
 
-.chip[aria-pressed="true"] {
+/* aria-pressed untuk chip yang memang <button> (filter di CampaignCatalog),
+   aria-current untuk chip yang <a> (toggle platform di /deals). */
+.chip[aria-pressed="true"],
+.chip[aria-current="page"] {
   background: var(--text);
   border-color: var(--text);
   color: var(--bg);
@@ -211,17 +273,20 @@
 
 /* Toggle platform Shopee terbaca sebagai Shopee saat aktif, bukan warna
    generik yang sama dengan setiap chip lain. Memakai --platform-shopee-solid
-   (bukan --platform-shopee, yang dipakai garis tepi tipis kartu) — oranye
+   (bukan --platform-shopee, yang dipakai garis tepi tipis kartu). Oranye
    asli brand terlalu terang untuk teks putih di atasnya (~3.6:1, di bawah
    ambang AA 4.5:1); versi solid ini lebih pekat supaya putih tetap jelas
    terbaca tanpa kartu ikut berubah warna. */
-.chip--shopee-toggle[aria-pressed="true"] {
+.chip--shopee-toggle[aria-pressed="true"],
+.chip--shopee-toggle[aria-current="page"] {
   background: var(--platform-shopee-solid);
   border-color: var(--platform-shopee-solid);
-  color: #ffffff;
+  /* Satu-satunya hex di luar tokens.css sebelumnya. Maknanya "label putih di
+     atas isian padat berwarna", dan itu persis --action-contrast. */
+  color: var(--action-contrast);
 }
 
-/* Angka dibedakan lewat ketebalan huruf, bukan opacity — menurunkan opacity
+/* Angka dibedakan lewat ketebalan huruf, bukan opacity. Menurunkan opacity
    membuat kontrasnya jatuh di bawah ambang WCAG di kedua tema. */
 .chip .tap-icon {
   font-size: var(--icon-sm);
@@ -306,7 +371,7 @@
   flex-direction: column;
   /* Lapisan latar, bukan ::before: .deal-cta::after memakai position:absolute
      terhadap kartu ini supaya seluruh kartu bisa diklik, sedangkan anak-anak
-     kartu lainnya tidak diposisikan — sebuah ::before yang diposisikan akan
+     kartu lainnya tidak diposisikan. Sebuah ::before yang diposisikan akan
      tergambar DI ATAS nama brand dan angka komisi. Kartu berakhir memakai
      shorthand `background` lagi di bawah, jadi sapuannya hilang otomatis. */
   background: var(--gradient-wash), var(--surface);
@@ -318,7 +383,51 @@
     box-shadow var(--duration-normal) var(--ease-out);
 }
 
-/* Aksen platform: satu garis tepi atas, bukan isian — penanda, bukan badge. */
+/**
+ * Bentuk RINGKAS kartu deal. Dipakai dashboard creator (/dashboard "Untuk
+ * kamu" dan /dashboard/tersimpan), yang hanya menampilkan tiga baris: nama
+ * brand, kategori·platform, lalu komisi.
+ *
+ * Sebelumnya bentuk ini TIDAK punya satu pun aturan. .deal-card adalah flex
+ * kolom tanpa `gap`, dan seluruh irama vertikal kartu katalog datang dari
+ * margin-top milik .deal-commission/.deal-flags/.deal-footer. Kelas yang tidak
+ * ada di sini sama sekali. Hasilnya tiga baris teks menempel rapat tanpa
+ * hierarki apa pun, di setiap lebar layar.
+ *
+ * Selektor anak LANGSUNG aman: kartu katalog membungkus seluruh isinya dalam
+ * div berkelas (.deal-card-head dan seterusnya), jadi tidak punya b/small/
+ * strong sebagai anak langsung dan tidak ikut terkena aturan ini.
+ */
+.deal-card > b {
+  font-size: var(--text-lead);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  /* Ruang untuk tombol hapus yang diposisikan absolut di kanan atas pada
+     /dashboard/tersimpan. Tanpa ini nama brand tertimpa tombolnya di kartu
+     dua kolom selebar ~138px di ponsel. */
+  padding-right: var(--space-16);
+}
+
+.deal-card > small {
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--text-subtle);
+}
+
+/* Komisi adalah alasan kartu ini dilihat, jadi ia yang paling besar. Irama
+   yang sama dengan .deal-commission-value di kartu katalog. */
+.deal-card > strong {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Aksen platform: satu garis tepi atas, bukan isian. Penanda, bukan badge. */
 .deal-card--tiktok {
   border-top-color: var(--platform-tiktok);
 }
@@ -334,12 +443,12 @@
     box-shadow: var(--shadow-card);
   }
 
-  /* :not() wajib — tanpa itu aturan ini (0,3,0) mengalahkan
+  /* :not() wajib. Tanpa itu aturan ini (0,3,0) mengalahkan
      .deal-card-expired .deal-cta (0,2,0) dan menyalakan tombol yang mati. */
   .deal-card:not(.deal-card-expired):hover .deal-cta {
-    background: var(--cta-hover);
-    color: var(--cta-contrast);
-    border-color: var(--cta-hover);
+    background: var(--action-hover);
+    color: var(--action-contrast);
+    border-color: var(--action-hover);
   }
 }
 
@@ -350,7 +459,7 @@
 /**
  * Campaign yang sudah berakhir dibedakan lewat permukaan yang lebih redup dan
  * badge, bukan lewat `opacity`. Menurunkan opacity satu kartu menurunkan
- * kontras seluruh teks di dalamnya sampai di bawah ambang WCAG — kartu yang
+ * kontras seluruh teks di dalamnya sampai di bawah ambang WCAG. Kartu yang
  * sudah tidak bisa dipakai pun tetap harus terbaca.
  */
 .deal-card-expired {
@@ -430,7 +539,7 @@
   display: flex;
   /* Teks kategori membungkus 2–3 baris di kartu sempit. Dengan `center` ikon
      tag ikut turun ke tengah blok dan terbaca seolah memimpin baris kedua,
-     bukan baris pertama — persis salah baca yang ingin dihindari. */
+     bukan baris pertama. Persis salah baca yang ingin dihindari. */
   align-items: flex-start;
   gap: var(--space-1);
   min-width: 0;
@@ -524,8 +633,18 @@
   padding: 0 var(--space-4);
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
-  background: var(--gradient-cta);
-  color: var(--cta-contrast);
+  /**
+   * Action ramp, bukan hot pink. Aturan §6.1 tegas: label ≥15px → #fb007f +
+   * ink, label ≤14px → action ramp + putih. Label tombol ini --text-sm (14px),
+   * jadi ia jatuh di sisi kedua.
+   *
+   * Alasannya juga terlihat di layar: satu viewport katalog memuat ~24 tombol
+   * ini. Magenta penuh berlabel hitam sebanyak itu terbaca seperti deretan
+   * stabilo, bukan tombol. Persis yang §6.1 sebut. Hot pink tetap dipakai di
+   * CTA tunggal yang lapang (header, hero, join banner, submit form).
+   */
+  background: var(--action);
+  color: var(--action-contrast);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   display: inline-flex;
@@ -558,6 +677,15 @@
   border: 1px dashed var(--line-strong);
   border-radius: var(--radius-xl);
   margin-top: var(--space-6);
+  display: grid;
+  justify-items: center;
+}
+
+/* Ilustrasi rak kosong duduk di atas judul, lebih kecil dari judul itu supaya
+   hierarkinya tidak terbalik. */
+.state-panel .illustration {
+  max-width: 200px;
+  margin-bottom: var(--space-4);
 }
 
 .state-panel h3 {
@@ -653,7 +781,7 @@
     width: 32px;
     height: 32px;
     /* --radius-md (12px) yang diwarisi kartu penuh terlalu besar buat lambang
-       32px — proporsi sudutnya jadi terlihat seperti stiker, bukan ikon. */
+       32px. Proporsi sudutnya jadi terlihat seperti stiker, bukan ikon. */
     border-radius: var(--radius-sm);
   }
 
@@ -661,7 +789,7 @@
     font-size: var(--text-xs);
   }
 
-  /* Satu ritme spacing yang diulang (--space-3), bukan campuran space-2/3/4 —
+  /* Satu ritme spacing yang diulang (--space-3), bukan campuran space-2/3/4,
      supaya mata membaca satu irama konsisten di kartu sekecil ini. */
   .deal-commission,
   .deal-benefits {
@@ -701,12 +829,12 @@
     text-align: center;
     /* Isian penuhnya sekarang datang dari aturan dasar .deal-cta, jadi tidak
        ada yang perlu ditimpa di sini. Ronde sebelumnya sengaja memakai isian
-       tonal supaya "tetap terasa tenang"; itu dibalik dengan sadar — ini
+       tonal supaya "tetap terasa tenang"; itu dibalik dengan sadar. Ini
        satu-satunya aksi di kartu, jadi boleh jadi elemen paling menonjol. */
   }
 
   /* "Tinggi konversi" berikut ikonnya ~150px kalau nowrap, lebih lebar dari
-     ~141px ruang isi kartu dua kolom di iPhone 14 — itu akan mendorong
+     ~141px ruang isi kartu dua kolom di iPhone 14. Itu akan mendorong
      scrollWidth melewati clientWidth. Belum bisa terjadi hari ini (nol baris
      memenuhinya), tapi kodenya harus aman saat cron-nya nanti menyala. */
   .deal-flags .badge {
@@ -720,16 +848,198 @@
     margin-bottom: var(--space-1-5);
   }
 
-  /* Empat baris filter di header lengket sudah memakan sepertiga layar. */
-  /* Berhenti lengket di layar kecil. Dengan baris popularitas, kontrol ini jadi
-     empat baris (~320px); ditambah header yang juga lengket, lebih dari separuh
-     layar 664px terpakai permanen dan kartu di baliknya tidak bisa disentuh —
-     dua tes e2e mobile-webkit gagal justru karena blok ini mencegat klik.
-     Menyusutkan gap saja tidak cukup, jadi filter ikut menggulung: pengguna
-     menggulir ke atas saat butuh, dan mendapat seluruh layar untuk hasilnya. */
+}
+
+/* Tombol hapus di kartu tersimpan. .deal-card sudah position: relative dari
+   aturan dasarnya, jadi tidak perlu diulang di elemen. */
+.saved-remove {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  transition: color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.saved-remove:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.saved-remove[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/**
+ * Perlakuan mobile/tablet untuk kontrol katalog. 900px, BUKAN 600px.
+ *
+ * Ambangnya sengaja disamakan dengan .mobile-nav (layout.css), yang menyala di
+ * ≤900px. Sebelumnya aturan ini berhenti di 600px, sehingga di pita 601–900px
+ * kontrol lengket setinggi ~320px masih menumpuk dengan header 64px DAN bottom
+ * nav 64px. Persis kondisi yang perbaikan 600px itu tulis untuk dihindari,
+ * hanya di lebar yang berbeda.
+ *
+ * Yang tersisa khusus ≤900px hanyalah pelipatan facet dan jarak yang lebih
+ * rapat; sifat tidak-lengketnya kini berlaku di semua lebar (lihat aturan dasar
+ * .catalog-controls di atas).
+ */
+@media (max-width: 900px) {
   .catalog-controls {
-    position: static;
     gap: var(--space-3);
     padding-block: var(--space-3);
   }
+
+  /* Facet dilipat di balik satu tombol. Tertutup, halaman langsung menampilkan
+     hasil; terbuka, tidak ada satu pun chip yang tersembunyi. */
+  .facet-toggle {
+    display: flex;
+  }
+
+  .catalog-facets {
+    gap: var(--space-3);
+  }
+
+  .catalog-facets:not([data-open="true"]) {
+    display: none;
+  }
+
+  .facet-toggle[aria-expanded="true"] .facet-toggle-caret {
+    transform: rotate(180deg);
+  }
+
+  /**
+   * Chip MEMBUNGKUS di sini, tidak menggulir. Sebelumnya tiap baris chip adalah
+   * scroller horizontal sendiri di dalam halaman yang menggulir vertikal,
+   * tiga area gulir bersarang sekaligus, dan chip di ujung kanan praktis tidak
+   * pernah ditemukan. Karena facet-nya kini dilipat, tingginya tidak lagi jadi
+   * masalah dan semua nilai bisa terlihat sekaligus.
+   */
+  .filter-chips {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+}
+
+/* Dulunya inline style di app/deals/page.tsx. Sebagai atribut `style` ia tidak
+   bisa punya aturan media maupun ditimpa tema. */
+.deals-results {
+  padding-bottom: var(--space-16);
+}
+
+/**
+ * Kartu pemilih platform di kepala /deals. Menggantikan dua chip pil dan empat
+ * ubin pintasan yang dulu ada di atasnya.
+ *
+ * Yang AKTIF berisi warna platform solid dengan label putih; yang tidak aktif
+ * tetap permukaan biasa dengan garis dan ikon berwarna platform. Bedanya sengaja
+ * besar: keduanya adalah pilihan, bukan dua tombol setara.
+ */
+.platform-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.platform-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "icon name" "icon count";
+  align-items: center;
+  gap: 0 var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  min-width: 0;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.platform-card:hover {
+  transform: translateY(-2px);
+}
+
+.platform-card-icon {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  font-size: var(--icon-lg);
+  background: var(--surface-sunken);
+}
+
+.platform-card b {
+  grid-area: name;
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+/* Angka dibedakan lewat ukuran, bukan opacity. Di kartu berisi warna, menurunkan
+   opacity putih menjatuhkan kontrasnya di bawah AA. */
+.platform-card span {
+  grid-area: count;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ikon TikTok netral, bukan teal: identitas TikTok monokrom, dan teal di sini
+   akan bertentangan dengan kartu aktifnya yang hitam. --text ikut berbalik
+   sendiri (hitam di tema terang, putih di gelap). */
+.platform-card--tiktok .platform-card-icon {
+  color: var(--text);
+}
+
+.platform-card--shopee .platform-card-icon {
+  color: var(--platform-shopee);
+}
+
+/* Keadaan aktif: isian solid platform, seluruh label putih. */
+.platform-card[aria-current="page"] {
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.platform-card[aria-current="page"] span {
+  color: #ffffff;
+}
+
+.platform-card[aria-current="page"] .platform-card-icon {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+/**
+ * Hitam TikTok nyaris sama dengan --bg tema gelap (#090a0a), jadi tanpa garis
+ * tepi kartunya lenyap ke latar, dan lebih buruk lagi, jadi nyaris identik
+ * dengan kartu yang TIDAK aktif, sehingga sinyal "sedang dipilih" hilang.
+ *
+ * --line-strong terlalu samar untuk itu (18% di tema gelap). Diturunkan dari
+ * --text supaya tetap sadar tema: putih 35% di tema gelap membuat tepinya jelas
+ * di atas hitam, dan ink 35% di tema terang otomatis tidak terlihat di atas
+ * isian hitam. Di sana kontras dengan kertas sudah cukup sendiri.
+ */
+.platform-card--tiktok[aria-current="page"] {
+  background: var(--platform-tiktok-solid);
+  border-color: color-mix(in srgb, var(--text) 35%, transparent);
+}
+
+.platform-card--shopee[aria-current="page"] {
+  background: var(--platform-shopee-solid);
 }

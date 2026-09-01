@@ -3,21 +3,21 @@ import { logout, register, ADMIN_EMAIL } from "./helpers/auth";
 import { cleanupUsersByEmails, completeOnboarding, promoteToSuperAdmin, resetRateLimitScope } from "./helpers/db";
 
 // Needed explicitly for API-only requests before any page.goto() has
-// happened — page.url() is "about:blank" at that point, which does not
+// happened. Page.url() is "about:blank" at that point, which does not
 // produce a usable Origin header for sameOrigin() (lib/security.ts).
 const origin = `http://localhost:${process.env.E2E_PORT ?? 3101}`;
 
 /**
  * Rewritten from scratch for Phase 9 of the rebuild plan. The pre-rebuild
  * version of this file tested a single-page /admin with a client-side
- * tab-switcher (buttons like "Database Kreator", "Katalog Campaign") — that
+ * tab-switcher (buttons like "Database Kreator", "Katalog Campaign"). That
  * whole UI was deleted in an earlier phase. The admin is now a real
  * multi-route app under /admin/*, gated by a single requireAdmin() call in
  * app/admin/layout.tsx, with a sidebar nav in app/admin/AdminNav.tsx. Every
  * route, nav label, and heading string below was read directly from the
  * current source, not carried over from the old suite.
  *
- * ADMIN vs. SUPER_ADMIN is a boundary the old suite never actually tested —
+ * ADMIN vs. SUPER_ADMIN is a boundary the old suite never actually tested,
  * it only had one undifferentiated "admin" role. ADMIN_EMAILS (see
  * playwright.config.ts) allowlists exactly one email, admin@tap.test, so
  * that shared fixture account is the only account that can ever be a plain
@@ -27,7 +27,7 @@ const origin = `http://localhost:${process.env.E2E_PORT ?? 3101}`;
  * a plain ADMIN across the whole suite run (see helpers/db.ts's
  * promoteToSuperAdmin comment and how auth-operations.spec.ts uses it). The
  * *positive* case (a promoted account can reach all 3) uses a throwaway
- * account instead — reconcileAdminRole() short-circuits and returns the
+ * account instead. ReconcileAdminRole() short-circuits and returns the
  * user as-is once role is already "super_admin" (lib/auth.ts), so
  * promoteToSuperAdmin() on a non-allowlisted email is sufficient on its own,
  * no allowlist entry required.
@@ -37,7 +37,7 @@ const emailsToClean: string[] = [];
 
 // register-ip/verify-confirm-ip (IP-scoped) and register-account (scoped by
 // the shared admin@tap.test address itself, reused across many separate
-// runs while debugging) — see auth-operations.spec.ts's beforeEach for why
+// runs while debugging). See auth-operations.spec.ts's beforeEach for why
 // this resets every test rather than once per file.
 test.beforeEach(async () => {
   await resetRateLimitScope("register-ip");
@@ -54,11 +54,11 @@ test.afterAll(async () => {
 /**
  * admin@tap.test may already exist from another spec file that ran earlier
  * in this same worker (the suite runs against the real dev Postgres, which
- * persists across spec files — see playwright.config.ts's top comment).
- * Probing existence via a raw POST /api/auth/register is NOT safe — that
+ * persists across spec files. See playwright.config.ts's top comment).
+ * Probing existence via a raw POST /api/auth/register is NOT safe. That
  * endpoint has a real side effect (creates the account on its very first
  * "does it exist" call, leaving a half-registered, never-verified row that
- * then makes every later real register() attempt fail as a duplicate) —
+ * then makes every later real register() attempt fail as a duplicate),
  * confirmed the hard way while rewriting auth-operations.spec.ts's
  * sample-lifecycle test against this exact account. /api/auth/login has no
  * such side effect, so it's the actual existence probe.
@@ -96,11 +96,11 @@ test("admin biasa melihat sidebar lengkap dan kesembilan rute utama merender jud
   await expect(sidebar).toBeVisible();
 
   // The creator-facing bottom tab bar used to be unconditional root-layout
-  // markup with no route awareness — it rendered on top of every admin page
+  // markup with no route awareness. It rendered on top of every admin page
   // at mobile width until MobileNav.tsx added its own /admin bail-out.
   await expect(page.locator(".mobile-nav")).toHaveCount(0);
 
-  // Plain ADMIN (not super_admin) must not see the 3 Super-Admin-only links —
+  // Plain ADMIN (not super_admin) must not see the 3 Super-Admin-only links -
   // AdminNav only renders the SUPER ADMIN block when isSuperAdmin is true.
   for (const [href] of SUPER_ADMIN_ROUTES) {
     await expect(sidebar.locator(`a.nav-link[href="${href}"]`)).toHaveCount(0);
@@ -120,7 +120,7 @@ test("creator biasa tidak bisa mengakses tiga rute khusus super admin lewat URL 
   emailsToClean.push(email);
   await register(page, { name: "Creator Bukan Admin", email, phone: `08123458${Date.now().toString().slice(-4)}` });
   // Otherwise the redirect this test checks for chains one hop further, into
-  // /dashboard's own onboarding gate (app/dashboard/layout.tsx) — not what
+  // /dashboard's own onboarding gate (app/dashboard/layout.tsx). Not what
   // this test is about.
   await completeOnboarding(email);
 
@@ -128,7 +128,7 @@ test("creator biasa tidak bisa mengakses tiga rute khusus super admin lewat URL 
   // before any page-specific super_admin check runs, so a non-admin creator
   // hits the same general redirect here as it does for /admin itself
   // (already covered by auth-operations.spec.ts's authorization-boundary
-  // test) — this confirms that guard also covers the 3 super-admin routes
+  // test). This confirms that guard also covers the 3 super-admin routes
   // specifically, not just the root.
   for (const [href] of SUPER_ADMIN_ROUTES) {
     await page.goto(href);
@@ -196,12 +196,12 @@ test("template CSV import bisa diunduh dan langsung lolos pratinjau tanpa error"
   expect(templateResponse.ok()).toBe(true);
   const templateCsv = await templateResponse.text();
 
-  // Round-trip: the template's own content, pasted back in, must parse clean —
+  // Round-trip: the template's own content, pasted back in, must parse clean -
   // proving the header names actually match what buildPreview() expects. Not
   // asserting the exact Baru/Diperbarui split: the template's example row
   // ("MS Glow") is a real brand name that may already exist in this shared
   // dev catalog, which would legitimately classify it as an update instead of
-  // new — that's not a parse failure, so only Gagal (and total rows) matter.
+  // new. That's not a parse failure, so only Gagal (and total rows) matter.
   await superPage.locator('textarea[name="csv"]').fill(templateCsv);
   await superPage.getByRole("button", { name: "Pratinjau" }).click();
   await expect(superPage.getByRole("heading", { name: "3 baris dibaca" })).toBeVisible();
@@ -220,7 +220,7 @@ test("logout dari admin kembali ke beranda publik, dan /admin tidak lagi bisa di
   await expect(page).toHaveURL(`${baseURL}/`);
 
   // requireAdmin() sends an unauthenticated visitor to /admin/login (not
-  // /daftar, which is the creator-facing form) — see lib/auth.ts's comment
+  // /daftar, which is the creator-facing form). See lib/auth.ts's comment
   // on why the admin entry point is deliberately separate.
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/admin\/login/);

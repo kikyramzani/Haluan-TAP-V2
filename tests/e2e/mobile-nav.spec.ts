@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
  * 2. Sasaran sentuh tab tidak pernah diukur.
  * 3. Konten paling bawah bisa terjebak di balik bar yang melayang.
  *
- * Hanya berjalan di lebar mobile — barnya memang display:none di atas 900px.
+ * Hanya berjalan di lebar mobile. Barnya memang display:none di atas 900px.
  */
 
 test.beforeEach(async ({ page }, testInfo) => {

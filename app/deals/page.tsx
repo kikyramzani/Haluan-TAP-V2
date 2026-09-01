@@ -6,6 +6,7 @@ import { getCurrentUser } from "../../lib/auth";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import CampaignCatalog from "../components/CampaignCatalog";
+import Icon from "../components/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -52,29 +53,38 @@ export default async function DealsPage({ searchParams }: Props) {
               : "Komisi yang ditampilkan adalah komisi terendah dari seluruh campaign brand tersebut."}
           </p>
 
-          <div className="filter-row" style={{ marginTop: "var(--space-6)" }}>
-            <div className="filter-chips" role="group" aria-label="Pilih platform">
-              <Link
-                className="chip"
-                href="/deals"
-                aria-pressed={platform === "tiktok"}
-                role="button"
-              >
-TikTok Shop <span className="chip-count">{platform === "tiktok" ? campaigns.length : other} deal live</span>
-              </Link>
-              <Link
-                className="chip chip--shopee-toggle"
-                href="/deals?platform=shopee"
-                aria-pressed={platform === "shopee"}
-                role="button"
-              >
-Shopee Affiliate <span className="chip-count">{platform === "shopee" ? campaigns.length : other} campaign live</span>
-              </Link>
-            </div>
+          {/*
+            Dua kartu platform, menggantikan empat ubin pintasan yang dulu ada di
+            sini. Isiannya SOLID, bukan gradasi: §3.4 membatasi satu Haluan Hot per
+            viewport dan melarang dua bidang bergradasi bersentuhan.
+
+            Tetap <Link> dengan aria-current, bukan role="button". <a> hanya
+            merespons ENTER, dan mengumumkannya sebagai tombol menjanjikan SPASI
+            yang tidak pernah bekerja.
+          */}
+          <div className="platform-cards" role="group" aria-label="Pilih platform">
+            <Link
+              className="platform-card platform-card--tiktok"
+              href="/deals"
+              aria-current={platform === "tiktok" ? "page" : undefined}
+            >
+              <i className="platform-card-icon"><Icon name="storefront" /></i>
+              <b>TikTok Shop</b>
+              <span>{platform === "tiktok" ? campaigns.length : other} deal live</span>
+            </Link>
+            <Link
+              className="platform-card platform-card--shopee"
+              href="/deals?platform=shopee"
+              aria-current={platform === "shopee" ? "page" : undefined}
+            >
+              <i className="platform-card-icon"><Icon name="package" /></i>
+              <b>Shopee Affiliate</b>
+              <span>{platform === "shopee" ? campaigns.length : other} campaign live</span>
+            </Link>
           </div>
         </section>
 
-        <section className="shell" style={{ paddingBottom: "var(--space-16)" }}>
+        <section className="shell deals-results">
           {failed ? (
             <div className="state-panel">
               <h3>Data campaign belum bisa dimuat</h3>

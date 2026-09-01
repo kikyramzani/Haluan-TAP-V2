@@ -33,7 +33,7 @@ export async function POST(request: Request) {
         return Response.json({ verificationRequired: true, challengeId: challenge.id, continuation, debugCode: debugEmailCode(challenge.code ?? ""), returnTo: safeReturnTo(body.returnTo) }, { status: 202 });
       } catch (error) {
         // The account never became usable, so it must not hold the address it
-        // just claimed — deleting it cascades away its challenge row too.
+        // just claimed. Deleting it cascades away its challenge row too.
         await deletePendingUser(user.id);
         throw error;
       }

@@ -2,7 +2,7 @@
  * The rules behind every badge a catalogue card may carry.
  *
  * They live here, not in the components, because each one is a claim to a
- * creator — "this ends in three days", "this pays ten points over open plan" —
+ * creator. "this ends in three days", "this pays ten points over open plan",
  * and a claim needs a unit test more than it needs a nicer border. Both catalogue
  * surfaces import the same rules, so the homepage and /deals can never disagree
  * about what a campaign is.
@@ -31,8 +31,8 @@ export const ENDING_SOON_DAYS = 14;
 
 /**
  * Classifies a campaign's "31/12/2026" end date. Inclusive: a campaign whose last
- * day is today has not ended. A date the calendar rejects — 31/02 parses
- * arithmetically and means nothing — is reported as unverified rather than being
+ * day is today has not ended. A date the calendar rejects. 31/02 parses
+ * arithmetically and means nothing. Is reported as unverified rather than being
  * silently dropped, because a row whose date cannot be trusted must not look like
  * a row whose date was checked.
  */
@@ -65,7 +65,7 @@ export function expiryLabel(state: ExpiryState) {
 }
 
 /**
- * Whether a card may carry a promotional badge at all — "Sample support" and any
+ * Whether a card may carry a promotional badge at all. "Sample support" and any
  * future benefit label. Expiry outranks promotion: a card must never advertise a
  * benefit and admit "already over" with the same visual weight. A date the sheet
  * cannot vouch for is treated the same way, because an unverified date is not

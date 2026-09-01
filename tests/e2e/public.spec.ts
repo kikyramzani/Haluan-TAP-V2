@@ -3,7 +3,7 @@ import { cleanupCatalogFixtures, resetRateLimitScope, seedCatalogFixtures, type 
 
 /**
  * /deals only renders the first PAGE_SIZE cards by default (see
- * app/components/CampaignCatalog.tsx's `visible` state + "load more") — with
+ * app/components/CampaignCatalog.tsx's `visible` state + "load more"). With
  * ~700 real brands ahead of anything alphabetically starting "E2E ...", a
  * fixture card is never in that initial slice. The search box filters the
  * underlying array directly, independent of that cap, so every test that
@@ -16,13 +16,13 @@ async function searchFor(page: Page, query: string) {
 /**
  * Rewritten for Phase 9 of the rebuild plan (see the plan's progress log):
  * the old version of this file depended on a curated CSV fixture set served
- * by a mock server. That mock server is gone — this now seeds a small,
+ * by a mock server. That mock server is gone. This now seeds a small,
  * deliberate set of real Postgres rows instead (see helpers/db.ts), covering
  * the same edge cases (multi-tier lowest-link selection, a null-commission
- * "—" display, an expired campaign, a Shopee/KETENTUAN_PLATFORM brand, a
+ * "-" display, an expired campaign, a Shopee/KETENTUAN_PLATFORM brand, a
  * "new SKU" flag), and cleans them up afterward. Assertions that only need
  * "the real catalog has something in it" read the real 700+ live brands
- * directly instead — no fixture needed for those.
+ * directly instead. No fixture needed for those.
  */
 
 let fixtures: CatalogFixtures;
@@ -46,8 +46,16 @@ test("katalog dirender di server dan tidak menarik ulang data dari klien", async
   expect(catalogRequests).toHaveLength(0);
 
   // Switching platform is a full navigation (searchParams read server-side),
-  // not a client fetch — the same guarantee the old test held.
-  await page.getByRole("button", { name: /Shopee Affiliate/ }).click();
+  // not a client fetch. The same guarantee the old test held.
+  //
+  // Perannya "link", bukan "button": chip ini memang <a href>, dan role="button"
+  // + aria-pressed yang dulu dipasang membuat pembaca layar menjanjikan SPASI
+  // bisa mengaktifkannya padahal <a> hanya merespons ENTER. Penanda aktifnya
+  // sekarang aria-current="page".
+  // Diarahkan ke kartunya, bukan sekadar nama: footer juga punya tautan
+  // "Shopee Affiliate", dan role="button" yang dulu membedakan keduanya
+  // sudah dilepas. Chip pil-nya kini kartu platform.
+  await page.locator(".platform-card--shopee").click();
   await page.waitForLoadState("networkidle");
   await expect(page.locator(".deal-card").first()).toBeVisible();
   expect(catalogRequests).toHaveLength(0);
@@ -82,11 +90,11 @@ test("katalog publik mobile-first, bisa dicari, dan header keamanannya utuh", as
     expect(card.commission).toBeGreaterThan(card.brand);
     expect(card.ctaHeight).toBeGreaterThanOrEqual(40);
     await expect(page.locator(".mobile-nav")).toBeVisible();
-    // Was dead CSS before MobileNav.tsx existed — the links never actually
+    // Was dead CSS before MobileNav.tsx existed. The links never actually
     // set aria-current, so the "active" tab never highlighted.
     await expect(page.locator('.mobile-nav a[href="/deals"]')).toHaveAttribute("aria-current", "page");
     // Pengunjung yang belum masuk dapat empat tab, dan tidak satu pun berujung
-    // ke dinding login — /dashboard memang tidak ditawarkan sama sekali.
+    // ke dinding login. /dashboard memang tidak ditawarkan sama sekali.
     await expect(page.locator(".mobile-nav a")).toHaveCount(4);
     await expect(page.locator('.mobile-nav a[href="/dashboard"]')).toHaveCount(0);
     await expect(page.locator('.mobile-nav a[href="/daftar?mode=login"]')).not.toHaveAttribute("aria-current", "page");
@@ -118,7 +126,7 @@ test("komisi yang tampil adalah nilai terkecil milik brand", async ({ page, requ
   const multi = page.locator(".deal-card").filter({ hasText: fixtures.multiTier.displayName });
   await expect(multi.locator(".deal-commission-value")).toHaveText("9%");
 
-  // Nilai yang belum ada tampil sebagai "—", bukan angka tebakan — copy sudah
+  // Nilai yang belum ada tampil sebagai "-", bukan angka tebakan. Copy sudah
   // diperbarui dari "belum terbaca dari sheet" karena datanya bukan lagi dari sheet.
   await searchFor(page, fixtures.unknownCommission.displayName);
   const unknown = page.locator(".deal-card").filter({ hasText: fixtures.unknownCommission.displayName });
@@ -223,13 +231,13 @@ test("angka GMV internal tidak pernah keluar ke permukaan publik", async ({ requ
 });
 
 test("public catalog stays available under a burst of concurrent requests", async ({ request }) => {
-  // No fault-injection harness anymore (Phase 9 dropped the mock server) —
+  // No fault-injection harness anymore (Phase 9 dropped the mock server) -
   // /api/campaigns wraps its own rate-limit check in a try/catch specifically
   // so a datastore hiccup there fails open, not closed. This proves the
   // externally-observable half of that: a burst never 500s, whether it's
-  // allowed (200) or actually rate-limited (429) — never anything else.
+  // allowed (200) or actually rate-limited (429). Never anything else.
   // Small on purpose: /api/campaigns' rate-limit bucket (120/5min, scoped by
-  // IP) is shared with every other test in this file — a large burst here
+  // IP) is shared with every other test in this file. A large burst here
   // would starve later tests' own /api/campaigns calls of headroom.
   const responses = await Promise.all(Array.from({ length: 5 }, () => request.get("/api/campaigns")));
   const statuses = responses.map((response) => response.status());
@@ -289,7 +297,7 @@ test("beranda memuat sampai 12 kartu per platform, bukan 6", async ({ page }) =>
   expect(tiktokCount).toBeLessThanOrEqual(12);
 
   // /api/campaigns' rate limit (120/5min, IP-scoped) is shared with every
-  // other test in this file — if it's tripped by the time this runs, 12 is
+  // other test in this file. If it's tripped by the time this runs, 12 is
   // already a fine answer on its own (there are ~700 real brands, always
   // over the cap) and the exact-count cross-check is just skipped.
   const catalogResponse = await page.request.get("/api/campaigns");
@@ -306,10 +314,10 @@ test("judul katalog dan ajakan masuk memakai kalimat yang diminta", async ({ pag
 });
 
 test("baris SKU baru dirender ketika ada brand yang ditandai", async ({ page }) => {
-  // fixtures.newSku sets Campaign.newSku=true directly (Phase 9 seed — see
+  // fixtures.newSku sets Campaign.newSku=true directly (Phase 9 seed. See
   // helpers/db.ts) instead of driving the retired /api/admin/catalog toggle.
   // NewSkuHighlight's own cards (.new-sku-card) carry no .badge-new-sku class
-  // — that class only exists on the main /deals BrandCard grid.
+  //. That class only exists on the main /deals BrandCard grid.
   await page.goto("/");
   await expect(page.locator("#new-sku")).toBeVisible();
   await expect(page.locator(".new-sku-card").filter({ hasText: fixtures.newSku.displayName })).toBeVisible();

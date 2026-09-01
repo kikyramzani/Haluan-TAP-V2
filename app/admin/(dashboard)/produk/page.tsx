@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../../lib/db";
 import { campaignCommissionLabel } from "../../../../lib/commission-display";
+import Icon from "../../../components/Icon";
 
 type Props = { searchParams: Promise<{ q?: string; page?: string }> };
 
@@ -51,8 +52,8 @@ export default async function AdminProdukPage({ searchParams }: Props) {
 
       <form className="admin-filterbar single" role="search">
         <label>
-          ⌕
-          <input type="search" name="q" defaultValue={q} placeholder="Cari brand atau label tier…" />
+          <Icon name="magnifying-glass" />
+          <input aria-label="Cari brand atau label tier" type="search" name="q" defaultValue={q} placeholder="Cari brand atau label tier…" />
         </label>
         <button type="submit">Cari</button>
       </form>
@@ -78,7 +79,7 @@ export default async function AdminProdukPage({ searchParams }: Props) {
                 <td>{tier.label || "—"}</td>
                 <td>{campaignCommissionLabel({ commissionType: tier.campaign.commissionType, commission: tier.commission === null ? null : Number(tier.commission) })}</td>
                 <td className="table-actions">
-                  <Link href={`/admin/campaign/${tier.campaignId}`}>Kelola →</Link>
+                  <Link href={`/admin/campaign/${tier.campaignId}`}>Kelola <Icon name="arrow-right" /></Link>
                 </td>
               </tr>
             ))}
@@ -95,13 +96,13 @@ export default async function AdminProdukPage({ searchParams }: Props) {
 
       <div className="admin-pagination">
         <Link aria-disabled={page <= 1} href={`/admin/produk?q=${encodeURIComponent(q)}&page=${page - 1}`}>
-          ← Sebelumnya
+          <Icon name="arrow-left" /> Sebelumnya
         </Link>
         <span>
           Halaman {page} dari {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} tier
         </span>
         <Link aria-disabled={page >= Math.ceil(total / PAGE_SIZE)} href={`/admin/produk?q=${encodeURIComponent(q)}&page=${page + 1}`}>
-          Berikutnya →
+          Berikutnya <Icon name="arrow-right" />
         </Link>
       </div>
     </>

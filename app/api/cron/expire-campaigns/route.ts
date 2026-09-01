@@ -9,7 +9,7 @@ const ENDING_SOON_WINDOW_DAYS = 3;
  * Two independent sweeps sharing one nightly slot: (1) flip ACTIVE campaigns
  * past their validUntil to ENDED, so the public catalog stops offering an
  * expired deal; (2) notify creators about campaigns ending within the next
- * few days, once each — Campaign.endingSoonNotifiedAt is the dedup guard so a
+ * few days, once each. Campaign.endingSoonNotifiedAt is the dedup guard so a
  * campaign already in its ending-soon window doesn't renotify every night.
  */
 export async function GET(request: Request) {

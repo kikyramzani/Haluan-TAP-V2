@@ -9,7 +9,7 @@ import { hashIp } from "../../../lib/hash-ip";
  * Pengalih ke etalase brand.
  *
  * Tidak ada lagi parameter `variant`. Satu brand hanya punya satu link yang
- * ditawarkan — tier dengan komisi terkecil — dan link itu diselesaikan di sini,
+ * ditawarkan. Tier dengan komisi terkecil - dan link itu diselesaikan di sini,
  * bukan dititipkan lewat URL. Ini juga memperbaiki link lama yang sudah beredar
  * dengan `?variant=` di dalamnya: sebelumnya nilai di luar jangkauan dijepit ke
  * link terakhir, sehingga creator bisa mendarat di tier yang tidak pernah
@@ -21,7 +21,7 @@ export async function GET(request: Request, context: { params: Promise<{ campaig
   const ip = clientIp(request);
 
   // Link etalase memang publik dan tetap berguna saat penghitung rate limit
-  // bermasalah, jadi jalur ini fail-open — sama seperti /api/campaigns.
+  // bermasalah, jadi jalur ini fail-open. Sama seperti /api/campaigns.
   try {
     const rate = await checkRateLimit("go-redirect", hashIp(ip), 60, 60);
     if (!rate.allowed) return Response.json({ error: "Terlalu banyak permintaan." }, { status: 429, headers: { "retry-after": String(rate.retryAfterSeconds) } });

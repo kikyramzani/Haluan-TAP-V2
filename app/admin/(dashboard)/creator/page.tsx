@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../../lib/db";
 import CreatorTable from "./CreatorTable";
+import Icon from "../../../components/Icon";
 
 type Props = { searchParams: Promise<{ q?: string; status?: string; page?: string }> };
 
@@ -71,8 +72,8 @@ export default async function AdminCreatorPage({ searchParams }: Props) {
 
       <form className="admin-filterbar" role="search">
         <label>
-          ⌕
-          <input type="search" name="q" defaultValue={q} placeholder="Cari nama, email, telepon, username…" />
+          <Icon name="magnifying-glass" />
+          <input aria-label="Cari nama, email, telepon, username" type="search" name="q" defaultValue={q} placeholder="Cari nama, email, telepon, username…" />
         </label>
         <select name="status" defaultValue={status}>
           <option value="all">Semua status</option>
@@ -88,13 +89,13 @@ export default async function AdminCreatorPage({ searchParams }: Props) {
 
       <div className="admin-pagination">
         <Link aria-disabled={page <= 1} href={`/admin/creator?q=${encodeURIComponent(q)}&status=${status}&page=${page - 1}`}>
-          ← Sebelumnya
+          <Icon name="arrow-left" /> Sebelumnya
         </Link>
         <span>
           Halaman {page} dari {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} kreator
         </span>
         <Link aria-disabled={page >= Math.ceil(total / PAGE_SIZE)} href={`/admin/creator?q=${encodeURIComponent(q)}&status=${status}&page=${page + 1}`}>
-          Berikutnya →
+          Berikutnya <Icon name="arrow-right" />
         </Link>
       </div>
     </>

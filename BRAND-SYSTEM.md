@@ -214,6 +214,7 @@ Bentuknya dipertahankan dari yang sudah ada di `tokens.css`, hanya hue-nya digan
 - Gradasi tidak pernah berada di bawah teks ≤14px. Untuk teks kecil, pakai isian solid.
 - Tidak ada dua bidang bergradasi yang bersentuhan. Selalu ada permukaan solid di antaranya.
 - Maksimal satu Haluan Hot per viewport. Kalau ada dua, salah satunya bukan yang utama dan harus turun jadi solid.
+- **Logo TIDAK dihitung.** Gradasi pada kata "TAP" di Logo Haluan TAP berada di luar tiga aturan di atas: ia tidak menghabiskan jatah satu-per-viewport, boleh bersentuhan dengan bidang bergradasi lain, dan boleh berada pada ukuran teks kecil. Alasannya bukan kelonggaran, melainkan perbedaan peran. Aturan-aturan itu ada untuk mencegah gradasi SALING BERSAING memperebutkan perhatian di antara kontrol. Logo tidak ikut lomba itu: ia identitas yang justru harus tampil sama persis di setiap halaman, dan orang berhenti "melihat"-nya setelah kunjungan kedua. Yang tetap mengikat logo: gradasinya dua perhentian dalam rona bertetangga, dan tidak pernah diletakkan di atas bidang bergradasi lain.
 - Gradasi tidak dianimasikan. Sapuan yang bergerak menarik perhatian ke arah yang tidak membawa informasi.
 
 ---
@@ -453,14 +454,18 @@ TAP punya logonya sendiri, bukan wordmark korporat induk yang ditempeli badge. S
 
 **Wordmark.** Satu baris, "Haluan TAP", Poppins 700 dijadikan outline. Outline, bukan teks hidup: sebuah logo tidak boleh berubah bentuk kalau webfont gagal dimuat. Huruf **A** pada TAP digambar ulang, dan hanya huruf itu: palangnya diganti batang berujung bulat yang menembus kedua kaki. Batang itu bentuk yang sama dengan yang ada di marka aplikasinya, jadi logo di header dan ikon di layar utama benar-benar satu huruf.
 
-- **Dua warna, dua sumber.** "Haluan" memakai `currentColor` sehingga mengikuti tinta halaman. "TAP" memakai `--brand-wordmark`, pasangan magenta yang sadar tema: `#c90063` di terang (5,59 di atas paper) dan `#ff209d` di gelap (5,45 di atas `#0e0e13`), keduanya dari tabel §2.5. `--cta` tidak bisa dipakai di sini: sebagai teks di atas ink ia hanya sekitar 3,6.
+- **Dua perlakuan, dua sumber.** "Haluan" memakai `currentColor` sehingga mengikuti tinta halaman. "TAP" membawa gradasi magenta ke violet yang SAMA dengan marka aplikasinya, lewat `--wordmark-from` dan `--wordmark-to`.
+- **Gradasinya berpasangan per tema**, bukan satu nilai. Kedua ujung `--gradient-hot` gagal AA sebagai teks di atas paper: kontras bersifat simetris, jadi `#fb007f` yang hanya 3,78 di bawah teks putih juga hanya 3,78 sebagai teks di atas putih, dan `#d226c7` hanya 4,23. Pasangan terang `#c90063` → `#9430c4` (5,59 dan 5,88 di atas paper); pasangan gelap `#ff209d` → `#b46ff5` (5,45 dan 5,99 di atas `#0e0e13`). Jarak rona-nya sekitar 55 derajat, karena versi 25 derajat pertama praktis tidak terlihat pada wordmark setinggi 30px.
+- **Gradasinya diberikan ke satu bidang persegi yang dipotong bentuk huruf**, bukan ke tiap huruf. Tiap glyph punya `transform` sendiri, dan transform membuat ruang koordinat baru, jadi gradasi yang menempel pada glyph ikut tergeser dan setiap huruf menyapu sendiri-sendiri. Terukur: ketiganya keluar dengan warna yang sama persis.
 - **Clear space** minimal setinggi huruf "H" di keempat sisi.
 - **Tinggi minimum** 22px di layar. Di bawah itu batang huruf A menutup rongganya.
 - **Latar yang diizinkan**: paper, ink, permukaan netral. Tidak pernah di atas `--gradient-hot` — magenta di atas magenta.
 - Tidak diregangkan, tidak dimiringkan, tidak diberi bayangan. `scaleX()` dan `font-stretch` dilarang §4.2; karena logonya outline, penskalaan proporsional memang satu-satunya yang mungkin.
-- **Tanpa gradasi.** §3.4 membatasi satu Haluan Hot per viewport, dan header muncul di setiap halaman.
+- **Gradasi logo tidak dihitung dalam jatah §3.4.** Pengecualian itu ditulis di sana beserta alasannya. Yang tetap berlaku: dua perhentian saja, rona bertetangga, dan logo tidak pernah diletakkan di atas bidang bergradasi lain.
 
-**Marka aplikasi.** Huruf A yang sama, diperbesar, dengan sudut dibulatkan dan dua bidang bertumpuk: chevron bergradasi `#fb007f` → `#d226c7` (kedua ujung `--gradient-hot`), lalu batang `#ff209d` semitransparan yang memunculkan nada ketiga di persilangannya. Kosakata ini mengikuti set ikon Google Workspace.
+**Marka aplikasi.** Huruf A yang sama, diperbesar, dengan sudut dibulatkan dan dua bidang bertumpuk: chevron bergradasi `#fb007f` → `#d226c7` (kedua ujung `--gradient-hot`), lalu batang `#ff5cb8` semitransparan yang memunculkan nada ketiga di persilangannya. Kosakata ini mengikuti set ikon Google Workspace.
+
+Batangnya pink pucat, bukan magenta terang. Versi pertama memakai `#ff209d`, dan magenta terang di atas chevron yang juga magenta hampir tidak menghasilkan beda nada sama sekali — justru nada ketiga itu yang jadi inti perangkatnya di set referensi.
 
 Gradasinya boleh di sini, dan itu bukan pengecualian yang dibuat-buat: batas §3.4 berlaku per viewport halaman, sementara bilah tab dan layar utama ponsel bukan viewport halaman. Yang tetap berlaku adalah pelajaran favicon sebelumnya — tiga perhentian lintas rona jadi bubur di 16px. Karena itu **dua** perhentian, dan rona bertetangga.
 
@@ -471,7 +476,7 @@ Gradasinya boleh di sini, dan itu bukan pengecualian yang dibuat-buat: batas §3
 | `apple-icon.png` | paper `#fcfcfc` | iOS tidak menangani transparansi ikon secara konsisten |
 | `icon-badge-96.png` | transparan, satu warna | Android meratakan badge notifikasi jadi siluet |
 
-`public/offline.html` memuat marka ini sebagai SVG **inline**. Halaman itu justru dipakai saat jaringan mati, jadi ia tidak boleh bergantung pada berkas yang harus diambil dari server.
+`public/offline.html` memuat marka ini sebagai SVG **inline**. Halaman itu justru dipakai saat jaringan mati, jadi ia tidak boleh bergantung pada berkas yang harus diambil dari server. `scripts/build-brand.mjs` menulis ulang marka itu setiap kali dijalankan, karena salinan tangan pasti menyimpang dan tidak ada satu pun tes yang memeriksanya.
 
 **`public/haluan-logo.png` tetap disimpan** sebagai wordmark korporat Haluan Digital Network, tetapi tidak lagi dirujuk kode mana pun. Ia identitas induk, bukan aset produk. Aturan lamanya — tidak diregangkan, tidak diganti warnanya — tetap berlaku kalau suatu saat ia dipakai lagi.
 

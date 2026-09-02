@@ -14,7 +14,7 @@
  * lisensinya dicatat di BRAND-LOGO-SOURCES.md.
  */
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -149,6 +149,13 @@ function buildWordmark() {
   return {
     ink: flatten(haluan.parts),
     hot: flatten(tap.parts),
+    // Batas kiri dan kanan kata TAP dalam ruang viewBox. Komponennya memakai
+    // ini sebagai kotak bidang bergradasi yang lalu dipotong bentuk hurufnya.
+    // Gradasi tidak bisa ditempelkan langsung ke tiap huruf: setiap glyph
+    // punya transform sendiri, dan transform membuat ruang koordinat baru,
+    // sehingga sapuannya ikut tergeser dan tiap huruf menyapu sendiri-sendiri.
+    hotFrom: Math.round(tap.parts[0].x + A_BASE_L),
+    hotTo: Math.round(tap.end),
     width: Math.round(tap.end),
     // Batas atas: ascender huruf l (-740). Batas bawah: overshoot lengkung
     // huruf a dan u yang turun 8 unit di bawah baseline. Tanpa ruang itu
@@ -192,9 +199,10 @@ function buildMark({ background = null, mono = null } = {}) {
   const ty = pad + (box + CAP * scale) / 2;
   const place = `transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${scale.toFixed(5)})"`;
 
-  // 30 di ruang 512 setara ~59 di ruang font; dibagi skala supaya lebar
-  // strokenya tetap sama berapa pun ukuran kanvasnya.
-  const soften = `stroke-width="${(30 / scale).toFixed(1)}" stroke-linejoin="round"`;
+  // Pembulatan sudut. Dinaikkan dari 30 ke 46: radius di set Google Workspace
+  // jauh lebih murah hati, dan pada 30 sudut chevron-nya masih terbaca tajam.
+  // Dibagi skala supaya lebarnya tetap sama berapa pun ukuran kanvasnya.
+  const soften = `stroke-width="${(46 / scale).toFixed(1)}" stroke-linejoin="round"`;
 
   if (mono) {
     // Android meratakan badge notifikasi jadi siluet, jadi tidak ada gradasi
@@ -217,10 +225,19 @@ function buildMark({ background = null, mono = null } = {}) {
     background ? `<rect width="${S}" height="${S}" fill="${background}"/>` : "",
     `<g ${place}>`,
     `<path d="${aChevron()}" fill="url(#hot)" stroke="url(#hot)" ${soften}/>`,
-    // Bidang kedua, semitransparan. Ia menutup rongga A sehingga hurufnya
-    // terbaca, dan di tempat ia menyilang kedua kaki muncul nada ketiga yang
-    // lebih terang: perangkat yang sama dipakai Google Drive, Chat, dan Voice.
-    `<path d="${aBar()}" fill="#ff209d" opacity="0.82"/>`,
+    /**
+     * Bidang kedua. Ia mengerjakan dua hal sekaligus: menutup rongga huruf A
+     * supaya hurufnya terbaca, dan memunculkan nada ketiga di tempat ia
+     * menyilang kedua kaki. Itu perangkat yang sama dipakai Google Drive,
+     * Chat, dan Voice.
+     *
+     * #ff5cb8, bukan #ff209d seperti sebelumnya. Magenta terang di atas
+     * chevron yang juga magenta hampir tidak menghasilkan beda nada sama
+     * sekali; pink yang lebih pucat memunculkannya dengan jelas. Tetap cukup
+     * jenuh untuk terlihat di atas latar terang, karena ujungnya yang menonjol
+     * keluar kaki harus tetap ada di sana.
+     */
+    `<path d="${aBar()}" fill="#ff5cb8" opacity="0.9"/>`,
     `</g></svg>`,
   ].join("");
 }
@@ -270,15 +287,41 @@ async function main() {
       `export const WORDMARK_VIEWBOX = "0 ${wordmark.top} ${wordmark.width} ${height}";`,
       `export const WORDMARK_RATIO = ${(wordmark.width / height).toFixed(4)};`,
       "",
+      "/** Kotak kata \"TAP\", tempat bidang gradasinya digambar lalu dipotong. */",
+      `export const WORDMARK_HOT_FROM = ${wordmark.hotFrom};`,
+      `export const WORDMARK_HOT_TO = ${wordmark.hotTo};`,
+      `export const WORDMARK_TOP = ${wordmark.top};`,
+      `export const WORDMARK_HEIGHT = ${height};`,
+      "",
       "/** Kata \"Haluan\": mengikuti tinta halaman lewat currentColor. */",
       `export const WORDMARK_INK: readonly BrandGlyph[] = ${glyphs(wordmark.ink)};`,
       "",
-      "/** Kata \"TAP\": magenta yang sadar tema, lihat --brand-wordmark. */",
+      "/** Kata \"TAP\": dipotong dari bidang bergradasi, lihat --wordmark-from/to. */",
       `export const WORDMARK_HOT: readonly BrandGlyph[] = ${glyphs(wordmark.hot)};`,
       "",
     ].join("\n"),
   );
   console.log("  app/components/brand-logo-paths.ts");
+
+  /**
+   * Marka di halaman offline ditulis ulang dari marka yang sama.
+   *
+   * Sebelumnya ia salinan tangan, dan salinan tangan pasti menyimpang: tidak
+   * ada satu pun tes yang memeriksa apakah keduanya masih sama. Halaman itu
+   * harus memuat marka-nya INLINE karena ia justru dipakai ketika jaringan
+   * mati, jadi ia tidak bisa sekadar menunjuk ke favicon.svg.
+   */
+  const offlinePath = resolve(PUBLIC, "offline.html");
+  const inline = buildMark()
+    .replace("<svg xmlns", '<svg class="mark" aria-hidden="true" focusable="false" xmlns')
+    .replace(' width="512" height="512"', "");
+  const offline = readFileSync(offlinePath, "utf8");
+  const markPattern = / {6}<svg class="mark"[\s\S]*?<\/svg>\n/;
+  // Yang diperiksa POLANYA, bukan apakah isinya berubah. Build yang idempoten
+  // memang menghasilkan berkas yang identik, dan itu bukan kegagalan.
+  if (!markPattern.test(offline)) throw new Error("Marka di public/offline.html tidak ditemukan");
+  writeFileSync(offlinePath, offline.replace(markPattern, `      ${inline}\n`));
+  console.log("  public/offline.html (marka inline)");
 }
 
 main().catch((error) => {

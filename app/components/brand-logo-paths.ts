@@ -7,6 +7,12 @@ export type BrandGlyph = { readonly d: string; readonly x: number };
 export const WORDMARK_VIEWBOX = "0 -740 5878 752";
 export const WORDMARK_RATIO = 7.8165;
 
+/** Kotak kata "TAP", tempat bidang gradasinya digambar lalu dipotong. */
+export const WORDMARK_HOT_FROM = 3948;
+export const WORDMARK_HOT_TO = 5878;
+export const WORDMARK_TOP = -740;
+export const WORDMARK_HEIGHT = 752;
+
 /** Kata "Haluan": mengikuti tinta halaman lewat currentColor. */
 export const WORDMARK_INK: readonly BrandGlyph[] = [
   { d: "M670 -702V0H499V-289H233V0H62V-702H233V-427H499V-702Z", x: 0 },
@@ -17,7 +23,7 @@ export const WORDMARK_INK: readonly BrandGlyph[] = [
   { d: "M617 -326V0H447V-303Q447 -359 418.0 -390.0Q389 -421 340 -421Q291 -421 262.0 -390.0Q233 -359 233 -303V0H62V-558H233V-484Q259 -521 303.0 -542.5Q347 -564 402 -564Q500 -564 558.5 -500.5Q617 -437 617 -326Z", x: 2958 },
 ];
 
-/** Kata "TAP": magenta yang sadar tema, lihat --brand-wordmark. */
+/** Kata "TAP": dipotong dari bidang bergradasi, lihat --wordmark-from/to. */
 export const WORDMARK_HOT: readonly BrandGlyph[] = [
   { d: "M567 -702V-565H381V0H210V-565H24V-702Z", x: 3932 },
   { d: "M16 0L270 -702H468L722 0ZM166 0L572 0L369 -561.0Z", x: 4503 },

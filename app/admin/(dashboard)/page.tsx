@@ -2,7 +2,17 @@ import Link from "next/link";
 import { prisma } from "../../../lib/db";
 import Icon from "../../components/Icon";
 
-export default async function AdminRingkasanPage() {
+type Props = { searchParams: Promise<{ error?: string }> };
+
+export default async function AdminRingkasanPage({ searchParams }: Props) {
+  /**
+   * /admin/pengguna, /admin/audit, dan /admin/import memantulkan admin biasa ke
+   * sini dengan ?error=forbidden — dan sampai sekarang halaman ini tidak pernah
+   * membaca searchParams sama sekali. Admin yang mengetik salah satu URL itu
+   * mendarat di ringkasan tanpa satu pun penjelasan kenapa.
+   */
+  const forbidden = (await searchParams).error === "forbidden";
+
   const [brandCount, campaignCount, sampleWaiting, creatorWaiting] = await Promise.all([
     prisma.brand.count({ where: { hidden: false } }),
     prisma.campaign.count({ where: { status: "ACTIVE" } }),
@@ -18,6 +28,12 @@ export default async function AdminRingkasanPage() {
           <h1>Halo, Admin</h1>
         </div>
       </div>
+
+      {forbidden ? (
+        <p className="admin-notice" role="alert">
+          Halaman itu khusus Super Admin. Minta Super Admin untuk membukanya kalau kamu memang perlu akses.
+        </p>
+      ) : null}
 
       <section className="admin-stats">
         <article>

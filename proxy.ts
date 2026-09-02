@@ -7,6 +7,15 @@ export function proxy(request: NextRequest) {
   const contentSecurityPolicy = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevelopment ? " 'unsafe-eval'" : ""}`,
+    /**
+     * Eksplisit, bukan mengandalkan rantai fallback.
+     *
+     * Tanpa baris ini worker-src jatuh ke child-src, lalu ke script-src — yang
+     * memuat 'strict-dynamic', dan strict-dynamic membuat 'self' DIABAIKAN.
+     * Akibatnya navigator.serviceWorker.register("/sw.js") bisa ditolak di
+     * produksi, sehingga cadangan offline dan push sama-sama mati diam-diam.
+     */
+    "worker-src 'self'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https: data: blob:",
     "font-src 'self'",

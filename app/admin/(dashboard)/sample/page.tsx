@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listSampleRequests } from "../../../../lib/requests";
 import { STATUS_LABELS, STATUS_ORDER, formatDate, type SampleRequestStatus } from "./labels";
 import Icon from "../../../components/Icon";
+import AdminPagination from "../AdminPagination";
 
 type Props = { searchParams: Promise<{ q?: string; status?: string; page?: string }> };
 
@@ -28,7 +29,6 @@ export default async function AdminSamplePage({ searchParams }: Props) {
     status: status === "all" ? undefined : status,
   });
 
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <>
@@ -64,7 +64,7 @@ export default async function AdminSamplePage({ searchParams }: Props) {
               <th>Username</th>
               <th>Status</th>
               <th>Diajukan</th>
-              <th />
+              <th><span className="sr-only">Aksi</span></th>
             </tr>
           </thead>
           <tbody>
@@ -95,17 +95,7 @@ export default async function AdminSamplePage({ searchParams }: Props) {
         </table>
       </div>
 
-      <div className="admin-pagination">
-        <Link aria-disabled={page <= 1} href={`/admin/sample?q=${encodeURIComponent(q)}&status=${status}&page=${page - 1}`}>
-          <Icon name="arrow-left" /> Sebelumnya
-        </Link>
-        <span>
-          Halaman {page} dari {pages} · {total} request
-        </span>
-        <Link aria-disabled={page >= pages} href={`/admin/sample?q=${encodeURIComponent(q)}&status=${status}&page=${page + 1}`}>
-          Berikutnya <Icon name="arrow-right" />
-        </Link>
-      </div>
+      <AdminPagination page={page} pageSize={PAGE_SIZE} total={total} unit="request" basePath="/admin/sample" query={{ q, status }} />
     </>
   );
 }

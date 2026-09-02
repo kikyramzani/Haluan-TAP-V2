@@ -1,8 +1,8 @@
-import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../../lib/db";
 import CreatorTable from "./CreatorTable";
 import Icon from "../../../components/Icon";
+import AdminPagination from "../AdminPagination";
 
 type Props = { searchParams: Promise<{ q?: string; status?: string; page?: string }> };
 
@@ -87,17 +87,7 @@ export default async function AdminCreatorPage({ searchParams }: Props) {
 
       <CreatorTable creators={creators} />
 
-      <div className="admin-pagination">
-        <Link aria-disabled={page <= 1} href={`/admin/creator?q=${encodeURIComponent(q)}&status=${status}&page=${page - 1}`}>
-          <Icon name="arrow-left" /> Sebelumnya
-        </Link>
-        <span>
-          Halaman {page} dari {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} kreator
-        </span>
-        <Link aria-disabled={page >= Math.ceil(total / PAGE_SIZE)} href={`/admin/creator?q=${encodeURIComponent(q)}&status=${status}&page=${page + 1}`}>
-          Berikutnya <Icon name="arrow-right" />
-        </Link>
-      </div>
+      <AdminPagination page={page} pageSize={PAGE_SIZE} total={total} unit="kreator" basePath="/admin/creator" query={{ q, status }} />
     </>
   );
 }

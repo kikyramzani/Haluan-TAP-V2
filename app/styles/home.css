@@ -578,16 +578,26 @@
   color: var(--text-subtle);
 }
 
-/* Ikon yang diunggah sudah punya bidang warnanya sendiri, jadi bingkainya dilepas. */
-.platform-icon.has-icon {
-  background: none;
-  border-color: transparent;
+/**
+ * Tanda platform monokrom (PlatformMark), bukan <img>.
+ *
+ * 22px di dalam ubin 44px: setengah lebarnya, jadi tandanya bernapas di dalam
+ * bidangnya alih-alih menyentuh tepi seperti object-fit: contain dulu.
+ */
+.platform-icon svg {
+  width: 22px;
+  height: 22px;
 }
 
-.platform-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+/* TikTok monokrom mengikuti tinta halaman — hitam di tema terang, putih di
+   gelap — sesuai BRAND-SYSTEM.md §2.4 yang sengaja menjauhi merah muda TikTok
+   karena nyaris sama dengan --cta. */
+.platform-icon--tiktok {
+  color: var(--text);
+}
+
+.platform-icon--shopee {
+  color: var(--platform-shopee);
 }
 
 .platform-body {

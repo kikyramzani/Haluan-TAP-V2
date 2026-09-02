@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { requireAdmin } from "../../../../lib/auth";
 import { listAuditEvents } from "../../../../lib/audit";
 import Icon from "../../../components/Icon";
+import AdminPagination from "../AdminPagination";
 
 type Props = { searchParams: Promise<{ q?: string; page?: string }> };
 
@@ -17,7 +17,6 @@ export default async function AdminAuditPage({ searchParams }: Props) {
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
 
   const { items, total } = await listAuditEvents({ q, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <>
@@ -79,17 +78,7 @@ export default async function AdminAuditPage({ searchParams }: Props) {
         </table>
       </div>
 
-      <div className="admin-pagination">
-        <Link aria-disabled={page <= 1} href={`/admin/audit?q=${encodeURIComponent(q)}&page=${page - 1}`}>
-          <Icon name="arrow-left" /> Sebelumnya
-        </Link>
-        <span>
-          Halaman {page} dari {totalPages} · {total} log
-        </span>
-        <Link aria-disabled={page >= totalPages} href={`/admin/audit?q=${encodeURIComponent(q)}&page=${page + 1}`}>
-          Berikutnya <Icon name="arrow-right" />
-        </Link>
-      </div>
+      <AdminPagination page={page} pageSize={PAGE_SIZE} total={total} unit="log" basePath="/admin/audit" query={{ q }} />
     </>
   );
 }

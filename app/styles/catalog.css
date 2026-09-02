@@ -271,21 +271,6 @@
   color: var(--bg);
 }
 
-/* Toggle platform Shopee terbaca sebagai Shopee saat aktif, bukan warna
-   generik yang sama dengan setiap chip lain. Memakai --platform-shopee-solid
-   (bukan --platform-shopee, yang dipakai garis tepi tipis kartu). Oranye
-   asli brand terlalu terang untuk teks putih di atasnya (~3.6:1, di bawah
-   ambang AA 4.5:1); versi solid ini lebih pekat supaya putih tetap jelas
-   terbaca tanpa kartu ikut berubah warna. */
-.chip--shopee-toggle[aria-pressed="true"],
-.chip--shopee-toggle[aria-current="page"] {
-  background: var(--platform-shopee-solid);
-  border-color: var(--platform-shopee-solid);
-  /* Satu-satunya hex di luar tokens.css sebelumnya. Maknanya "label putih di
-     atas isian padat berwarna", dan itu persis --action-contrast. */
-  color: var(--action-contrast);
-}
-
 /* Angka dibedakan lewat ketebalan huruf, bukan opacity. Menurunkan opacity
    membuat kontrasnya jatuh di bawah ambang WCAG di kedua tema. */
 .chip .tap-icon {
@@ -981,6 +966,47 @@
   border-radius: var(--radius-md);
   font-size: var(--icon-lg);
   background: var(--surface-sunken);
+}
+
+/**
+ * PlatformMark dirender inline sebagai <svg fill="currentColor">, bukan <img>,
+ * justru supaya `color: #fff` pada kartu aktif di bawah benar-benar sampai ke
+ * tandanya. Warna dari CSS tidak bisa menembus batas dokumen sebuah <img>.
+ *
+ * Aturannya sendiri yang tadinya hilang: .platform-icon img di home.css punya
+ * ukuran, .platform-card-icon tidak pernah punya sama sekali.
+ */
+.platform-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Inisial untuk platform yang belum punya tanda resmi monokrom. */
+.platform-card--soon .platform-card-icon {
+  font-family: var(--font-display);
+  font-style: normal;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-display);
+  letter-spacing: 0.04em;
+  color: var(--text-subtle);
+}
+
+/**
+ * Kartu "segera hadir": hadir, jelas belum bisa dibuka, dan bukan tautan.
+ *
+ * Bergaris putus-putus, bukan sekadar diredupkan: opacity rendah menjatuhkan
+ * kontras teksnya di bawah AA, sementara garis putus-putus adalah sinyal bentuk
+ * yang terbaca tanpa bergantung pada warna maupun kontras.
+ */
+.platform-card--soon {
+  border-style: dashed;
+  background: none;
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.platform-card--soon:hover {
+  transform: none;
 }
 
 .platform-card b {

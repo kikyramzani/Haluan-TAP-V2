@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Tidak ada koneksi · TAP by Haluan</title>
+    <!--
+      Gaya inline, tanpa satu pun berkas eksternal.
+
+      Halaman ini justru dipakai ketika jaringan mati, jadi apa pun yang perlu
+      diambil dari server akan gagal. Itu pula alasan berkas ini tinggal di
+      public/ dan bukan menjadi rute Next: rute akan menautkan chunk CSS dan JS
+      yang tidak ikut di-cache service worker, sehingga halaman offline-nya
+      tampil tanpa gaya sama sekali.
+
+      Warnanya dikutip literal dari BRAND-SYSTEM.md §2.1 karena berkas ini
+      tidak bisa membaca token di tokens.css.
+    -->
+    <style>
+      :root {
+        color-scheme: light dark;
+        --paper: #fcfcfc;
+        --ink: #090a0a;
+        --muted: #5c5f66;
+        --line: rgba(9, 10, 10, 0.12);
+        --cta: #d60069;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #090a0a;
+          --ink: #fcfcfc;
+          --muted: #a2a5ab;
+          --line: rgba(252, 252, 252, 0.14);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px calc(24px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom))
+          calc(24px + env(safe-area-inset-left));
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Open Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      main {
+        width: min(420px, 100%);
+        text-align: center;
+      }
+
+      .mark {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto 24px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        font-family: Poppins, system-ui, sans-serif;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-family: Poppins, system-ui, sans-serif;
+        font-size: clamp(24px, 5vw, 30px);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+      }
+
+      p {
+        margin: 0 0 28px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+        text-wrap: pretty;
+      }
+
+      a.retry {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0 28px;
+        border-radius: 999px;
+        background: var(--cta);
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      a.retry:hover {
+        filter: brightness(1.08);
+      }
+
+      a.retry:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true">TAP</div>
+      <h1>Tidak ada koneksi</h1>
+      <p>
+        TAP menampilkan komisi dan status sample yang berubah setiap hari, jadi halaman ini tidak
+        disimpan offline. Sambungkan kembali internet, lalu coba lagi.
+      </p>
+      <!--
+        Tautan biasa, bukan tombol ber-JavaScript.
+
+        CSP situs ini memakai `script-src 'self' 'nonce-…' 'strict-dynamic'`,
+        dan proxy.ts memasangnya juga pada berkas di public/. Skrip inline apa
+        pun di sini akan diblokir tanpa suara, sehingga tombolnya justru tidak
+        melakukan apa-apa persis ketika ia paling dibutuhkan. Navigasi biasa
+        tidak butuh skrip sama sekali: kalau jaringan sudah pulih halaman
+        aslinya terbuka, kalau belum service worker menyajikan halaman ini lagi.
+      -->
+      <a class="retry" href="/deals">Coba lagi</a>
+    </main>
+  </body>
+</html>

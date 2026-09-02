@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
-import { prisma } from "../../../../lib/db";
-import Icon from "../../../components/Icon";
+import { prisma } from "../../../../../lib/db";
+import Icon from "../../../../components/Icon";
+import AdminPagination from "../../AdminPagination";
 
 type Props = { searchParams: Promise<{ q?: string; page?: string }> };
 
@@ -49,7 +50,7 @@ export default async function AdminLinkPage({ searchParams }: Props) {
         </div>
       </div>
 
-      <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
+      <p className="admin-hint">
         Daftar link untuk audit cepat. Edit dilakukan di halaman campaign masing-masing agar tidak ada dua jalur tulis untuk data yang sama.
       </p>
 
@@ -69,7 +70,7 @@ export default async function AdminLinkPage({ searchParams }: Props) {
               <th>Platform</th>
               <th>URL</th>
               <th>Utama</th>
-              <th />
+              <th><span className="sr-only">Aksi</span></th>
             </tr>
           </thead>
           <tbody>
@@ -80,7 +81,7 @@ export default async function AdminLinkPage({ searchParams }: Props) {
                 </td>
                 <td>{platformLabel(link.campaign.platform)}</td>
                 <td>
-                  <a href={link.url} target="_blank" rel="noopener noreferrer" title={link.url}>
+                  <a className="table-url" href={link.url} target="_blank" rel="noopener noreferrer" title={link.url}>
                     {truncateUrl(link.url)}
                   </a>
                 </td>
@@ -101,17 +102,7 @@ export default async function AdminLinkPage({ searchParams }: Props) {
         </table>
       </div>
 
-      <div className="admin-pagination">
-        <Link aria-disabled={page <= 1} href={`/admin/link?q=${encodeURIComponent(q)}&page=${page - 1}`}>
-          <Icon name="arrow-left" /> Sebelumnya
-        </Link>
-        <span>
-          Halaman {page} dari {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} link
-        </span>
-        <Link aria-disabled={page >= Math.ceil(total / PAGE_SIZE)} href={`/admin/link?q=${encodeURIComponent(q)}&page=${page + 1}`}>
-          Berikutnya <Icon name="arrow-right" />
-        </Link>
-      </div>
+      <AdminPagination page={page} pageSize={PAGE_SIZE} total={total} unit="link" basePath="/admin/campaign/link" query={{ q }} />
     </>
   );
 }

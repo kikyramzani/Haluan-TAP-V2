@@ -54,7 +54,7 @@ test("default gate evidence is written under the ignored outputs directory", () 
 
 test("release metrics reject empty suites, skipped tests, and every vulnerability", () => {
   const unit = (overrides = "") => `# pass 37\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n${overrides}`;
-  const baseline = parseGateBaseline({ unitContractPassed: 37, e2ePassed: 116 });
+  const baseline = parseGateBaseline({ unitContractPassed: 37, e2ePassed: 116, e2eSkipped: 0 });
   assert.equal(measureStage("unit+contract", unit(), 0, baseline).valid, true);
   assert.equal(measureStage("unit+contract", unit().replace("# pass 37", "# pass 36"), 0, baseline).valid, false);
   assert.equal(measureStage("unit+contract", `${unit()}# pass 37\n`, 0, baseline).valid, false, "summary TAP ganda harus ambigu");
@@ -65,7 +65,22 @@ test("release metrics reject empty suites, skipped tests, and every vulnerabilit
   assert.equal(measureStage("e2e", "115 passed\n1 skipped", 0, baseline).valid, false);
   assert.equal(measureStage("e2e", "116 passed\n1 flaky", 0, baseline).valid, false);
   assert.equal(measureStage("e2e", "116 passed\n1 did not run", 0, baseline).valid, false);
-  assert.throws(() => parseGateBaseline({ unitContractPassed: 0, e2ePassed: 116 }), /positive integer/);
+  assert.throws(() => parseGateBaseline({ unitContractPassed: 0, e2ePassed: 116, e2eSkipped: 0 }), /positive integer/);
+
+  /**
+   * Skip yang memang disengaja dihitung, bukan dilarang.
+   *
+   * Suite ini punya dua test.skip() struktural yang selalu menyala, jadi
+   * `skipped === 0` adalah syarat yang tidak pernah bisa dipenuhi. Angka yang
+   * diharapkan tetap menjaga sifat aslinya: skip ke-3 tetap membuat gerbangnya
+   * merah.
+   */
+  const withSkips = parseGateBaseline({ unitContractPassed: 37, e2ePassed: 116, e2eSkipped: 2 });
+  assert.equal(measureStage("e2e", "2 skipped\n116 passed (1.5m)", 0, withSkips).valid, true);
+  assert.equal(measureStage("e2e", "3 skipped\n116 passed (1.5m)", 0, withSkips).valid, false, "skip tak terduga harus menggagalkan");
+  assert.equal(measureStage("e2e", "116 passed (1.5m)", 0, withSkips).valid, false, "skip yang hilang juga perubahan");
+  assert.throws(() => parseGateBaseline({ unitContractPassed: 37, e2ePassed: 116 }), /e2eSkipped/);
+  assert.throws(() => parseGateBaseline({ unitContractPassed: 37, e2ePassed: 116, e2eSkipped: -1 }), /e2eSkipped/);
 });
 
 test("release CLI refuses an unsafe artifact and leaves a successful temp repo clean", () => {
@@ -77,7 +92,7 @@ test("release CLI refuses an unsafe artifact and leaves a successful temp repo c
     mkdirSync(bin);
     writeFileSync(join(repo, ".gitignore"), "outputs/\nbin/\nevidence.log\n");
     writeFileSync(join(repo, "tracked.txt"), "fixture\n");
-    writeFileSync(join(repo, "release-gate-baseline.json"), '{"unitContractPassed":1,"e2ePassed":1}\n');
+    writeFileSync(join(repo, "release-gate-baseline.json"), '{"unitContractPassed":1,"e2ePassed":1,"e2eSkipped":0}\n');
     const fakeNpm = join(bin, "npm");
     writeFileSync(fakeNpm, [
       "#!/bin/sh",

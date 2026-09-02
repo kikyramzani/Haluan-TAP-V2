@@ -33,7 +33,7 @@ const CATEGORY_GLYPH = {
 
 /**
  * Dikunci ke nama kategori persis. Admin bisa menambah kategori kapan saja lewat
- * /admin/kategori, jadi yang tidak dikenal jatuh ke ikon tag generik, bukan
+ * /admin/campaign/kategori, jadi yang tidak dikenal jatuh ke ikon tag generik, bukan
  * ikon kosong, bukan error.
  */
 export default function CategoryIcon({ category }: { category: string }) {

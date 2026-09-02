@@ -30,6 +30,7 @@ export default function CreatorTable({ creators }: { creators: CreatorRow[] }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
   const [notice, setNotice] = useState("");
+  const [done, setDone] = useState("");
   const router = useRouter();
 
   const pendingIds = creators.filter((creator) => creator.membership === "PENDING").map((creator) => creator.id);
@@ -43,13 +44,19 @@ export default function CreatorTable({ creators }: { creators: CreatorRow[] }) {
   }
   function runBulkVerify() {
     setNotice("");
+    setDone("");
+    const count = selected.length;
     startTransition(async () => {
       const result = await bulkVerifyCreators(selected);
-      if ("error" in result) setNotice(result.error);
-      else {
-        setSelected([]);
-        router.refresh();
+      if ("error" in result) {
+        setNotice(result.error);
+        return;
       }
+      setSelected([]);
+      // Sebelumnya satu-satunya tanda berhasil adalah kotak centang yang kosong
+      // lagi, pada aksi yang memverifikasi sampai 50 kreator sekaligus.
+      setDone(`${count} kreator diverifikasi.`);
+      router.refresh();
     });
   }
 
@@ -63,6 +70,11 @@ export default function CreatorTable({ creators }: { creators: CreatorRow[] }) {
         {notice ? (
           <span className="form-error" role="alert">
             {notice}
+          </span>
+        ) : null}
+        {done ? (
+          <span className="form-ok" role="status">
+            {done}
           </span>
         ) : null}
       </div>
@@ -86,7 +98,7 @@ export default function CreatorTable({ creators }: { creators: CreatorRow[] }) {
               <th>Akun</th>
               <th>Followers</th>
               <th>Bergabung</th>
-              <th />
+              <th><span className="sr-only">Aksi</span></th>
             </tr>
           </thead>
           <tbody>

@@ -2,6 +2,18 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  /**
+   * Produk, Link, dan Kategori pindah ke dalam /admin/campaign sebagai tab.
+   * Admin yang sudah menandai halaman lamanya tidak boleh mendarat di 404.
+   * Permanen: struktur ini tidak akan dikembalikan.
+   */
+  async redirects() {
+    return [
+      { source: "/admin/produk", destination: "/admin/campaign/produk", permanent: true },
+      { source: "/admin/link", destination: "/admin/campaign/link", permanent: true },
+      { source: "/admin/kategori", destination: "/admin/campaign/kategori", permanent: true },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: [
       { key: "X-Content-Type-Options", value: "nosniff" },

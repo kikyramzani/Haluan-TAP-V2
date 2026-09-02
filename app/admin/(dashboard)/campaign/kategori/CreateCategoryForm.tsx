@@ -12,10 +12,10 @@ export default function CreateCategoryForm() {
   }, [state]);
 
   return (
-    <form action={formAction} ref={formRef} className="two-col">
+    <form action={formAction} ref={formRef} className="two-col inline-edit">
       <label>
         <span>Nama kategori baru</span>
-        <input name="name" placeholder="mis. Kesehatan & Kecantikan" required maxLength={80} />
+        <input name="name" placeholder="mis. Kesehatan & Kecantikan" required maxLength={80} autoCapitalize="words" />
       </label>
       <button className="submit-btn" type="submit" disabled={pending}>
         {pending ? "Menyimpan…" : "Tambah kategori"}
@@ -23,6 +23,11 @@ export default function CreateCategoryForm() {
       {state?.error ? (
         <p className="form-error" role="alert">
           {state.error}
+        </p>
+      ) : null}
+      {state?.success ? (
+        <p className="form-ok" role="status">
+          Kategori baru tersimpan.
         </p>
       ) : null}
     </form>

@@ -1,17 +1,9 @@
 # Ikon platform
 
-`PlatformPanel` di halaman depan mencari berkas berikut dan memakainya bila ada:
+**Folder ini sudah tidak dibaca oleh kode mana pun.**
 
-- `tiktok.png`
-- `shopee.png`
+Dulu `PlatformPanel` memeriksa keberadaan `tiktok.png` / `shopee.png` di sini dengan `existsSync` dan jatuh ke inisial "TT"/"SH" bila berkasnya belum ada. Berkasnya memang tidak pernah masuk, jadi panelnya selalu menampilkan inisial.
 
-Ekstensi yang diterima, sesuai urutan pencarian: `.png`, `.webp`, `.svg`, `.jpg`.
-Ukuran render 44x44, jadi 88x88 atau 132x132 sudah cukup untuk layar retina.
+Tandanya sekarang ada di dalam repo sebagai SVG monokrom inline di `app/components/PlatformMark.tsx`, dengan sumbernya tercatat di `BRAND-LOGO-SOURCES.md`. Inline, bukan berkas, karena kartu platform aktif di `/deals` memaksa `color: #ffffff` pada ikonnya — dan warna dari CSS tidak bisa menembus batas dokumen sebuah `<img>`.
 
-Selama berkasnya belum ada, panel tetap tampil memakai inisial "TT" dan "SH".
-Tidak ada gambar rusak dan tidak ada layout yang bergeser saat berkasnya masuk.
-
-Catatan aset: ikon 3D bergaya bukan press asset resmi TikTok atau Shopee, jadi
-pilihan itu ada di luar aturan sumber resmi di `BRAND-LOGO-SOURCES.md`. Kalau
-ikon semacam itu yang dipakai, catat asalnya di berkas tersebut supaya aturan
-dan kenyataan tetap sejalan.
+Menambahkan berkas ke folder ini tidak akan mengubah apa pun. Untuk menambah atau mengganti tanda platform, sunting `PlatformMark.tsx` dan catat sumbernya di `BRAND-LOGO-SOURCES.md`.

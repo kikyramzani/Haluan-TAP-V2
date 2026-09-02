@@ -22,7 +22,7 @@ export default async function AdminPenggunaPage() {
         </div>
       </div>
 
-      <p className="admin-panel-empty" style={{ textAlign: "left", padding: 0, marginBottom: "var(--space-4)" }}>
+      <p className="admin-hint">
         Peran ADMIN dikelola otomatis dari daftar <code>ADMIN_EMAILS</code> setiap request — mengubahnya di sini tidak
         akan bertahan selama email masih ada di allowlist. Kontrol di bawah hanya untuk mempromosikan atau
         menurunkan status <b>Super Admin</b>, yang murni manual.
@@ -49,7 +49,12 @@ export default async function AdminPenggunaPage() {
                   </td>
                   <td>{user.email}</td>
                   <td>
-                    <span className="admin-status">{user.role === "SUPER_ADMIN" ? "Super Admin" : "Admin"}</span>
+                    {/* Tanpa kelas peran, kedua nilai dirender sebagai pil abu-abu
+                        yang identik — di halaman yang justru tugasnya membedakan
+                        keduanya. */}
+                    <span className={`admin-status${user.role === "SUPER_ADMIN" ? " role-super" : ""}`}>
+                      {user.role === "SUPER_ADMIN" ? "Super Admin" : "Admin"}
+                    </span>
                   </td>
                   <td>
                     {isSelf ? (

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
-import { prisma } from "../../../../lib/db";
-import { campaignCommissionLabel } from "../../../../lib/commission-display";
-import Icon from "../../../components/Icon";
+import { prisma } from "../../../../../lib/db";
+import { campaignCommissionLabel } from "../../../../../lib/commission-display";
+import Icon from "../../../../components/Icon";
+import AdminPagination from "../../AdminPagination";
 
 type Props = { searchParams: Promise<{ q?: string; page?: string }> };
 
@@ -46,7 +47,7 @@ export default async function AdminProdukPage({ searchParams }: Props) {
         </div>
       </div>
 
-      <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
+      <p className="admin-hint">
         Daftar baris tier untuk audit cepat. Edit dilakukan di halaman campaign masing-masing agar tidak ada dua jalur tulis untuk data yang sama.
       </p>
 
@@ -66,7 +67,7 @@ export default async function AdminProdukPage({ searchParams }: Props) {
               <th>Platform</th>
               <th>Tier</th>
               <th>Komisi</th>
-              <th />
+              <th><span className="sr-only">Aksi</span></th>
             </tr>
           </thead>
           <tbody>
@@ -94,17 +95,7 @@ export default async function AdminProdukPage({ searchParams }: Props) {
         </table>
       </div>
 
-      <div className="admin-pagination">
-        <Link aria-disabled={page <= 1} href={`/admin/produk?q=${encodeURIComponent(q)}&page=${page - 1}`}>
-          <Icon name="arrow-left" /> Sebelumnya
-        </Link>
-        <span>
-          Halaman {page} dari {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} tier
-        </span>
-        <Link aria-disabled={page >= Math.ceil(total / PAGE_SIZE)} href={`/admin/produk?q=${encodeURIComponent(q)}&page=${page + 1}`}>
-          Berikutnya <Icon name="arrow-right" />
-        </Link>
-      </div>
+      <AdminPagination page={page} pageSize={PAGE_SIZE} total={total} unit="tier" basePath="/admin/campaign/produk" query={{ q }} />
     </>
   );
 }

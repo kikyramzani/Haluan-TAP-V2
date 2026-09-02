@@ -50,7 +50,7 @@ export default function ImportForm() {
       </form>
 
       {previewOk ? (
-        <div className="admin-panel" style={{ marginTop: "var(--space-4)" }}>
+        <div className="admin-panel import-step">
           <div className="panel-heading">
             <div>
               <span>PRATINJAU</span>
@@ -77,7 +77,7 @@ export default function ImportForm() {
           </div>
 
           {previewState.failedRows.length ? (
-            <div style={{ marginTop: "var(--space-4)" }}>
+            <div className="import-step">
               {previewState.failedRows.map((issue) => (
                 <div className="issue-row" key={issue.row}>
                   <span className="issue-value">Baris {issue.row}</span>
@@ -88,7 +88,7 @@ export default function ImportForm() {
           ) : null}
 
           {!confirmOk ? (
-            <form action={confirmAction} style={{ marginTop: "var(--space-4)" }}>
+            <form action={confirmAction} className="import-step">
               <input type="hidden" name="csv" value={previewState.csv} />
               {confirmState && "error" in confirmState ? (
                 <p className="form-error" role="alert">
@@ -100,7 +100,7 @@ export default function ImportForm() {
               </button>
             </form>
           ) : (
-            <p className="admin-success" style={{ marginTop: "var(--space-4)" }}>
+            <p className="admin-success import-step">
               Impor selesai: {confirmState.summary.written} brand ditulis ({confirmState.summary.newCount} baru,{" "}
               {confirmState.summary.updatedCount} diperbarui).
             </p>

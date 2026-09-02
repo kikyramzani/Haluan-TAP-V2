@@ -34,8 +34,20 @@ export default function LogoUploadField({ defaultValue }: { defaultValue?: strin
   return (
     <label>
       <span>Logo (path/URL, atau unggah file)</span>
-      <input name="logoUrl" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="/brand-logos/nama-brand.webp" />
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} disabled={pending} style={{ marginTop: "var(--space-2)" }} />
+      {/* inputMode/autoCapitalize/autoCorrect: papan ketik ponsel meng-kapital
+          dan mengoreksi otomatis field tanpa tipe, jadi path seperti
+          "/brand-logos/nama-brand.webp" berubah bentuk saat diketik. */}
+      <input
+        name="logoUrl"
+        value={url}
+        onChange={(event) => setUrl(event.target.value)}
+        placeholder="/brand-logos/nama-brand.webp"
+        inputMode="url"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+      />
+      <input className="file-input" ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} disabled={pending} />
       {pending ? <small>Mengunggah…</small> : null}
       {error ? (
         <p className="form-error" role="alert">

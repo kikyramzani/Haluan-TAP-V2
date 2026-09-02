@@ -44,7 +44,7 @@ export default async function EditCampaignPage({ params }: { params: Promise<{ i
         </Link>
       </div>
 
-      <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
+      <p className="admin-hint">
         {campaign.platform === "SHOPEE_AFFILIATE" ? "Shopee" : "TikTok Shop"} · Tipe komisi:{" "}
         {campaign.commissionType === "PERSENTASE" ? "Persentase" : "Ketentuan platform"} · Slug: <code>{campaign.slug}</code>
       </p>

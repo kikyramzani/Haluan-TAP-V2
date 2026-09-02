@@ -6,7 +6,7 @@ import { getCurrentUser } from "../../lib/auth";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import CampaignCatalog from "../components/CampaignCatalog";
-import Icon from "../components/Icon";
+import PlatformMark from "../components/PlatformMark";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,10 @@ export default async function DealsPage({ searchParams }: Props) {
   const platform = params.platform?.toLowerCase() === "shopee" ? "shopee" : "tiktok";
 
   let campaigns: Campaign[] = [];
-  let other = 0;
+  // Peta per platform, bukan satu skalar `other`. Yang lama menuliskan
+  // "hanya ada dua platform" ke dalam alur datanya sendiri, jadi kartu ketiga
+  // apa pun akan memaksa membongkarnya lagi.
+  const counts: Record<string, number> = { tiktok: 0, shopee: 0 };
   let failed = false;
   try {
     const [current, alternate] = await Promise.all([
@@ -32,7 +35,8 @@ export default async function DealsPage({ searchParams }: Props) {
       getCampaignCatalog(platform === "shopee" ? "tiktok" : "shopee"),
     ]);
     campaigns = current;
-    other = alternate.length;
+    counts[platform] = current.length;
+    counts[platform === "shopee" ? "tiktok" : "shopee"] = alternate.length;
   } catch {
     failed = true;
   }
@@ -68,19 +72,36 @@ export default async function DealsPage({ searchParams }: Props) {
               href="/deals"
               aria-current={platform === "tiktok" ? "page" : undefined}
             >
-              <i className="platform-card-icon"><Icon name="storefront" /></i>
+              <i className="platform-card-icon"><PlatformMark name="tiktok" /></i>
               <b>TikTok Shop</b>
-              <span>{platform === "tiktok" ? campaigns.length : other} deal live</span>
+              <span>{counts.tiktok} deal live</span>
             </Link>
             <Link
               className="platform-card platform-card--shopee"
               href="/deals?platform=shopee"
               aria-current={platform === "shopee" ? "page" : undefined}
             >
-              <i className="platform-card-icon"><Icon name="package" /></i>
+              <i className="platform-card-icon"><PlatformMark name="shopee" /></i>
               <b>Shopee Affiliate</b>
-              <span>{platform === "shopee" ? campaigns.length : other} campaign live</span>
+              <span>{counts.shopee} campaign live</span>
             </Link>
+            {/*
+              Lazada belum punya campaign satu pun, jadi kartunya BUKAN tautan:
+              tidak ada tujuan yang berguna untuk dibuka. <span>, bukan <a>
+              aria-disabled — tautan mati tetap bisa difokus dan diklik, dan
+              mengumumkannya nonaktif sambil membiarkannya bekerja adalah bug
+              yang sama seperti pada pagination admin.
+
+              Inisial, bukan tanda resmi: belum ada mark Lazada monokrom
+              berbentuk persegi dari sumber yang diizinkan
+              BRAND-LOGO-SOURCES.md, dan wordmark lebar tidak muat di slot 44px
+              bersama dua glyph persegi.
+            */}
+            <span className="platform-card platform-card--soon">
+              <i className="platform-card-icon" aria-hidden="true">LZ</i>
+              <b>Lazada</b>
+              <span>Segera hadir</span>
+            </span>
           </div>
         </section>
 

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { bulkUpdateBrands } from "./actions";
+import ConfirmButton from "../ConfirmButton";
 import Icon from "../../../components/Icon";
 
 export type BrandRow = {
@@ -19,6 +20,7 @@ export default function BrandTable({ brands }: { brands: BrandRow[] }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
   const [notice, setNotice] = useState("");
+  const [done, setDone] = useState("");
   const router = useRouter();
 
   const allSelected = brands.length > 0 && selected.length === brands.length;
@@ -29,15 +31,28 @@ export default function BrandTable({ brands }: { brands: BrandRow[] }) {
   function toggleOne(id: string, checked: boolean) {
     setSelected((current) => (checked ? [...current, id] : current.filter((item) => item !== id)));
   }
+  const DONE_LABEL: Record<string, string> = {
+    activate: "diaktifkan",
+    feature: "dijadikan unggulan",
+    unfeature: "dicabut dari unggulan",
+    archive: "diarsipkan",
+  };
+
   function run(action: "activate" | "feature" | "unfeature" | "archive") {
     setNotice("");
+    setDone("");
+    const count = selected.length;
     startTransition(async () => {
       const result = await bulkUpdateBrands(selected, action);
-      if (result.error) setNotice(result.error);
-      else {
-        setSelected([]);
-        router.refresh();
+      if (result.error) {
+        setNotice(result.error);
+        return;
       }
+      setSelected([]);
+      // Sebelumnya satu-satunya tanda bahwa aksi massal berhasil adalah
+      // kotak centangnya kosong lagi — pada aksi yang menyentuh sampai 50 baris.
+      setDone(`${count} brand ${DONE_LABEL[action]}.`);
+      router.refresh();
     });
   }
 
@@ -54,12 +69,26 @@ export default function BrandTable({ brands }: { brands: BrandRow[] }) {
         <button type="button" disabled={!selected.length || pending} onClick={() => run("unfeature")}>
           Batalkan unggulan
         </button>
-        <button type="button" className="danger" disabled={!selected.length || pending} onClick={() => run("archive")}>
+        {/* Pengarsipan massal menyentuh sampai 50 baris sekaligus dan hanya bisa
+            dibalik satu per satu, jadi ia butuh langkah kedua. */}
+        <ConfirmButton
+          className="danger"
+          confirmLabel={`Ya, arsipkan ${selected.length}`}
+          pendingLabel="Mengarsipkan…"
+          pending={pending}
+          disabled={!selected.length}
+          onConfirm={() => run("archive")}
+        >
           Arsipkan
-        </button>
+        </ConfirmButton>
         {notice ? (
           <span className="form-error" role="alert">
             {notice}
+          </span>
+        ) : null}
+        {done ? (
+          <span className="form-ok" role="status">
+            {done}
           </span>
         ) : null}
       </div>
@@ -75,7 +104,7 @@ export default function BrandTable({ brands }: { brands: BrandRow[] }) {
               <th>Kategori</th>
               <th>Campaign</th>
               <th>Status</th>
-              <th />
+              <th><span className="sr-only">Aksi</span></th>
             </tr>
           </thead>
           <tbody>

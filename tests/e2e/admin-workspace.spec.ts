@@ -73,12 +73,21 @@ const MAIN_ROUTES: Array<[string, string, string]> = [
   ["/admin", "Ringkasan", "Halo, Admin"],
   ["/admin/brand", "Brand", "Kelola brand"],
   ["/admin/campaign", "Campaign", "Kelola campaign"],
-  ["/admin/produk", "Produk", "Daftar tier campaign"],
-  ["/admin/link", "Link", "Daftar link campaign"],
-  ["/admin/kategori", "Kategori", "Kelola kategori brand"],
   ["/admin/creator", "Creator", "Database kreator"],
   ["/admin/sample", "Sample", "Antrean request sample"],
   ["/admin/analitik", "Analitik", "Performa 30 hari terakhir"],
+];
+
+/**
+ * [href, label tab, teks <h1>] untuk ketiga permukaan yang pindah dari sidebar
+ * ke dalam tab /admin/campaign. Ketiganya hanya bisa ditulis dari halaman
+ * campaign, jadi berdiri sendiri di sidebar hanya memantulkan admin kembali.
+ */
+const CAMPAIGN_TABS: Array<[string, string, string]> = [
+  ["/admin/campaign", "Campaign", "Kelola campaign"],
+  ["/admin/campaign/produk", "Produk", "Daftar tier campaign"],
+  ["/admin/campaign/link", "Link", "Daftar link campaign"],
+  ["/admin/campaign/kategori", "Kategori", "Kelola kategori brand"],
 ];
 
 // [href, expected <h1> text once reachable] for AdminNav's SUPER_ADMIN_ITEMS.
@@ -88,7 +97,7 @@ const SUPER_ADMIN_ROUTES: Array<[string, string]> = [
   ["/admin/import", "Import data brand"],
 ];
 
-test("admin biasa melihat sidebar lengkap dan kesembilan rute utama merender judul aslinya", async ({ page }) => {
+test("admin biasa melihat sidebar lengkap dan keenam rute utama merender judul aslinya", async ({ page }) => {
   await loginAsSharedAdmin(page);
   await page.goto("/admin");
 
@@ -112,6 +121,45 @@ test("admin biasa melihat sidebar lengkap dan kesembilan rute utama merender jud
     await link.click();
     await expect(page).toHaveURL(new RegExp(`${href.replace(/\//g, "\\/")}$`));
     await expect(page.getByRole("heading", { level: 1 }), `h1 di ${href}`).toHaveText(heading);
+  }
+});
+
+test("Produk, Link, dan Kategori dijangkau lewat tab di dalam /admin/campaign", async ({ page }) => {
+  await loginAsSharedAdmin(page);
+  await page.goto("/admin/campaign");
+
+  const sidebar = page.locator("aside.admin-sidebar");
+  // Ketiganya tidak boleh muncul lagi sebagai tujuan sidebar tersendiri.
+  for (const href of ["/admin/produk", "/admin/link", "/admin/kategori"]) {
+    await expect(sidebar.locator(`a.nav-link[href="${href}"]`), `sidebar ${href}`).toHaveCount(0);
+  }
+
+  const tabs = page.locator(".admin-tabs");
+  await expect(tabs).toBeVisible();
+
+  for (const [href, label, heading] of CAMPAIGN_TABS) {
+    const tab = tabs.locator(`a[href="${href}"]`);
+    await expect(tab, `tab ${label}`).toBeVisible();
+    await tab.click();
+    await expect(page).toHaveURL(new RegExp(`${href.replace(/\//g, "\\/")}$`));
+    await expect(page.getByRole("heading", { level: 1 }), `h1 di ${href}`).toHaveText(heading);
+    // Tepat satu tab yang aktif: /admin/campaign adalah prefix ketiga lainnya,
+    // jadi pencocokan prefix polos akan menyalakan dua tab sekaligus.
+    await expect(tabs.locator('a[aria-selected="true"]')).toHaveCount(1);
+    await expect(tabs.locator('a[aria-selected="true"]')).toHaveText(label);
+  }
+});
+
+test("URL admin lama untuk produk, link, dan kategori dialihkan ke tab campaign", async ({ page }) => {
+  await loginAsSharedAdmin(page);
+  const moved: Array<[string, string]> = [
+    ["/admin/produk", "/admin/campaign/produk"],
+    ["/admin/link", "/admin/campaign/link"],
+    ["/admin/kategori", "/admin/campaign/kategori"],
+  ];
+  for (const [oldHref, newHref] of moved) {
+    await page.goto(oldHref);
+    await expect(page, `redirect ${oldHref}`).toHaveURL(new RegExp(`${newHref.replace(/\//g, "\\/")}$`));
   }
 });
 

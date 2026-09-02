@@ -210,3 +210,18 @@ Dua nama tambahan memakai alias ke file yang sama, bukan salinan kedua: Makeover
 Dua aset dari halaman yang sama ditolak setelah diperiksa satu per satu, bukan hanya dihitung: `the-pods.webp` ternyata logo PODS, perusahaan kontainer pindahan asal Amerika, bukan brand "The Pods" di katalog — halaman program sendiri memakai gambar hasil pencarian (nama file `OIP_…`); dan `aerostreet.webp` adalah kolase foto produk parfum dengan logo kecil di tengah, yang pada 46 px hanya menjadi bercak. Keduanya tetap memakai inisial.
 
 Enam nama katalog lain dari halaman yang sama tidak menambah file karena asetnya sudah ada dengan ejaan berbeda; keduanya disatukan lewat alias di `app/brand-assets.ts`: Cimol Bojot AA, Elvicto (Perfume dan Skincare), goojodoq store, LeDingDing, Purito Indonesia, Samono Indonesia.
+
+## Tanda platform (2 September 2026)
+
+Bukan logo brand katalog, melainkan tanda platform tempat campaign-nya berjalan. Dipakai di panel platform beranda dan di kartu pemilih platform `/deals`.
+
+Jalur path-nya di-inline ke `app/components/PlatformMark.tsx`, bukan disimpan sebagai berkas di `public/`. Alasannya teknis dan mengikat: kartu platform yang aktif memaksa `color: #ffffff` pada ikonnya (`catalog.css`), dan warna dari CSS tidak bisa menembus batas dokumen sebuah `<img>`. Hanya SVG inline yang bisa mematuhinya lewat `fill="currentColor"`.
+
+| Tanda | Platform | Sumber |
+|---|---|---|
+| `tiktok` | TikTok Shop | Simple Icons — https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/tiktok.svg (paket https://github.com/simple-icons/simple-icons) |
+| `shopee` | Shopee Affiliate | Simple Icons — https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/shopee.svg (paket https://github.com/simple-icons/simple-icons) |
+
+Keduanya monokrom, bukan warna asli platform. Ini keputusan sistem desain, bukan keterbatasan aset: BRAND-SYSTEM.md §2.4 sengaja menjauhkan aksen platform TAP dari warna asli TikTok karena merah mudanya nyaris sama dengan `--cta`, sehingga tanda berwarna penuh akan menghidupkan kembali tabrakan itu.
+
+**Lazada belum punya tanda.** Simple Icons tidak memuatnya, dan berkas Wikimedia Commons yang tersedia (`File:Lazada (2019).svg`, 410 × 107 mm) adalah wordmark lebar berwarna — bentuk yang tidak muat di slot ikon 44 px persegi di samping dua glyph persegi, dan melanggar aturan monokrom di atas. Kartunya memakai inisial `LZ` sampai ada mark resmi monokrom berbentuk persegi. Jangan menggantinya dengan logo hasil buatan sendiri.

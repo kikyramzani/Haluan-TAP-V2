@@ -38,7 +38,7 @@ export default async function AdminImportPage() {
 
       <ImportForm />
 
-      <div className="panel-heading" style={{ marginTop: "var(--space-8)" }}>
+      <div className="panel-heading import-section">
         <div>
           <span>RIWAYAT</span>
           <h2>10 impor terakhir</h2>

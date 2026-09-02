@@ -16,10 +16,11 @@ import Icon, { type IconName } from "../../components/Icon";
 const MAIN_ITEMS: Array<[string, IconName, string]> = [
   ["/admin", "squares-four", "Ringkasan"],
   ["/admin/brand", "storefront", "Brand"],
+  // Produk, Link, dan Kategori tidak lagi berdiri sendiri di sini. Ketiganya
+  // hanya bisa diubah dari halaman campaign, jadi tempatnya sebagai tab di
+  // dalam /admin/campaign (lihat CampaignTabs.tsx), bukan sebagai tujuan
+  // sidebar yang selalu memantulkan admin kembali ke campaign yang sama.
   ["/admin/campaign", "megaphone", "Campaign"],
-  ["/admin/produk", "package", "Produk"],
-  ["/admin/link", "link-simple", "Link"],
-  ["/admin/kategori", "tag", "Kategori"],
   ["/admin/creator", "user-circle", "Creator"],
   ["/admin/sample", "gift", "Sample"],
   ["/admin/analitik", "chart-line-up", "Analitik"],

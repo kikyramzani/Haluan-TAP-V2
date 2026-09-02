@@ -23,7 +23,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <span>HALUAN AFFILIATE OPERATIONS</span>
           </div>
           <div className="admin-profile">
-            <Link href="/dashboard"><Icon name="arrow-left" /> Dashboard creator</Link>
+            {/* aria-label eksplisit: di bawah 900px labelnya disembunyikan CSS
+                (font-size: 0) supaya headernya muat satu baris, dan tanpa ini
+                tautannya jadi tak bernama bagi pembaca layar. */}
+            <Link href="/dashboard" aria-label="Kembali ke dashboard creator">
+              <Icon name="arrow-left" /> Dashboard creator
+            </Link>
             <span>
               <b>{admin.name}</b>
               <small>{admin.role === "super_admin" ? "Super Admin" : "Administrator"} terverifikasi</small>

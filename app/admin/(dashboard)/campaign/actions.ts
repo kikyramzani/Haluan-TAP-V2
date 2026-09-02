@@ -13,8 +13,8 @@ import { recomputeBrandPlatformStat } from "./stats";
 function revalidateCampaignSurfaces(id?: string) {
   revalidatePath("/admin/campaign");
   if (id) revalidatePath(`/admin/campaign/${id}`);
-  revalidatePath("/admin/produk");
-  revalidatePath("/admin/link");
+  revalidatePath("/admin/campaign/produk");
+  revalidatePath("/admin/campaign/link");
 }
 
 export async function createCampaign(_prevState: unknown, formData: FormData) {

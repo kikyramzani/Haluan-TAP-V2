@@ -254,6 +254,18 @@
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  /**
+   * Langkah 20px. Dipakai di lima tempat sebelum tokennya pernah ada.
+   *
+   * `var(--space-5)` yang tidak terdefinisi membuat SELURUH deklarasinya
+   * dibuang diam-diam, jadi .admin-note kehilangan padding sisi, daftar di
+   * dalamnya kehilangan indentasi, .push-toggle kehilangan padding atas-bawah,
+   * dan tombol kirim filter admin berakhir tanpa padding sama sekali sehingga
+   * labelnya menempel ke tepi. Salah satu pemanggilnya bahkan sudah menuliskan
+   * fallback `var(--space-5, var(--space-4))`, tanda bahwa celah ini pernah
+   * disadari tapi tidak pernah ditutup.
+   */
+  --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
   --space-12: 48px;

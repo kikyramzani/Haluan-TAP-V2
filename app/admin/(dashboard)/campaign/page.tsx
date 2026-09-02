@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../../lib/db";
 import { commissionRangeLabel, minMaxCommission } from "../../../../lib/commission-display";
 import Icon from "../../../components/Icon";
+import AdminPagination from "../AdminPagination";
 
 type Props = { searchParams: Promise<{ q?: string; platform?: string; status?: string; page?: string }> };
 
@@ -16,8 +17,17 @@ function statusLabel(status: string) {
   return status === "ENDED" ? "Berakhir" : status === "HIDDEN" ? "Disembunyikan" : "Aktif";
 }
 
+/**
+ * Tiga status, tiga kelas.
+ *
+ * Sebelumnya ENDED dan HIDDEN sama-sama memetakan ke status-archived, dan
+ * status-archived sendiri tidak pernah didefinisikan di CSS mana pun, jadi
+ * ketiga nilainya tampil sebagai pil abu-abu yang tidak bisa dibedakan.
+ * "Berakhir" (masa berlakunya habis) dan "Disembunyikan" (keputusan admin)
+ * adalah dua hal berbeda dan perlu terlihat berbeda.
+ */
 function statusClass(status: string) {
-  return status === "ENDED" ? "status-archived" : status === "HIDDEN" ? "status-archived" : "status-active";
+  return status === "ENDED" ? "status-ended" : status === "HIDDEN" ? "status-hidden" : "status-active";
 }
 
 export default async function AdminCampaignPage({ searchParams }: Props) {
@@ -100,7 +110,7 @@ export default async function AdminCampaignPage({ searchParams }: Props) {
               <th>Komisi</th>
               <th>Tier</th>
               <th>Status</th>
-              <th />
+              <th><span className="sr-only">Aksi</span></th>
             </tr>
           </thead>
           <tbody>
@@ -131,23 +141,14 @@ export default async function AdminCampaignPage({ searchParams }: Props) {
         </table>
       </div>
 
-      <div className="admin-pagination">
-        <Link
-          aria-disabled={page <= 1}
-          href={`/admin/campaign?q=${encodeURIComponent(q)}&platform=${params.platform ?? "all"}&status=${params.status ?? "all"}&page=${page - 1}`}
-        >
-          <Icon name="arrow-left" /> Sebelumnya
-        </Link>
-        <span>
-          Halaman {page} dari {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} campaign
-        </span>
-        <Link
-          aria-disabled={page >= Math.ceil(total / PAGE_SIZE)}
-          href={`/admin/campaign?q=${encodeURIComponent(q)}&platform=${params.platform ?? "all"}&status=${params.status ?? "all"}&page=${page + 1}`}
-        >
-          Berikutnya <Icon name="arrow-right" />
-        </Link>
-      </div>
+      <AdminPagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        total={total}
+        unit="campaign"
+        basePath="/admin/campaign"
+        query={{ q, platform: params.platform, status: params.status }}
+      />
     </>
   );
 }

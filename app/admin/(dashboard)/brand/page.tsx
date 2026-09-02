@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "../../../../lib/db";
 import BrandTable from "./BrandTable";
 import Icon from "../../../components/Icon";
+import AdminPagination from "../AdminPagination";
 
 type Props = { searchParams: Promise<{ q?: string; status?: string; page?: string }> };
 
@@ -65,17 +66,7 @@ export default async function AdminBrandPage({ searchParams }: Props) {
 
       <BrandTable brands={brands} />
 
-      <div className="admin-pagination">
-        <Link aria-disabled={page <= 1} href={`/admin/brand?q=${encodeURIComponent(q)}&status=${status}&page=${page - 1}`}>
-          <Icon name="arrow-left" /> Sebelumnya
-        </Link>
-        <span>
-          Halaman {page} dari {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} brand
-        </span>
-        <Link aria-disabled={page >= Math.ceil(total / PAGE_SIZE)} href={`/admin/brand?q=${encodeURIComponent(q)}&status=${status}&page=${page + 1}`}>
-          Berikutnya <Icon name="arrow-right" />
-        </Link>
-      </div>
+      <AdminPagination page={page} pageSize={PAGE_SIZE} total={total} unit="brand" basePath="/admin/brand" query={{ q, status }} />
     </>
   );
 }

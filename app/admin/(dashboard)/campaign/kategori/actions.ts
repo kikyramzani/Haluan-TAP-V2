@@ -1,10 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "../../../../lib/auth";
-import { prisma } from "../../../../lib/db";
-import { recordAudit } from "../../../../lib/audit";
-import { brandSlug } from "../../../../lib/brand-key";
+import { requireAdmin } from "../../../../../lib/auth";
+import { prisma } from "../../../../../lib/db";
+import { recordAudit } from "../../../../../lib/audit";
+import { brandSlug } from "../../../../../lib/brand-key";
 
 export async function createCategory(_prevState: unknown, formData: FormData) {
   const admin = await requireAdmin();
@@ -19,7 +19,7 @@ export async function createCategory(_prevState: unknown, formData: FormData) {
 
   const category = await prisma.category.create({ data: { name, slug } });
   await recordAudit({ actorId: admin.id, action: "category.create", targetId: category.id, after: { name, slug } });
-  revalidatePath("/admin/kategori");
+  revalidatePath("/admin/campaign/kategori");
   return { success: true };
 }
 
@@ -42,7 +42,7 @@ export async function renameCategory(_prevState: unknown, formData: FormData) {
 
   const updated = await prisma.category.update({ where: { id }, data: { name, slug } });
   await recordAudit({ actorId: admin.id, action: "category.rename", targetId: id, before: { name: before.name, slug: before.slug }, after: { name: updated.name, slug: updated.slug } });
-  revalidatePath("/admin/kategori");
+  revalidatePath("/admin/campaign/kategori");
   return { success: true };
 }
 
@@ -59,6 +59,6 @@ export async function deleteCategory(_prevState: unknown, formData: FormData) {
 
   await prisma.category.delete({ where: { id } });
   await recordAudit({ actorId: admin.id, action: "category.delete", targetId: id, before: { name: before.name, slug: before.slug } });
-  revalidatePath("/admin/kategori");
+  revalidatePath("/admin/campaign/kategori");
   return { success: true };
 }

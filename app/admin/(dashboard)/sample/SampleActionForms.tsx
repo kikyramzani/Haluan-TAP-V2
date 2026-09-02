@@ -60,7 +60,7 @@ export default function SampleActionForms({ id, status }: { id: string; status: 
           </label>
           <label>
             <span>Nomor resi</span>
-            <input name="trackingNumber" required maxLength={100} />
+            <input name="trackingNumber" required maxLength={100} inputMode="numeric" autoCapitalize="characters" autoCorrect="off" spellCheck={false} />
           </label>
         </div>
         <ErrorText error={shipState?.error} />

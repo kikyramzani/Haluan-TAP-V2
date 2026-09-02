@@ -73,9 +73,19 @@ export default function CampaignForm({ campaign }: { campaign: Campaign }) {
           {state.error}
         </p>
       ) : null}
-      <button className="submit-btn" type="submit" disabled={pending}>
-        {pending ? "Menyimpan…" : "Simpan campaign"}
-      </button>
+      <div className="form-submit-row">
+        <button className="submit-btn" type="submit" disabled={pending}>
+          {pending ? "Menyimpan…" : "Simpan campaign"}
+        </button>
+        {/* updateCampaignAction mengembalikan { success: true } sejak awal, tapi
+            tidak ada yang pernah merendernya: penyimpanan yang berhasil hanya
+            memuat ulang halaman dengan nilai yang sama persis. */}
+        {state?.success ? (
+          <span className="form-ok" role="status">
+            Perubahan campaign tersimpan.
+          </span>
+        ) : null}
+      </div>
     </form>
   );
 }

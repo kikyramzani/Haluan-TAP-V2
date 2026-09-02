@@ -61,7 +61,22 @@ export function parseGateBaseline(value) {
   for (const [name, count] of Object.entries({ unitContractPassed, e2ePassed })) {
     if (!Number.isSafeInteger(count) || count <= 0) throw new Error(`${name} must be a positive integer in release-gate-baseline.json`);
   }
-  return { unitContractPassed, e2ePassed };
+  /**
+   * e2eSkipped boleh nol, jadi ia diperiksa terpisah dari dua angka di atas.
+   *
+   * Gerbang ini dulu menuntut `skipped === 0` mati-matian. Syarat itu tidak
+   * pernah bisa dipenuhi: dua test.skip() di suite memang selalu menyala
+   * (keyboard.spec.ts melewati WebKit karena perangkat sentuh tidak punya
+   * tombol Tab, mobile-nav.spec.ts melewati proyek di atas 900px karena bar
+   * bawahnya memang tidak dirender di sana). Jadi gerbangnya merah terlepas
+   * dari mutu kodenya. Angka yang diharapkan tetap menangkap skip baru yang
+   * tidak disengaja, tanpa menuntut hal yang mustahil.
+   */
+  const e2eSkipped = value.e2eSkipped;
+  if (!Number.isSafeInteger(e2eSkipped) || e2eSkipped < 0) {
+    throw new Error("e2eSkipped must be a non-negative integer in release-gate-baseline.json");
+  }
+  return { unitContractPassed, e2ePassed, e2eSkipped };
 }
 
 export function defaultArtifactPath(repoRoot, head, now = new Date()) {
@@ -149,8 +164,10 @@ export function measureStage(stage, output, status, baseline) {
     const flaky = optionalCount("flaky");
     const didNotRun = optionalCount("did not run");
     return {
-      label: Number.isFinite(passed) ? `${passed}/${baseline?.e2ePassed ?? "?"} passed · ${skipped} skipped · ${flaky} flaky · ${didNotRun} did not run` : "TIDAK TERBACA/AMBIGU",
-      valid: status === 0 && passed === baseline?.e2ePassed && skipped === 0 && flaky === 0 && didNotRun === 0,
+      label: Number.isFinite(passed)
+        ? `${passed}/${baseline?.e2ePassed ?? "?"} passed · ${skipped}/${baseline?.e2eSkipped ?? "?"} skipped · ${flaky} flaky · ${didNotRun} did not run`
+        : "TIDAK TERBACA/AMBIGU",
+      valid: status === 0 && passed === baseline?.e2ePassed && skipped === baseline?.e2eSkipped && flaky === 0 && didNotRun === 0,
     };
   }
   return { label: "TIDAK TERBACA", valid: false };
@@ -233,7 +250,7 @@ export function main(args = process.argv.slice(2), env = process.env) {
   say(`commit sebelum: ${headBefore}`);
   say(`tree sebelum: ${treeBefore ? `${treeBefore.split("\n").length} perubahan (TIDAK BERSIH)` : "bersih"}`);
   say(`base: ${options.base} · ${baseResolved ? baseCheck.stdout.trim() : "TIDAK DITEMUKAN"}`);
-  say(`baseline: ${baselineResolved ? `unit+contract ${baseline.unitContractPassed} · e2e ${baseline.e2ePassed}` : `GAGAL — ${baselineError}`}`);
+  say(`baseline: ${baselineResolved ? `unit+contract ${baseline.unitContractPassed} · e2e ${baseline.e2ePassed} lulus + ${baseline.e2eSkipped} dilewati` : `GAGAL — ${baselineError}`}`);
   say(`whitespace ${options.base}..HEAD: ${whitespaceClean ? "bersih" : "GAGAL"}`);
   say(`port: E2E ${env.E2E_PORT ?? "3101"} · legacy ${env.E2E_LEGACY_PORT ?? "3104"} · mock ${env.MOCK_REDIS_PORT ?? "6381"}`);
   say(`runs wajib: ${options.runs}`);

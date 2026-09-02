@@ -1,4 +1,4 @@
-import { prisma } from "../../../../lib/db";
+import { prisma } from "../../../../../lib/db";
 import CreateCategoryForm from "./CreateCategoryForm";
 import CategoryRow from "./CategoryRow";
 
@@ -17,6 +17,12 @@ export default async function AdminKategoriPage() {
         </div>
       </div>
 
+      {/* Kategori menempel di brand, bukan di campaign. Catatan ini ada supaya
+          penempatannya di dalam tab Campaign tidak mengajarkan model yang keliru. */}
+      <p className="admin-hint">
+        Kategori dipilih di halaman brand dan berlaku untuk semua campaign brand tersebut. Menghapus kategori hanya bisa dilakukan saat tidak ada brand yang memakainya.
+      </p>
+
       <section className="admin-panel">
         <div className="panel-heading">
           <div>
@@ -34,7 +40,7 @@ export default async function AdminKategoriPage() {
               <th>Nama</th>
               <th>Slug</th>
               <th>Brand</th>
-              <th />
+              <th><span className="sr-only">Aksi</span></th>
             </tr>
           </thead>
           <tbody>

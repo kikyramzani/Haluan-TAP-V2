@@ -52,14 +52,8 @@
   border-bottom-color: var(--accent);
 }
 
-/* workspace.css duplicates this stat-tile job as .admin-stats/.kpi. Check
-   there before adding a third variant of the same component. */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: var(--space-3);
-}
-
+/* Ubin statistik. workspace.css menduplikasi pekerjaan yang sama sebagai
+   .admin-stats. Periksa ke sana sebelum menambah varian ketiga. */
 .kpi {
   padding: var(--space-4);
   border: 1px solid var(--line);
@@ -81,29 +75,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.admin-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  align-items: center;
-}
-
-.admin-toolbar input[type="search"],
-.admin-toolbar input[type="text"],
-.admin-toolbar select {
-  min-height: 44px;
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
-  font-size: var(--text-sm);
-}
-
-.admin-toolbar input[type="search"] {
-  flex: 1;
-  min-width: 220px;
-}
-
 /* Tabel. workspace.css duplicates this as .admin-table-wrap. Check there
    before adding a third variant of the same component. */
 .table-wrap {
@@ -112,6 +83,16 @@
      scrolling internally. The whole page becomes horizontally scrollable
      at narrow widths instead of just the table. */
   min-width: 0;
+  /**
+   * Blok penampung untuk keturunan yang position: absolute.
+   *
+   * .sr-only memakai `position: absolute`, dan tanpa penampung di sini blok
+   * penampungnya menjadi ICB — jadi label tersembunyi di dalam <th> kolom aksi
+   * lolos dari penggulir ini, terdampar di posisi statisnya sekitar 655px, dan
+   * membuat SELURUH halaman admin bisa digeser ke samping di ponsel 390px
+   * meski tidak ada satu pun piksel yang terlihat di sana.
+   */
+  position: relative;
   overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -133,6 +114,16 @@
   vertical-align: middle;
 }
 
+/**
+ * Tanpa position: sticky.
+ *
+ * Sebelumnya baris ini `position: sticky; top: 0`, tapi .table-wrap hanya
+ * punya overflow-x dan tidak pernah punya tinggi, jadi tidak ada wadah
+ * bergulir vertikal untuk ditempeli: header itu tidak pernah sekali pun
+ * menempel. Menambahkan max-height agar sticky-nya hidup akan membuat wadah
+ * gulir bersarang di dalam halaman yang sudah bergulir vertikal, yang lebih
+ * buruk daripada kehilangan header. Jadi propertinya dihapus, bukan ditambal.
+ */
 .admin-table th {
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
@@ -140,9 +131,6 @@
   text-transform: uppercase;
   color: var(--text-subtle);
   background: var(--surface-sunken);
-  position: sticky;
-  top: 0;
-  z-index: 1;
 }
 
 .admin-table tbody tr:last-child td {
@@ -172,43 +160,89 @@
   font-size: var(--text-xs);
 }
 
-/* Penanda bahwa nilai berasal dari override admin, bukan dari sheet. */
-.edited-marker {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: var(--space-half) var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  border: 1px solid var(--accent-line);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-}
-
 .table-actions {
   display: flex;
   gap: var(--space-2);
   justify-content: flex-end;
 }
 
-.table-actions button {
-  min-height: 36px;
+/**
+ * Tautan aksi ikut memakai bentuk tombolnya.
+ *
+ * base.css menyetel `a { color: inherit; text-decoration: none }`, dan tidak
+ * pernah ada aturan .table-actions a, jadi "Edit"/"Kelola"/"Detail" dirender
+ * sebagai teks tubuh biasa — tidak bisa dibedakan dari data di sel sebelahnya,
+ * di dalam sel yang tombol saudaranya justru bergaya.
+ */
+.table-actions button,
+.table-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  /* 36px lama ada di bawah ambang sentuh 44px yang dipakai di tempat lain. */
+  min-height: 40px;
   padding: 0 var(--space-3);
   border-radius: var(--radius-sm);
   border: 1px solid var(--line-strong);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
 }
 
-.table-actions button:hover {
+.table-actions button:hover,
+.table-actions a:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
+/**
+ * .danger merah sejak keadaan istirahat, bukan hanya saat hover.
+ *
+ * Satu-satunya aturan .danger di repo ini dulu adalah :hover, sehingga di
+ * perangkat sentuh "Arsipkan", "Hapus", dan "Turunkan ke Creator" tidak pernah
+ * terlihat berbeda dari tombol netral di sebelahnya — selamanya.
+ */
+.table-actions .danger {
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--line-strong));
+  color: var(--danger);
+}
+
 .table-actions .danger:hover {
   border-color: var(--danger);
-  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+/* Langkah kedua konfirmasi: penuh, bukan sekadar berkontur, supaya jelas
+   bahwa klik berikutnya benar-benar mengeksekusi. */
+.table-actions .danger.is-armed,
+.danger.is-armed {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #ffffff;
+}
+
+.confirm-pair {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.confirm-cancel {
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.confirm-cancel:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* Editor katalog */
@@ -223,9 +257,27 @@
   gap: var(--space-2);
 }
 
+/* Kolomnya dibagi bersama header dan barisnya supaya keduanya benar-benar
+   sejajar; satu variabel, bukan dua daftar yang harus diingat cocok. */
+.tier-editor {
+  --tier-columns: 130px minmax(0, 1fr) minmax(0, 200px) auto;
+}
+
+.tier-head {
+  display: grid;
+  grid-template-columns: var(--tier-columns);
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
 .tier-row {
   display: grid;
-  grid-template-columns: 90px 1fr auto auto;
+  grid-template-columns: var(--tier-columns);
   gap: var(--space-2);
   align-items: center;
   padding: var(--space-2);
@@ -234,13 +286,58 @@
   background: var(--surface-sunken);
 }
 
+.tier-row > label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+/**
+ * Label per-field hanya muncul saat barisnya menumpuk.
+ *
+ * Di lebar penuh .tier-head sudah menamai kolomnya, jadi mengulang label di
+ * tiap baris hanya kebisingan. Di bawah 769px header itu hilang bersama
+ * grid-nya, dan tanpa aturan ini editor komisi serta URL afiliasi kembali
+ * bergantung sepenuhnya pada placeholder — yang lenyap begitu field terisi.
+ */
+.tier-field-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .tier-row input {
-  min-height: 36px;
+  width: 100%;
+  /* 36px sebelumnya, di bawah ambang sentuh 44px yang dipakai di semua
+     formulir admin lain. */
+  min-height: 44px;
   padding: 0 var(--space-2);
   border-radius: var(--radius-sm);
   border: 1px solid var(--line-strong);
   background: var(--surface);
+  color: var(--text);
   font-size: var(--text-sm);
+  transition: border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+/* Aturan fokus di workspace.css dilingkupi .admin-request-form, jadi ketiga
+   field ini sebelumnya tidak punya cincin fokus sama sekali. */
+.tier-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.tier-row input:disabled {
+  background: var(--surface-sunken);
+  color: var(--text-subtle);
+  cursor: not-allowed;
 }
 
 .tier-row input[type="url"] {
@@ -248,35 +345,35 @@
   font-size: var(--text-xs);
 }
 
-@media (max-width: 768px) {
-  .tier-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-.logo-picker {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
+.tier-actions {
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 
-.logo-preview {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--line);
-  background: var(--surface-sunken);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
+@media (max-width: 768px) {
+  .tier-head {
+    display: none;
+  }
 
-.logo-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: var(--space-1);
+  .tier-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tier-field-label {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--text-muted);
+  }
+
+  .tier-row .table-actions {
+    justify-content: flex-start;
+  }
 }
 
 /* Antrean baris yang ditolak parser */
@@ -314,22 +411,6 @@
     grid-template-columns: 1fr;
     gap: var(--space-2);
   }
-}
-
-.audit-entry {
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--line);
-  font-size: var(--text-sm);
-}
-
-.audit-entry pre {
-  margin: var(--space-2) 0 0;
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  background: var(--surface-sunken);
-  overflow-x: auto;
-  font-size: var(--text-xs);
-  line-height: 1.5;
 }
 
 .empty-cell {
@@ -426,4 +507,275 @@
 
 .analitik-trend-bar:hover em {
   background: var(--accent-strong);
+}
+
+/* ── Primitif bersama ruang kerja admin ──────────────────────────────── */
+
+/**
+ * Judul halaman admin ikut tangga tipografi.
+ *
+ * Setiap <h1> admin hidup di dalam .panel-heading, dan .panel-heading h1 tidak
+ * pernah punya aturan sama sekali — hanya .panel-heading h2. base.css juga
+ * tidak menyetel ukuran h1 global. Hasilnya seluruh judul admin dirender pada
+ * default user-agent 2em: ukuran tetap yang tidak pernah menyusut, berdiri di
+ * samping h2 saudaranya yang memakai clamp().
+ */
+.panel-heading h1 {
+  font-size: var(--text-h2);
+}
+
+/** Keterangan abu-abu di bawah judul. Menggantikan style inline yang sama
+    persis, disalin di empat halaman. */
+.admin-hint {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  max-width: 68ch;
+  text-wrap: pretty;
+}
+
+/**
+ * Konfirmasi penyimpanan berhasil, sebaris.
+ *
+ * Sebelumnya CampaignForm, TierLinkEditor, CategoryRow, dan kedua aksi massal
+ * mengembalikan { success: true } tetapi hanya merender state.error, jadi
+ * penyimpanan yang berhasil sama sekali tidak terlihat. Bentuknya sengaja
+ * lebih ringan daripada .admin-success: ini muncul di dalam sel tabel dan di
+ * bawah tombol, bukan di puncak halaman.
+ */
+.form-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--positive);
+}
+
+.form-ok::before {
+  content: "✓";
+  font-weight: var(--weight-semibold);
+}
+
+/**
+ * Tombol kirim filter/pencarian.
+ *
+ * .admin-filterbar punya aturan untuk label, input, dan select, tetapi tidak
+ * satu pun untuk button. Digabung dengan `button { background: none; border: 0 }`
+ * di base.css, kontrol "Terapkan"/"Cari" — kendali utama di delapan halaman
+ * admin — dirender sebagai teks tubuh polos tanpa border, tanpa padding, dan
+ * tanpa target sentuh 44px.
+ *
+ * radius-sm, bukan pill: ia berdiri tepat di samping input persegi di baris
+ * yang sama, dan pil di sana terbaca seperti komponen dari sistem lain.
+ */
+.admin-filterbar button {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.admin-filterbar button:hover {
+  background: var(--accent-strong);
+}
+
+/**
+ * Pil status yang benar-benar membawa warna.
+ *
+ * .status-active, .status-archived, dan .membership-suspended dirujuk di lima
+ * tabel tetapi tidak pernah didefinisikan, jadi semuanya jatuh ke .admin-status
+ * abu-abu netral: "Aktif" dan "Arsip" tampil identik, begitu pula "Super Admin"
+ * dan "Admin" di halaman yang justru tugasnya membedakan keduanya.
+ *
+ * Warna tidak berdiri sendiri sebagai penanda — teks di dalam pil selalu
+ * menyebut statusnya, jadi ini memperkuat, bukan menggantikan.
+ */
+.admin-status.status-active {
+  background: var(--positive-soft);
+  color: var(--positive);
+  border-color: color-mix(in srgb, var(--positive) 30%, transparent);
+}
+
+.admin-status.status-ended {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 30%, transparent);
+}
+
+.admin-status.status-archived,
+.admin-status.status-hidden {
+  background: var(--surface-sunken);
+  color: var(--text-subtle);
+  border-style: dashed;
+}
+
+.admin-status.status-suspended,
+.admin-status.membership-suspended {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+}
+
+.admin-status.role-super {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  border-color: var(--accent-line);
+}
+
+/**
+ * Pagination: tautan yang terlihat seperti tautan, ujung yang bukan tautan.
+ *
+ * Tidak pernah ada aturan .admin-pagination a — hanya untuk button, yang tidak
+ * pernah dipakai di sana. Lihat AdminPagination.tsx untuk sisi markupnya.
+ */
+.admin-page-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  white-space: nowrap;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.admin-page-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.admin-page-link.is-disabled {
+  border-style: dashed;
+  color: var(--text-subtle);
+  opacity: 0.6;
+}
+
+.admin-page-count {
+  font-variant-numeric: tabular-nums;
+}
+
+/** Baris edit sebaris: field melebar, tombolnya seukuran isinya. */
+.inline-edit {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.table-url {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--text-xs);
+  color: var(--accent-strong);
+  word-break: break-all;
+}
+
+.table-url:hover {
+  text-decoration: underline;
+}
+
+/**
+ * Filter bar di ponsel.
+ *
+ * .admin-filterbar tidak punya breakpoint sama sekali: label-nya flex: 1 dengan
+ * min-width 180px dan tiap select flex 1 1 160px, jadi di /admin/campaign
+ * (pencarian + dua select + tombol) barisnya pecah jadi empat tingkat di atas
+ * tabel. Di bawah 768px setiap kontrol mengambil satu baris penuh, yang lebih
+ * mudah disentuh dan tingginya justru lebih pendek.
+ */
+@media (max-width: 768px) {
+  .admin-filterbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+
+  .admin-filterbar label,
+  .admin-filterbar select,
+  .admin-filterbar button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .inline-edit {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-pagination {
+    /* Hitungan halaman di tengah, tombolnya mengapit — bukan tiga baris
+       teks tak berbentuk seperti sebelumnya. */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
+
+  .admin-page-count {
+    grid-column: 1 / -1;
+    order: -1;
+    text-align: center;
+  }
+
+  .admin-page-link {
+    justify-content: center;
+  }
+}
+
+/**
+ * Jarak antar langkah, bukan lima marginTop inline.
+ *
+ * Alur import dulu memasang `style={{ marginTop: "var(--space-4)" }}` di lima
+ * tempat berbeda di dalam satu alur yang sama. Itu bukan lima keputusan tata
+ * letak, melainkan satu gap yang tidak pernah dituliskan.
+ */
+.import-step {
+  margin-top: var(--space-4);
+}
+
+.import-section {
+  margin-top: var(--space-8);
+}
+
+/* Pemilih berkas tidak ikut skin field mana pun, dan memang tidak seharusnya —
+   tampilannya dikendalikan browser. Yang dibutuhkan hanya jaraknya. */
+.file-input {
+  margin-top: var(--space-2);
+}
+
+/**
+ * Tombol simpan berdampingan dengan konfirmasinya.
+ *
+ * Konfirmasi yang muncul DI BAWAH tombol mendorong sisa halaman turun; di
+ * samping tombol ia muncul tanpa menggeser apa pun.
+ */
+.form-submit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.form-submit-row .form-ok {
+  margin-top: 0;
+}
+
+/**
+ * Di dalam sel tabel, .inline-edit tetap dua kolom di lebar mana pun.
+ *
+ * Aturan menumpuk di breakpoint 768px ada untuk formulir yang lebarnya benar-benar
+ * mengikuti layar. Tabel admin punya min-width 720px dan menggulir sendiri, jadi
+ * selnya tidak pernah sempit — menumpuknya di sana hanya menggandakan tinggi
+ * baris tanpa satu piksel pun ruang yang dimenangkan.
+ */
+td .inline-edit {
+  grid-template-columns: minmax(0, 1fr) auto;
 }

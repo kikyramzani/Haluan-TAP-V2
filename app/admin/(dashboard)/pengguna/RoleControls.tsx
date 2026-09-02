@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import ConfirmButton from "../ConfirmButton";
 import { promoteToSuperAdmin, demoteToCreator } from "./actions";
 
 export default function RoleControls({ userId, role }: { userId: string; role: "ADMIN" | "SUPER_ADMIN" }) {
@@ -18,9 +19,12 @@ export default function RoleControls({ userId, role }: { userId: string; role: "
   if (role === "SUPER_ADMIN") {
     return (
       <form action={demoteAction} className="table-actions">
-        <button type="submit" className="danger" disabled={demotePending}>
-          {demotePending ? "Memproses…" : "Turunkan ke Creator"}
-        </button>
+        {/* Menurunkan seorang Super Admin mencabut akses ke Pengguna & Peran,
+            Audit Log, dan Import Data sekaligus — dan hanya Super Admin lain
+            yang bisa mengembalikannya. */}
+        <ConfirmButton className="danger" confirmLabel="Ya, turunkan" pendingLabel="Memproses…" pending={demotePending}>
+          Turunkan ke Creator
+        </ConfirmButton>
         <input type="hidden" name="userId" value={userId} />
         {demoteState && "error" in demoteState ? (
           <span className="form-error" role="alert">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import ConfirmButton from "../../ConfirmButton";
 import { renameCategory, deleteCategory } from "./actions";
 
 export type CategoryRowData = { id: string; name: string; slug: string; brandCount: number };
@@ -12,16 +13,21 @@ export default function CategoryRow({ category }: { category: CategoryRowData })
   return (
     <tr>
       <td>
-        <form action={renameAction} className="two-col" style={{ gridTemplateColumns: "1fr auto" }}>
+        <form action={renameAction} className="two-col inline-edit">
           <input type="hidden" name="id" value={category.id} />
           <input name="name" defaultValue={category.name} required maxLength={80} aria-label={`Nama kategori ${category.name}`} />
           <button className="submit-btn" type="submit" disabled={renamePending}>
-            {renamePending ? "…" : "Simpan"}
+            {renamePending ? "Menyimpan…" : "Simpan"}
           </button>
         </form>
         {renameState?.error ? (
           <p className="form-error" role="alert">
             {renameState.error}
+          </p>
+        ) : null}
+        {renameState?.success ? (
+          <p className="form-ok" role="status">
+            Nama kategori tersimpan.
           </p>
         ) : null}
       </td>
@@ -30,9 +36,9 @@ export default function CategoryRow({ category }: { category: CategoryRowData })
       <td className="table-actions">
         <form action={deleteAction}>
           <input type="hidden" name="id" value={category.id} />
-          <button className="danger" type="submit" disabled={deletePending}>
-            {deletePending ? "Menghapus…" : "Hapus"}
-          </button>
+          <ConfirmButton className="danger" confirmLabel="Ya, hapus" pendingLabel="Menghapus…" pending={deletePending}>
+            Hapus
+          </ConfirmButton>
         </form>
         {deleteState?.error ? (
           <p className="form-error" role="alert">

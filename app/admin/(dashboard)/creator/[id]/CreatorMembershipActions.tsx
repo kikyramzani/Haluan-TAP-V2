@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import ConfirmButton from "../../ConfirmButton";
 import { verifyCreator, rejectCreator, suspendCreator, restoreCreatorToPending } from "../actions";
 
 type Membership = "PENDING" | "VERIFIED" | "REJECTED" | "SUSPENDED";
@@ -56,9 +57,11 @@ export default function CreatorMembershipActions({ creatorId, membership }: { cr
         {canSuspend ? (
           <form action={suspendAction}>
             <input type="hidden" name="id" value={creatorId} />
-            <button className="submit-btn" type="submit" disabled={suspendPending}>
-              {suspendPending ? "Menangguhkan…" : "Suspend"}
-            </button>
+            {/* Menangguhkan mencabut akses kreator ke seluruh katalog seketika.
+                Pemulihannya manual, lewat "Kembalikan ke Pending". */}
+            <ConfirmButton className="submit-btn danger" confirmLabel="Ya, tangguhkan" pendingLabel="Menangguhkan…" pending={suspendPending}>
+              Suspend
+            </ConfirmButton>
             {suspendState && "error" in suspendState ? (
               <p className="form-error" role="alert">
                 {suspendState.error}

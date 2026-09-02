@@ -13,6 +13,7 @@ import "./styles/admin.css";
 import "./styles/workspace.css";
 import ThemeToggle from "./ThemeToggle";
 import MobileNav from "./MobileNav";
+import ServiceWorkerRegistrar from "./ServiceWorkerRegistrar";
 import { getCurrentUser } from "../lib/auth";
 import { siteUrl } from "../lib/site-url";
 
@@ -48,13 +49,23 @@ export const viewport: Viewport = {
   // Terkunci di 5x, bukan dinonaktifkan: pembatasan zoom adalah kegagalan
   // aksesibilitas, tapi tanpa batas atas kontrol standalone jadi mudah tergeser.
   maximumScale: 5,
-  // Paper dan ink dari BRAND-SYSTEM.md §2.1. Nilainya sengaja dikutip literal
-  // karena viewport metadata dirender di server dan tidak bisa membaca token CSS;
-  // kalau --bg berubah, dua baris ini ikut diubah manual.
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fcfcfc" },
-    { media: "(prefers-color-scheme: dark)", color: "#090a0a" },
-  ],
+  /**
+   * Satu nilai, bukan pasangan media.
+   *
+   * Pasangan prefers-color-scheme yang lama salah membaca aplikasinya sendiri:
+   * <html data-theme="light"> adalah bawaan, dan skrip di <head> hanya
+   * memulihkan pilihan yang PERNAH disimpan creator — preferensi sistem tidak
+   * pernah menyalakan tema gelap dengan sendirinya. Jadi pengguna bersistem
+   * gelap yang belum pernah menyentuh toggle mendapat chrome browser #090a0a
+   * di atas halaman yang benar-benar terang.
+   *
+   * ThemeToggle memperbarui <meta name="theme-color"> saat temanya diganti,
+   * jadi chrome-nya tetap mengikuti tampilan yang sebenarnya.
+   *
+   * Paper dari BRAND-SYSTEM.md §2.1, dikutip literal karena viewport metadata
+   * dirender di server dan tidak bisa membaca token CSS.
+   */
+  themeColor: "#fcfcfc",
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -88,6 +99,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           {children}
         </div>
         <MobileNav isSignedIn={Boolean(viewer)} />
+        <ServiceWorkerRegistrar />
         <Analytics />
         <SpeedInsights />
       </body>

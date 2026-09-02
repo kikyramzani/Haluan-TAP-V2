@@ -47,6 +47,12 @@ const GLYPHS = {
     adv: 674,
     d: "M617 -326V0H447V-303Q447 -359 418.0 -390.0Q389 -421 340 -421Q291 -421 262.0 -390.0Q233 -359 233 -303V0H62V-558H233V-484Q259 -521 303.0 -542.5Q347 -564 402 -564Q500 -564 558.5 -500.5Q617 -437 617 -326Z",
   },
+  h: { adv: 674, d: "M617 -326V0H447V-303Q447 -359 418.0 -390.0Q389 -421 340 -421Q291 -421 262.0 -390.0Q233 -359 233 -303V0H62V-740H233V-483Q259 -520 304.0 -542.0Q349 -564 405 -564Q501 -564 559.0 -500.5Q617 -437 617 -326Z" },
+  t: { adv: 406, d: "M373 -145V0H286Q193 0 141.0 -45.5Q89 -91 89 -194V-416H21V-558H89V-694H260V-558H372V-416H260V-192Q260 -167 272.0 -156.0Q284 -145 312 -145Z" },
+  p: {
+    adv: 679,
+    d: "M405 -566Q474 -566 530.0 -531.0Q586 -496 618.5 -431.0Q651 -366 651 -280Q651 -194 618.5 -128.5Q586 -63 530.0 -27.5Q474 8 405 8Q347 8 302.5 -16.0Q258 -40 233 -78V266H62V-558H233V-479Q258 -518 302.0 -542.0Q346 -566 405 -566ZM354 -417Q303 -417 267.5 -380.0Q232 -343 232 -279Q232 -215 267.5 -178.0Q303 -141 354 -141Q405 -141 441.0 -178.5Q477 -216 477 -280Q477 -344 441.5 -380.5Q406 -417 354 -417Z",
+  },
   T: { adv: 591, d: "M567 -702V-565H381V0H210V-565H24V-702Z" },
   A: { adv: 737, d: "M499 -124H237L195 0H16L270 -702H468L722 0H541ZM455 -256 368 -513 282 -256Z" },
   P: {
@@ -55,190 +61,198 @@ const GLYPHS = {
   },
 };
 
-/**
- * Huruf A digambar ulang, dan hanya huruf A.
- *
- * Bentuk dasarnya tetap A Poppins, lengkap dengan rongga dan palangnya, supaya
- * ia tidak pernah berhenti terbaca sebagai huruf A. Yang diubah satu hal:
- * palangnya dipanjangkan ke kiri dan kanan sampai selebar tapak hurufnya, jadi
- * ia menembus kedua kaki alih-alih berhenti di dalamnya.
- *
- * Percobaan pertama membuang palang itu sama sekali dan menggantinya dengan rel
- * di baseline. Dua hal langsung rusak: rel itu memberi T sebuah palang bawah
- * sehingga terbaca "I", dan A tanpa palang terbaca "Δ". Palang yang menembus
- * mempertahankan kedua huruf dan tetap jadi detail yang jelas milik TAP.
- *
- * Advance-nya tetap 737, sama dengan A asli, jadi jarak ke T dan P tidak perlu
- * ditebak ulang.
- */
-const A_ADV = 737;
-const A_BASE_L = 16;
-const A_BASE_R = 722;
-const A_APEX_L = 270;
-const A_APEX_R = 468;
-/** Ketebalan kaki, diukur mendatar. Lebih ramping dari A Poppins asli supaya
- *  rongganya tetap terlihat sampai 16px di bilah tab. */
-const A_LEG = 150;
-/** Batang: tinggi, posisi atas, dan seberapa jauh ia melewati kedua kaki. */
-const A_BAR_H = 138;
-const A_BAR_TOP = -262;
-const A_BAR_OVERHANG = 34;
-
-/**
- * Kaki A tanpa palang bawaannya: rongga segitiga sengaja dibiarkan TERBUKA ke
- * bawah. Batang di lapisan berikutnya yang menutupnya, jadi batang itulah
- * palangnya.
- */
-function aChevron() {
-  const innerL = A_BASE_L + A_LEG;
-  const innerR = A_BASE_R - A_LEG;
-  const slope = (A_APEX_L - A_BASE_L) / CAP;
-  const meetY = -(innerR - innerL) / (2 * slope);
-  return (
-    `M${A_BASE_L} 0L${A_APEX_L} -${CAP}H${A_APEX_R}L${A_BASE_R} 0Z` +
-    `M${innerL} 0L${innerR} 0L${(innerL + innerR) / 2} ${meetY.toFixed(1)}Z`
-  );
-}
-
-/** Batang berujung bulat yang menembus kedua kaki. */
-function aBar() {
-  const x = A_BASE_L - A_BAR_OVERHANG;
-  const w = A_BASE_R - A_BASE_L + A_BAR_OVERHANG * 2;
-  const r = A_BAR_H / 2;
-  return (
-    `M${x + r} ${A_BAR_TOP}h${w - A_BAR_H}` +
-    `a${r} ${r} 0 0 1 0 ${A_BAR_H}` +
-    `h-${w - A_BAR_H}` +
-    `a${r} ${r} 0 0 1 0 -${A_BAR_H}z`
-  );
-}
-
 /* ── Perakitan wordmark ──────────────────────────────────────────────── */
 
 /** §4.2: Poppins geometris terasa renggang di ukuran display. */
 const TRACKING = -0.02 * UPEM;
 
+/**
+ * Menggeser seluruh koordinat X sebuah path, alih-alih memakai
+ * `transform="translate(x)"`.
+ *
+ * Ini bukan gaya penulisan, melainkan syarat supaya gradasinya benar. Transform
+ * membuat ruang koordinat baru, jadi gradasi yang dirujuk sebuah path ikut
+ * tergeser bersama transform-nya, dan tiap huruf berakhir menyapu
+ * sendiri-sendiri. Dengan offset dipanggang ke dalam path, ketiga huruf berbagi
+ * satu ruang koordinat dan gradasinya diselesaikan tepat satu kali.
+ *
+ * Perintah huruf besar bersifat absolut dan X-nya digeser; V hanya membawa Y,
+ * dan seluruh perintah huruf kecil bersifat relatif, jadi keduanya dilewati.
+ */
+function translatePath(d, dx) {
+  if (!dx) return d;
+  return d.replace(/([A-Za-z])([^A-Za-z]*)/g, (_, cmd, args) => {
+    const raw = args.trim();
+    if (!raw) return cmd;
+    const nums = raw.split(/[\s,]+/).map(Number);
+    if (cmd === "H") {
+      for (let i = 0; i < nums.length; i += 1) nums[i] += dx;
+    } else if (cmd === "M" || cmd === "L" || cmd === "T" || cmd === "Q" || cmd === "C" || cmd === "S") {
+      for (let i = 0; i < nums.length; i += 2) nums[i] += dx;
+    }
+    return cmd + nums.join(" ");
+  });
+}
+
+/**
+ * Huruf "t" pada kata "tap" membawa detail khasnya.
+ *
+ * Wordmark pindah ke huruf kecil, dan huruf "a" kecil di Poppins berbentuk
+ * lingkaran bertangkai — palang yang dulu menembus kedua kaki huruf A kapital
+ * tidak punya tempat di sana. Menembus lingkaran "a" pun bukan jawaban: hasilnya
+ * terbaca seperti huruf "e".
+ *
+ * Huruf "t" justru SUDAH punya palang. Memanjangkannya ke kiri dan kanan adalah
+ * gerak yang persis sama dengan versi kapitalnya, pada satu-satunya huruf yang
+ * tidak kehilangan apa pun karenanya: "t" berpalang panjang tetap "t".
+ */
+const T_BAR_TOP = -558;
+const T_BAR_H = 142;
+const T_BAR_OVERHANG = 60;
+const T_INK_L = 21;
+const T_INK_R = 372;
+
+function tBar() {
+  const x = T_INK_L - T_BAR_OVERHANG;
+  const w = T_INK_R - T_INK_L + T_BAR_OVERHANG * 2;
+  const r = T_BAR_H / 2;
+  return (
+    `M${x + r} ${T_BAR_TOP}h${w - T_BAR_H}` +
+    `a${r} ${r} 0 0 1 0 ${T_BAR_H}` +
+    `h-${w - T_BAR_H}` +
+    `a${r} ${r} 0 0 1 0 -${T_BAR_H}z`
+  );
+}
+
+/**
+ * Merangkai sebuah kata jadi daftar path yang offset-nya sudah dipanggang.
+ * Huruf "t" menyumbang dua path: hurufnya sendiri, lalu palang panjangnya.
+ */
 function layout(word, startX) {
   let x = startX;
-  const parts = [];
+  const ds = [];
   for (const ch of word) {
-    // Huruf A dirender sebagai DUA path terpisah, sama persis dengan marka
-    // aplikasinya: chevron berongga terbuka, lalu batang yang menutup
-    // rongganya. Terpisah, bukan satu path gabungan, supaya arah putaran
-    // kontur tidak pernah bisa melubangi kaki hurufnya lewat aturan nonzero.
-    const ds = ch === "A" ? [aChevron(), aBar()] : [GLYPHS[ch].d];
-    parts.push({ ch, x, ds });
-    // Ujung batang A menonjol 34 unit melewati kaki kanannya, jadi advance
-    // aslinya menyisakan jarak terlalu rapat ke P. Ruangnya dikembalikan di
-    // sini, bukan dengan memendekkan batangnya, karena tonjolan itu justru
-    // detail yang membedakan huruf ini.
-    x += (ch === "A" ? A_ADV + A_BAR_OVERHANG : GLYPHS[ch].adv) + TRACKING;
+    const glyph = GLYPHS[ch];
+    ds.push(translatePath(glyph.d, x));
+    if (ch === "t") ds.push(translatePath(tBar(), x));
+    // Palang "t" menonjol 60 unit melewati sisi kanannya, jadi advance aslinya
+    // menyisakan jarak terlalu rapat ke "a". Ruangnya dikembalikan di sini,
+    // bukan dengan memendekkan palangnya, karena tonjolan itu justru detailnya.
+    x += glyph.adv + (ch === "t" ? T_BAR_OVERHANG : 0) + TRACKING;
   }
-  return { parts, end: x - TRACKING };
+  return { ds, start: startX, end: x - TRACKING };
 }
 
 function buildWordmark() {
-  const haluan = layout("Haluan", 0);
+  const haluan = layout("haluan", 0);
   // Jeda antarkata lebih lebar dari spasi biasa: dua warna yang berdampingan
   // butuh ruang bernapas supaya tidak terbaca sebagai satu kata.
-  const tap = layout("TAP", haluan.end + 300);
-
-  const flatten = (parts) =>
-    parts.flatMap((p) => p.ds.map((d) => ({ d, x: Math.round(p.x) })));
+  const tap = layout("tap", haluan.end + 300);
 
   return {
-    ink: flatten(haluan.parts),
-    hot: flatten(tap.parts),
-    // Batas kiri dan kanan kata TAP dalam ruang viewBox. Komponennya memakai
-    // ini sebagai kotak bidang bergradasi yang lalu dipotong bentuk hurufnya.
-    // Gradasi tidak bisa ditempelkan langsung ke tiap huruf: setiap glyph
-    // punya transform sendiri, dan transform membuat ruang koordinat baru,
-    // sehingga sapuannya ikut tergeser dan tiap huruf menyapu sendiri-sendiri.
-    hotFrom: Math.round(tap.parts[0].x + A_BASE_L),
+    ink: haluan.ds,
+    hot: tap.ds,
+    // Kotak kata "tap": bidang bergradasi digambar di sini, lalu dipotong
+    // mengikuti bentuk hurufnya.
+    hotFrom: Math.round(tap.start),
     hotTo: Math.round(tap.end),
     width: Math.round(tap.end),
-    // Batas atas: ascender huruf l (-740). Batas bawah: overshoot lengkung
-    // huruf a dan u yang turun 8 unit di bawah baseline. Tanpa ruang itu
-    // keduanya terpotong tipis di sisi bawah.
+    // Huruf kecil memakai kotak yang jauh lebih tinggi daripada kapital:
+    // ascender "h" dan "l" naik sampai -740, dan ekor "p" turun sampai +266.
     top: -740,
-    bottom: 12,
+    bottom: 266,
   };
 }
 
 /* ── Marka aplikasi ──────────────────────────────────────────────────── */
 
 /**
- * Chevron huruf A yang sama, dibulatkan dan diberi dua bidang bertumpuk,
- * mengikuti kosakata set ikon Google Workspace: bentuk geometris mengapung,
- * gradasi lembut, dan nada ketiga yang muncul di persilangan.
+ * Marka aplikasi: kata "TAP" kapital, satu baris.
  *
- * Dua perhentian, bukan tiga. Versi favicon sebelumnya membuang gradasi tiga
- * warna karena "tiga perhentian dalam 16px tidak pernah terbaca sebagai
- * gradasi, hanya jadi bubur keabuan". Dua perhentian dalam rona bertetangga
- * tidak punya masalah itu: di 16px ia terbaca sebagai satu bidang magenta, dan
- * siluetnya yang menanggung pengenalan.
+ * Kapital, bukan huruf kecil seperti wordmark-nya, dan itu keputusan teknis.
+ * Kapital tidak punya ascender maupun descender, jadi pada kanvas persegi
+ * hurufnya bisa jauh lebih besar — dan ruang itulah yang menentukan apakah tiga
+ * huruf masih terbaca di 16px.
+ *
+ * Hurufnya juga ditebalkan lewat stroke yang mengikuti fill-nya sendiri.
+ * Poppins Bold adalah bobot terberat yang ada di repo ini, dan pada 16px ia
+ * masih terlalu ramping. Stroke yang sama sekaligus membulatkan sudutnya, yang
+ * memang arah yang diminta.
  */
 /**
- * Marka aplikasi: huruf A yang sama persis dengan yang ada di wordmark, hanya
- * diperbesar dan diberi dua warna.
+ * Tracking dan ketebalan keduanya didorong sejauh mungkin, dan angkanya berasal
+ * dari melihat hasilnya di ukuran render sebenarnya.
  *
- * Sudutnya dibulatkan lewat `stroke-linejoin: round` pada path yang juga
- * di-fill, jadi tidak ada satu pun titik yang perlu dihitung ulang. Itu juga
- * yang membuat bentuknya di ikon dan di wordmark tidak akan pernah menyimpang.
+ * Diukur pada kanvas 512 yang diperkecil: dengan weight 44 dan tracking -30,
+ * "TAP" baru terbaca mulai 32px. Dengan weight 82 dan tracking -55 ia terbaca
+ * mulai 20px. Di 16px keduanya sama-sama TIDAK terbaca sebagai tiga huruf —
+ * tinggi kapitalnya di sana hanya sekitar 5px. Itu batas nyata dari tiga huruf
+ * pada kanvas 16px, bukan sesuatu yang bisa disetel habis.
  */
-function buildMark({ background = null, mono = null } = {}) {
+const MARK_TRACKING = -0.055 * UPEM;
+const MARK_WEIGHT = 82;
+
+function markLetters() {
+  let x = 0;
+  const ds = [];
+  for (const ch of "TAP") {
+    ds.push(translatePath(GLYPHS[ch].d, x));
+    x += GLYPHS[ch].adv + MARK_TRACKING;
+  }
+  return { ds, width: x - MARK_TRACKING };
+}
+
+/**
+ * Padding bawaan sengaja rapat: kata "TAP" melebar, jadi lebarnya yang jadi
+ * batas, dan setiap piksel padding langsung memotong tinggi hurufnya di 16px.
+ *
+ * Ikon maskable TIDAK boleh memakai nilai ini. Android memotong maskable ke
+ * bentuk sistem, dan zona amannya adalah lingkaran berdiameter 80% kanvas.
+ * Untuk kata selebar ini, persegi panjang terlebar yang muat di lingkaran itu
+ * hanya sekitar 382px pada kanvas 512 — jadi paddingnya harus sekitar 65,
+ * bukan 12. Tanpa itu, huruf T dan P terpotong di sudut.
+ */
+function buildMark({ background = null, mono = null, pad = 12 } = {}) {
   const S = 512;
-  const pad = 62;
   const box = S - pad * 2;
 
-  // Kotak sebenarnya termasuk ujung batang yang menonjol keluar kedua kaki.
-  const artL = A_BASE_L - A_BAR_OVERHANG;
-  const artW = A_BASE_R - A_BASE_L + A_BAR_OVERHANG * 2;
-  const scale = Math.min(box / artW, box / CAP);
-  const tx = pad + (box - artW * scale) / 2 - artL * scale;
-  const ty = pad + (box + CAP * scale) / 2;
+  const letters = markLetters();
+  // Stroke menambah lebar di kedua sisi, jadi kotak yang harus muat adalah
+  // huruf plus setengah stroke di kiri dan kanan.
+  const artW = letters.width + MARK_WEIGHT;
+  const artH = CAP + MARK_WEIGHT;
+  const scale = Math.min(box / artW, box / artH);
+  const tx = pad + (box - artW * scale) / 2 + (MARK_WEIGHT / 2) * scale;
+  const ty = pad + (box + artH * scale) / 2 - (MARK_WEIGHT / 2) * scale;
   const place = `transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${scale.toFixed(5)})"`;
+  const shape = `stroke-width="${MARK_WEIGHT}" stroke-linejoin="round"`;
 
-  // Pembulatan sudut. Dinaikkan dari 30 ke 46: radius di set Google Workspace
-  // jauh lebih murah hati, dan pada 30 sudut chevron-nya masih terbaca tajam.
-  // Dibagi skala supaya lebarnya tetap sama berapa pun ukuran kanvasnya.
-  const soften = `stroke-width="${(46 / scale).toFixed(1)}" stroke-linejoin="round"`;
+  const paths = (fill) =>
+    letters.ds.map((d) => `<path d="${d}" fill="${fill}" stroke="${fill}" ${shape}/>`).join("");
 
   if (mono) {
     // Android meratakan badge notifikasi jadi siluet, jadi tidak ada gradasi
     // dan tidak ada transparansi parsial yang bisa bertahan di sana.
     return [
       `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" width="${S}" height="${S}">`,
-      `<g ${place} fill="${mono}">`,
-      `<path d="${aChevron()}" stroke="${mono}" ${soften}/>`,
-      `<path d="${aBar()}"/>`,
-      `</g></svg>`,
+      `<g ${place}>${paths(mono)}</g>`,
+      `</svg>`,
     ].join("");
   }
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" width="${S}" height="${S}">`,
-    `<defs><linearGradient id="hot" x1="0.1" y1="0" x2="0.9" y2="1">`,
+    `<defs>`,
+    // userSpaceOnUse dalam ruang huruf: offset tiap huruf sudah dipanggang ke
+    // path-nya, jadi ketiganya berbagi satu ruang dan sapuannya melintasi kata,
+    // bukan mengulang di tiap huruf.
+    `<linearGradient id="hot" gradientUnits="userSpaceOnUse" x1="0" y1="-${CAP}" x2="${letters.width.toFixed(0)}" y2="0">`,
     // Kedua ujung --gradient-hot (BRAND-SYSTEM.md §3.1).
     `<stop offset="0" stop-color="#fb007f"/><stop offset="1" stop-color="#d226c7"/>`,
     `</linearGradient></defs>`,
     background ? `<rect width="${S}" height="${S}" fill="${background}"/>` : "",
-    `<g ${place}>`,
-    `<path d="${aChevron()}" fill="url(#hot)" stroke="url(#hot)" ${soften}/>`,
-    /**
-     * Bidang kedua. Ia mengerjakan dua hal sekaligus: menutup rongga huruf A
-     * supaya hurufnya terbaca, dan memunculkan nada ketiga di tempat ia
-     * menyilang kedua kaki. Itu perangkat yang sama dipakai Google Drive,
-     * Chat, dan Voice.
-     *
-     * #ff5cb8, bukan #ff209d seperti sebelumnya. Magenta terang di atas
-     * chevron yang juga magenta hampir tidak menghasilkan beda nada sama
-     * sekali; pink yang lebih pucat memunculkannya dengan jelas. Tetap cukup
-     * jenuh untuk terlihat di atas latar terang, karena ujungnya yang menonjol
-     * keluar kaki harus tetap ada di sana.
-     */
-    `<path d="${aBar()}" fill="#ff5cb8" opacity="0.9"/>`,
-    `</g></svg>`,
+    `<g ${place}>${paths("url(#hot)")}</g>`,
+    `</svg>`,
   ].join("");
 }
 
@@ -250,8 +264,10 @@ const OUTPUTS = [
   { file: "favicon.svg", svg: buildMark() },
   { file: "icon-192.png", svg: buildMark(), size: 192 },
   { file: "icon-512.png", svg: buildMark(), size: 512 },
-  { file: "icon-maskable-512.png", svg: buildMark({ background: "#fcfcfc" }), size: 512, flatten: true },
-  { file: "apple-icon.png", svg: buildMark({ background: "#fcfcfc" }), size: 180, flatten: true },
+  // pad 66: zona aman maskable. pad 46: iOS memakai topeng sudut membulat
+  // sendiri, lebih longgar daripada lingkaran Android tapi tetap memotong sudut.
+  { file: "icon-maskable-512.png", svg: buildMark({ background: "#fcfcfc", pad: 66 }), size: 512, flatten: true },
+  { file: "apple-icon.png", svg: buildMark({ background: "#fcfcfc", pad: 46 }), size: 180, flatten: true },
   { file: "icon-badge-96.png", svg: buildMark({ mono: "#ffffff" }), size: 96 },
 ];
 
@@ -272,19 +288,19 @@ async function main() {
   }
 
   const height = wordmark.bottom - wordmark.top;
+  // Daftar path polos: offset tiap huruf sudah dipanggang ke dalam datanya,
+  // jadi tidak ada lagi koordinat terpisah yang harus dibawa komponennya.
   const glyphs = (list) =>
-    `[\n${list.map((g) => `  { d: ${JSON.stringify(g.d)}, x: ${g.x} },`).join("\n")}\n]`;
+    `[\n${list.map((d) => `  ${JSON.stringify(d)},`).join("\n")}\n]`;
 
   writeFileSync(
     resolve(ROOT, "app/components/brand-logo-paths.ts"),
     [
       "// DIHASILKAN scripts/build-brand.mjs. Jangan disunting tangan.",
-      "// Outline Poppins Bold (SIL OFL 1.1) plus huruf A yang digambar ulang.",
+      "// Outline Poppins Bold (SIL OFL 1.1) plus palang huruf t yang digambar ulang.",
       "// Lihat BRAND-LOGO-SOURCES.md untuk sumber dan lisensinya.",
       "",
-      "export type BrandGlyph = { readonly d: string; readonly x: number };",
-      "",
-      `export const WORDMARK_VIEWBOX = "0 ${wordmark.top} ${wordmark.width} ${height}";`,
+            `export const WORDMARK_VIEWBOX = "0 ${wordmark.top} ${wordmark.width} ${height}";`,
       `export const WORDMARK_RATIO = ${(wordmark.width / height).toFixed(4)};`,
       "",
       "/** Kotak kata \"TAP\", tempat bidang gradasinya digambar lalu dipotong. */",
@@ -294,10 +310,10 @@ async function main() {
       `export const WORDMARK_HEIGHT = ${height};`,
       "",
       "/** Kata \"Haluan\": mengikuti tinta halaman lewat currentColor. */",
-      `export const WORDMARK_INK: readonly BrandGlyph[] = ${glyphs(wordmark.ink)};`,
+      `export const WORDMARK_INK: readonly string[] = ${glyphs(wordmark.ink)};`,
       "",
       "/** Kata \"TAP\": dipotong dari bidang bergradasi, lihat --wordmark-from/to. */",
-      `export const WORDMARK_HOT: readonly BrandGlyph[] = ${glyphs(wordmark.hot)};`,
+      `export const WORDMARK_HOT: readonly string[] = ${glyphs(wordmark.hot)};`,
       "",
     ].join("\n"),
   );

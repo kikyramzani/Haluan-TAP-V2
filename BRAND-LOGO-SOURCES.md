@@ -239,3 +239,5 @@ Glyph `H a l u n T P` diambil apa adanya lewat fontTools, lengkap dengan advance
 OFL 1.1 mengizinkan turunan seperti ini. Yang dilarangnya adalah menjual font-nya sendiri, bukan memakai outline-nya di dalam sebuah logo. Berkas TTF-nya tidak ikut di-commit; skrip build mengunduhnya saat dijalankan, dan hasilnya yang disimpan.
 
 Poppins juga sudah jadi typeface display resmi produk ini (BRAND-SYSTEM.md §4.1), jadi logonya memakai huruf yang sama dengan judul di seluruh aplikasi.
+
+Wordmark pindah ke huruf kecil pada 2 September 2026, jadi glyph `h`, `t`, dan `p` huruf kecil ikut diambil dari berkas yang sama dengan cara yang sama. Yang digambar ulang sekarang palang huruf `t`, bukan lagi huruf `A`.

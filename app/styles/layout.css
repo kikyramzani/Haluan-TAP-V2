@@ -51,9 +51,17 @@
   min-height: 44px;
 }
 
+/**
+ * 34px, bukan 30px seperti versi kapital.
+ *
+ * Kotak wordmark huruf kecil jauh lebih tinggi: ascender h dan l naik sampai
+ * -740 dan ekor p turun sampai +266, sementara x-height-nya hanya 558. Pada
+ * kotak 30px, tinggi huruf yang benar-benar terlihat tinggal sekitar 17px,
+ * jauh lebih ringan daripada kapital yang mengisi 93% kotaknya.
+ */
 .brand-logo {
   display: block;
-  height: 30px;
+  height: 34px;
   width: auto;
 }
 
@@ -141,7 +149,7 @@
   }
 
   .brand-logo {
-    height: 25px;
+    height: 29px;
   }
 }
 

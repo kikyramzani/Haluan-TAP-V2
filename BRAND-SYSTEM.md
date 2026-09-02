@@ -452,22 +452,26 @@ Latar `--gradient-soft` (§3.2) dengan teks ink. Ini salah satu dari sedikit tem
 
 TAP punya logonya sendiri, bukan wordmark korporat induk yang ditempeli badge. Sumbernya `app/components/BrandLogo.tsx`, dan seluruh asetnya dihasilkan `scripts/build-brand.mjs`.
 
-**Wordmark.** Satu baris, "Haluan TAP", Poppins 700 dijadikan outline. Outline, bukan teks hidup: sebuah logo tidak boleh berubah bentuk kalau webfont gagal dimuat. Huruf **A** pada TAP digambar ulang, dan hanya huruf itu: palangnya diganti batang berujung bulat yang menembus kedua kaki. Batang itu bentuk yang sama dengan yang ada di marka aplikasinya, jadi logo di header dan ikon di layar utama benar-benar satu huruf.
+**Wordmark.** Satu baris, "haluan tap", **seluruhnya huruf kecil**, Poppins 700 dijadikan outline. Huruf kecil mengikuti kesan Upwork dan Fiverr: keduanya wordmark huruf kecil yang membulat dan ramah, tanpa marka terpisah. Outline, bukan teks hidup: sebuah logo tidak boleh berubah bentuk kalau webfont gagal dimuat.
+
+Detail khasnya ada pada huruf **t** di kata "tap": palangnya memanjang ke kiri dan kanan, menembus kedua sisinya. Huruf "a" kecil berbentuk lingkaran bertangkai, jadi palang yang dulu menembus kedua kaki huruf A kapital tidak punya tempat di sana, dan menembus lingkaran "a" justru membuatnya terbaca seperti "e". Huruf "t" sudah punya palang sejak awal, jadi memanjangkannya adalah gerak yang sama pada satu-satunya huruf yang tidak kehilangan apa pun karenanya.
 
 - **Dua perlakuan, dua sumber.** "Haluan" memakai `currentColor` sehingga mengikuti tinta halaman. "TAP" membawa gradasi magenta ke violet yang SAMA dengan marka aplikasinya, lewat `--wordmark-from` dan `--wordmark-to`.
 - **Gradasinya berpasangan per tema**, bukan satu nilai. Kedua ujung `--gradient-hot` gagal AA sebagai teks di atas paper: kontras bersifat simetris, jadi `#fb007f` yang hanya 3,78 di bawah teks putih juga hanya 3,78 sebagai teks di atas putih, dan `#d226c7` hanya 4,23. Pasangan terang `#c90063` → `#9430c4` (5,59 dan 5,88 di atas paper); pasangan gelap `#ff209d` → `#b46ff5` (5,45 dan 5,99 di atas `#0e0e13`). Jarak rona-nya sekitar 55 derajat, karena versi 25 derajat pertama praktis tidak terlihat pada wordmark setinggi 30px.
 - **Gradasinya diberikan ke satu bidang persegi yang dipotong bentuk huruf**, bukan ke tiap huruf. Tiap glyph punya `transform` sendiri, dan transform membuat ruang koordinat baru, jadi gradasi yang menempel pada glyph ikut tergeser dan setiap huruf menyapu sendiri-sendiri. Terukur: ketiganya keluar dengan warna yang sama persis.
 - **Clear space** minimal setinggi huruf "H" di keempat sisi.
-- **Tinggi minimum** 22px di layar. Di bawah itu batang huruf A menutup rongganya.
+- **Tinggi minimum** 26px di layar. Angkanya naik dari 22px karena kotak huruf kecil jauh lebih tinggi daripada kapital: ascender "h" dan "l" naik sampai -740 dan ekor "p" turun sampai +266, sementara x-height-nya hanya 558. Pada kotak yang sama, tinggi huruf yang benar-benar terlihat jadi jauh lebih kecil. Karena itu `.brand-logo` dirender 34px, bukan 30px.
 - **Latar yang diizinkan**: paper, ink, permukaan netral. Tidak pernah di atas `--gradient-hot` — magenta di atas magenta.
 - Tidak diregangkan, tidak dimiringkan, tidak diberi bayangan. `scaleX()` dan `font-stretch` dilarang §4.2; karena logonya outline, penskalaan proporsional memang satu-satunya yang mungkin.
 - **Gradasi logo tidak dihitung dalam jatah §3.4.** Pengecualian itu ditulis di sana beserta alasannya. Yang tetap berlaku: dua perhentian saja, rona bertetangga, dan logo tidak pernah diletakkan di atas bidang bergradasi lain.
 
-**Marka aplikasi.** Huruf A yang sama, diperbesar, dengan sudut dibulatkan dan dua bidang bertumpuk: chevron bergradasi `#fb007f` → `#d226c7` (kedua ujung `--gradient-hot`), lalu batang `#ff5cb8` semitransparan yang memunculkan nada ketiga di persilangannya. Kosakata ini mengikuti set ikon Google Workspace.
+**Marka aplikasi.** Kata **"TAP"** kapital, satu baris, dengan gradasi `#fb007f` → `#d226c7` (kedua ujung `--gradient-hot`) menyapu melintasi ketiga hurufnya.
 
-Batangnya pink pucat, bukan magenta terang. Versi pertama memakai `#ff209d`, dan magenta terang di atas chevron yang juga magenta hampir tidak menghasilkan beda nada sama sekali — justru nada ketiga itu yang jadi inti perangkatnya di set referensi.
+Kapital, bukan huruf kecil seperti wordmark-nya, dan itu keputusan teknis: kapital tidak punya ascender maupun descender, jadi pada kanvas persegi hurufnya bisa jauh lebih besar. Hurufnya juga ditebalkan lewat stroke yang mengikuti fill-nya sendiri — Poppins Bold adalah bobot terberat yang ada di repo ini, dan pada ukuran favicon ia masih terlalu ramping. Stroke yang sama sekaligus membulatkan sudutnya.
 
-Gradasinya boleh di sini, dan itu bukan pengecualian yang dibuat-buat: batas §3.4 berlaku per viewport halaman, sementara bilah tab dan layar utama ponsel bukan viewport halaman. Yang tetap berlaku adalah pelajaran favicon sebelumnya — tiga perhentian lintas rona jadi bubur di 16px. Karena itu **dua** perhentian, dan rona bertetangga.
+**Batas yang terukur, dan tidak bisa disetel habis.** Diukur pada kanvas 512 yang diperkecil ke ukuran render sebenarnya: dengan ketebalan awal, "TAP" baru terbaca mulai **32px**. Setelah tracking dan ketebalannya didorong sejauh mungkin, ia terbaca mulai **20px**. Di **16px ia tidak terbaca sebagai tiga huruf** — tinggi kapitalnya di sana hanya sekitar 5px. Itu batas nyata dari tiga huruf pada kanvas 16px. Di layar ber-DPI tinggi, tab browser umumnya meminta 32px, jadi dalam praktiknya sebagian besar pengguna melihat versi yang terbaca.
+
+**Padding maskable berbeda, dan wajib berbeda.** Android memotong ikon maskable ke bentuk sistem dengan zona aman berupa lingkaran berdiameter 80% kanvas. Untuk kata selebar "TAP", persegi panjang terlebar yang muat di lingkaran itu hanya sekitar 382px pada kanvas 512, jadi paddingnya 66 — bukan 12 seperti favicon. Tanpa itu huruf T dan P terpotong di sudut.
 
 | Berkas | Latar | Alasan |
 |---|---|---|

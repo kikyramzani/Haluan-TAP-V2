@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { requireUser } from "../../../lib/auth";
 import { prisma } from "../../../lib/db";
@@ -14,7 +15,10 @@ export default async function LengkapiProfilPage() {
   return (
     <main>
       <nav className="nav shell">
-        <Link className="brand" href="/" aria-label="TAP by Haluan home">
+        {/* Satu-satunya halaman yang dulu hanya memasang badge tanpa wordmark
+            Haluan. Sekarang seragam dengan sembilan lockup lainnya. */}
+        <Link className="brand" href="/" aria-label="Haluan TAP, ke beranda">
+          <Image src="/haluan-logo.png" alt="" width={107} height={35} />
           <strong>TAP</strong>
         </Link>
       </nav>

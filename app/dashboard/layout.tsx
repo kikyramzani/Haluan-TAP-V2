@@ -24,10 +24,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   return (
     <main className="creator-app">
       <nav className="creator-topbar shell">
-        <Link className="brand" href="/">
-          <Image src="/haluan-logo.png" alt="Haluan Digital Network" width={107} height={35} />
-          <span className="brand-divider" />
-          <strong>TAP</strong>
+        <Link className="brand" href="/" aria-label="Haluan TAP, ke beranda">
+          <Image src="/haluan-logo.png" alt="" width={107} height={35} /><strong>TAP</strong>
         </Link>
         <div className="creator-user">
           <span>

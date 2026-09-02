@@ -44,10 +44,8 @@ export default function SiteHeader({ variant = "home", viewer = null }: Props) {
     <>
       <header className="site-header" data-scrolled={scrolled}>
         <div className="shell nav">
-          <Link className="brand" href="/" aria-label="TAP by Haluan, ke beranda">
-            <Image src="/haluan-logo.png" alt="Haluan Digital Network" width={92} height={24} priority />
-            <span className="brand-divider" aria-hidden="true" />
-            <strong>TAP</strong>
+          <Link className="brand" href="/" aria-label="Haluan TAP, ke beranda">
+            <Image src="/haluan-logo.png" alt="" width={92} height={24} priority /><strong>TAP</strong>
           </Link>
 
           <nav className="nav-links" aria-label="Navigasi utama">

@@ -40,10 +40,8 @@ export default function AdminNav({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const pathname = usePathname();
   return (
     <aside className="admin-sidebar">
-      <Link className="brand" href="/">
-        <Image src="/haluan-logo.png" alt="Haluan Digital Network" width={107} height={35} />
-        <span className="brand-divider" />
-        <strong>TAP</strong>
+      <Link className="brand" href="/" aria-label="Haluan TAP, ke beranda">
+        <Image src="/haluan-logo.png" alt="" width={107} height={35} /><strong>TAP</strong>
       </Link>
       <span className="sidebar-label">ADMIN WORKSPACE</span>
       {MAIN_ITEMS.map(([href, icon, label]) => (

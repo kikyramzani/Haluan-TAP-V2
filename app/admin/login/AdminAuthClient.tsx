@@ -90,7 +90,7 @@ export default function AdminAuthClient({ emailVerificationEnabled }: { emailVer
   return (
     <main className="auth-main">
       <nav className="nav shell auth-nav">
-        <Link className="brand" href="/" aria-label="TAP by Haluan home"><Image src="/haluan-logo.png" alt="Haluan Digital Network" width={107} height={35}/><span className="brand-divider" /><strong>TAP</strong></Link>
+        <Link className="brand" href="/" aria-label="Haluan TAP, ke beranda"><Image src="/haluan-logo.png" alt="" width={107} height={35}/><strong>TAP</strong></Link>
         <Link className="back-link" href="/"><Icon name="arrow-left" /> Kembali ke home</Link>
       </nav>
 

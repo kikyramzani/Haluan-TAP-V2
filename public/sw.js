@@ -17,7 +17,9 @@
  * tampil tanpa gaya sama sekali. /offline.html memuat gayanya sendiri inline.
  */
 
-const CACHE_NAME = "tap-offline-v1";
+// Dinaikkan saat isi offline.html berubah, supaya klien yang sudah memasang
+// PWA tidak menyimpan cangkang versi lama.
+const CACHE_NAME = "tap-offline-v2";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {
@@ -79,7 +81,9 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(payload.title, {
       body: payload.body,
       icon: "/icon-192.png",
-      badge: "/icon-192.png",
+      // Android meratakan badge jadi siluet monokrom, jadi ikon berwarna
+      // di sana hanya jadi gumpalan buram. Aset ini memang satu warna.
+      badge: "/icon-badge-96.png",
       // tag: notifikasi baru menggantikan yang lama alih-alih menumpuk jadi
       // deretan panjang di shade. data.url: tiap notifikasi bisa menunjuk
       // halaman yang benar-benar relevan, bukan selalu daftar umum.

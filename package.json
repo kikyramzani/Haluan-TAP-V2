@@ -9,6 +9,7 @@
     "postinstall": "prisma generate",
     "dev": "next dev",
     "build": "next build",
+    "build:brand": "node scripts/build-brand.mjs",
     "start": "next start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "test": "node --test --test-reporter=tap tests/*.test.mjs",

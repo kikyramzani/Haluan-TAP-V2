@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import { requireUser } from "../../lib/auth";
 import { prisma } from "../../lib/db";
 import { logoutAction } from "../logout-action";
 import DashboardNav from "./DashboardNav";
+import BrandLogo from "../components/BrandLogo";
 
 /**
  * Shared shell for every /dashboard/* route (Phase 5 of the rebuild plan,
@@ -25,7 +25,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     <main className="creator-app">
       <nav className="creator-topbar shell">
         <Link className="brand" href="/" aria-label="Haluan TAP, ke beranda">
-          <Image src="/haluan-logo.png" alt="" width={107} height={35} /><strong>TAP</strong>
+          <BrandLogo />
         </Link>
         <div className="creator-user">
           <span>

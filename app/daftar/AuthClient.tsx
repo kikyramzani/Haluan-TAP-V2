@@ -2,10 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { track } from "@vercel/analytics";
 import Icon from "../components/Icon";
 import Illustration from "../components/Illustration";
+import BrandLogo from "../components/BrandLogo";
 
 type AuthMode = "register" | "login" | "verify" | "forgot" | "reset";
 
@@ -118,7 +118,7 @@ export default function AuthClient({ googleEnabled, emailVerificationEnabled, in
   return (
     <main className="auth-main">
       <nav className="nav shell auth-nav">
-        <Link className="brand" href="/" aria-label="Haluan TAP, ke beranda"><Image src="/haluan-logo.png" alt="" width={107} height={35}/><strong>TAP</strong></Link>
+        <Link className="brand" href="/" aria-label="Haluan TAP, ke beranda"><BrandLogo /></Link>
         <Link className="back-link" href="/"><Icon name="arrow-left" /> Kembali ke home</Link>
       </nav>
 

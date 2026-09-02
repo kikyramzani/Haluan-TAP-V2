@@ -447,16 +447,35 @@ Latar `--gradient-soft` (§3.2) dengan teks ink. Ini salah satu dari sedikit tem
 
 ## 7. Logo, ikon, imagery
 
-### Logo
+### Logo Haluan TAP
 
-`public/haluan-logo.png` (29,6 KB) adalah wordmark yang dipakai di `SiteHeader`, topbar dashboard creator, dan `AdminNav`.
+TAP punya logonya sendiri, bukan wordmark korporat induk yang ditempeli badge. Sumbernya `app/components/BrandLogo.tsx`, dan seluruh asetnya dihasilkan `scripts/build-brand.mjs`.
 
-- **Clear space** minimal setinggi huruf wordmark di keempat sisi.
-- **Tinggi minimum** 20px di layar. Di bawah itu wordmark-nya tidak terbaca.
-- **Latar yang diizinkan**: paper, ink, permukaan netral. Wordmark **tidak** ditempatkan di atas `--gradient-hot` — magenta di atas magenta.
-- Wordmark tidak diregangkan, tidak dimiringkan, tidak diberi bayangan, dan tidak diganti warnanya.
+**Wordmark.** Satu baris, "Haluan TAP", Poppins 700 dijadikan outline. Outline, bukan teks hidup: sebuah logo tidak boleh berubah bentuk kalau webfont gagal dimuat. Huruf **A** pada TAP digambar ulang, dan hanya huruf itu: palangnya diganti batang berujung bulat yang menembus kedua kaki. Batang itu bentuk yang sama dengan yang ada di marka aplikasinya, jadi logo di header dan ikon di layar utama benar-benar satu huruf.
 
-Aset ikon lain: `favicon.svg`, `apple-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, dan `og.jpg` (1200×630). Kalau palet berubah, keenamnya ikut berubah — kalau tidak, tab browser dan kartu share akan memakai warna lama.
+- **Dua warna, dua sumber.** "Haluan" memakai `currentColor` sehingga mengikuti tinta halaman. "TAP" memakai `--brand-wordmark`, pasangan magenta yang sadar tema: `#c90063` di terang (5,59 di atas paper) dan `#ff209d` di gelap (5,45 di atas `#0e0e13`), keduanya dari tabel §2.5. `--cta` tidak bisa dipakai di sini: sebagai teks di atas ink ia hanya sekitar 3,6.
+- **Clear space** minimal setinggi huruf "H" di keempat sisi.
+- **Tinggi minimum** 22px di layar. Di bawah itu batang huruf A menutup rongganya.
+- **Latar yang diizinkan**: paper, ink, permukaan netral. Tidak pernah di atas `--gradient-hot` — magenta di atas magenta.
+- Tidak diregangkan, tidak dimiringkan, tidak diberi bayangan. `scaleX()` dan `font-stretch` dilarang §4.2; karena logonya outline, penskalaan proporsional memang satu-satunya yang mungkin.
+- **Tanpa gradasi.** §3.4 membatasi satu Haluan Hot per viewport, dan header muncul di setiap halaman.
+
+**Marka aplikasi.** Huruf A yang sama, diperbesar, dengan sudut dibulatkan dan dua bidang bertumpuk: chevron bergradasi `#fb007f` → `#d226c7` (kedua ujung `--gradient-hot`), lalu batang `#ff209d` semitransparan yang memunculkan nada ketiga di persilangannya. Kosakata ini mengikuti set ikon Google Workspace.
+
+Gradasinya boleh di sini, dan itu bukan pengecualian yang dibuat-buat: batas §3.4 berlaku per viewport halaman, sementara bilah tab dan layar utama ponsel bukan viewport halaman. Yang tetap berlaku adalah pelajaran favicon sebelumnya — tiga perhentian lintas rona jadi bubur di 16px. Karena itu **dua** perhentian, dan rona bertetangga.
+
+| Berkas | Latar | Alasan |
+|---|---|---|
+| `favicon.svg`, `icon-192.png`, `icon-512.png` | transparan | browser menaruhnya di atas chrome-nya sendiri |
+| `icon-maskable-512.png` | paper `#fcfcfc` | Android memotong maskable ke bentuk sistem |
+| `apple-icon.png` | paper `#fcfcfc` | iOS tidak menangani transparansi ikon secara konsisten |
+| `icon-badge-96.png` | transparan, satu warna | Android meratakan badge notifikasi jadi siluet |
+
+`public/offline.html` memuat marka ini sebagai SVG **inline**. Halaman itu justru dipakai saat jaringan mati, jadi ia tidak boleh bergantung pada berkas yang harus diambil dari server.
+
+**`public/haluan-logo.png` tetap disimpan** sebagai wordmark korporat Haluan Digital Network, tetapi tidak lagi dirujuk kode mana pun. Ia identitas induk, bukan aset produk. Aturan lamanya — tidak diregangkan, tidak diganti warnanya — tetap berlaku kalau suatu saat ia dipakai lagi.
+
+`public/og.jpg` (1200×630) tidak ikut berubah; lihat §10.
 
 ### Ikon
 
@@ -535,7 +554,7 @@ Kabar baiknya: kodebase ini sudah token-clean. Di luar `tokens.css` hanya ada **
 | `app/manifest.ts` | `background_color` / `theme_color` hardcode | **selesai** — `#fcfcfc` |
 | `app/styles/catalog.css` | Satu-satunya hex di luar `tokens.css` | **selesai** — jadi `var(--action-contrast)` |
 | `public/` — font | Ganti Archivo + Inter dengan Poppins + Open Sans | **selesai** — 6 berkas subset latin/latin-ext; berkas lama dihapus |
-| `public/` — ikon | Regenerasi favicon dan icon PWA | **selesai** — heksagon brand di atas `#fb007f`, marka ink; `favicon.svg` + 4 PNG diregenerasi darinya |
+| `public/` — ikon | Regenerasi favicon dan icon PWA | **selesai** — marka huruf A Logo Haluan TAP, gradasi `#fb007f` → `#d226c7` dengan batang `#ff209d` semitransparan; `favicon.svg` + 4 PNG + badge monokrom dihasilkan `scripts/build-brand.mjs`, yang sekarang benar-benar ada di repo |
 | `public/og.jpg` | Kartu share 1200×630 | **sengaja tidak diubah** — aset 3D yang diproduksi khusus dan masih terlihat baik; menggantinya dengan vektor datar justru menurunkan kualitasnya |
 | `STITCH-DESIGN-SPEC.md` §2.1–2.9 | Cermin dari `tokens.css` | **belum** |
 | `app/admin/(dashboard)/AdminNav.tsx` | Glyph Unicode → `Icon.tsx` (§6.4) | **selesai** — beserta 16 berkas admin lain dan toggle kata sandi |

@@ -2,10 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { track } from "@vercel/analytics";
 import Icon from "../components/Icon";
 import ArtSlot from "../components/ArtSlot";
+import BrandLogo from "../components/BrandLogo";
 
 type Viewer = {
   name: string;
@@ -155,7 +155,7 @@ export default function RequestSampleClient({ art }: Props) {
     <main>
       <nav className="nav shell">
         <Link className="brand" href="/" aria-label="Haluan TAP, ke beranda">
-          <Image src="/haluan-logo.png" alt="" width={107} height={35} /><strong>TAP</strong>
+          <BrandLogo />
         </Link>
         <Link className="back-link" href="/deals"><Icon name="arrow-left" /> Kembali ke katalog</Link>
       </nav>

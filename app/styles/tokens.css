@@ -139,6 +139,18 @@
   --cta-press: #be005e;
   --cta-contrast: #ffffff;
 
+  /**
+   * Magenta kata "TAP" pada Logo Haluan TAP.
+   *
+   * Terpisah dari --cta karena perannya berbeda: --cta adalah ISIAN yang
+   * membawa label putih, sementara ini adalah TEKS di atas latar halaman.
+   * Nilainya diambil langsung dari tabel kontras §2.5, yang mencatat #ff209d
+   * mencapai 5,45 di atas #0e0e13. --cta sendiri hanya sekitar 3,6 sebagai
+   * teks di atas ink, jadi memakainya di sini akan membuat nama produk sulit
+   * dibaca justru di tema bawaan aplikasi.
+   */
+  --brand-wordmark: #ff209d;
+
   /* Ramp padat kini identik dengan ramp tombol. Namanya dipertahankan karena
      dipakai kontrol rapat (tombol kartu, pil hitungan filter, baris tabel
      admin), dan nama tersendiri menjaga maksudnya tetap terbaca. */
@@ -385,6 +397,10 @@
   --cta-hover: #c90063;
   --cta-press: #be005e;
   --cta-contrast: #ffffff;
+
+  /* §2.5: #c90063 mencapai 5,59 di atas paper. Pasangan terang dari
+     --brand-wordmark; lihat catatannya di blok tema gelap. */
+  --brand-wordmark: #c90063;
 
   --action: var(--cta);
   --action-hover: var(--cta-hover);

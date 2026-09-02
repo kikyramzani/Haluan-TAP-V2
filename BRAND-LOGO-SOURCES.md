@@ -225,3 +225,17 @@ Jalur path-nya di-inline ke `app/components/PlatformMark.tsx`, bukan disimpan se
 Keduanya monokrom, bukan warna asli platform. Ini keputusan sistem desain, bukan keterbatasan aset: BRAND-SYSTEM.md §2.4 sengaja menjauhkan aksen platform TAP dari warna asli TikTok karena merah mudanya nyaris sama dengan `--cta`, sehingga tanda berwarna penuh akan menghidupkan kembali tabrakan itu.
 
 **Lazada belum punya tanda.** Simple Icons tidak memuatnya, dan berkas Wikimedia Commons yang tersedia (`File:Lazada (2019).svg`, 410 × 107 mm) adalah wordmark lebar berwarna — bentuk yang tidak muat di slot ikon 44 px persegi di samping dua glyph persegi, dan melanggar aturan monokrom di atas. Kartunya memakai inisial `LZ` sampai ada mark resmi monokrom berbentuk persegi. Jangan menggantinya dengan logo hasil buatan sendiri.
+
+## Huruf Logo Haluan TAP (2 September 2026)
+
+Bukan logo pihak ketiga, melainkan huruf yang dipakai membangun logo produk sendiri. Dicatat di sini karena asalnya berkas berlisensi dan turunannya di-commit sebagai aset.
+
+| Aset | Sumber | Lisensi |
+|---|---|---|
+| Outline glyph di `app/components/brand-logo-paths.ts` | Poppins Bold — https://github.com/google/fonts/blob/main/ofl/poppins/Poppins-Bold.ttf | SIL Open Font License 1.1 |
+
+Glyph `H a l u n T P` diambil apa adanya lewat fontTools, lengkap dengan advance width aslinya. Huruf **A** tidak: ia digambar ulang sepenuhnya di `scripts/build-brand.mjs`, memakai koordinat A Poppins hanya sebagai titik acuan.
+
+OFL 1.1 mengizinkan turunan seperti ini. Yang dilarangnya adalah menjual font-nya sendiri, bukan memakai outline-nya di dalam sebuah logo. Berkas TTF-nya tidak ikut di-commit; skrip build mengunduhnya saat dijalankan, dan hasilnya yang disimpan.
+
+Poppins juga sudah jadi typeface display resmi produk ini (BRAND-SYSTEM.md §4.1), jadi logonya memakai huruf yang sama dengan judul di seluruh aplikasi.

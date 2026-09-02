@@ -27,98 +27,47 @@
 }
 
 /**
- * Lockup Haluan TAP.
+ * Logo Haluan TAP.
  *
- * Sebelumnya: wordmark, garis rambut 1px, lalu tulisan "TAP" dengan tracking
- * 0.14em. Tiga hal salah di sana.
+ * Satu SVG, satu objek. Sebelumnya berkas korporat haluan-logo.png bersanding
+ * dengan badge magenta bertuliskan TAP: identitas induk yang ditempeli penanda
+ * produk, bukan logo milik TAP sendiri.
  *
- * 1. Pemisah 1px netral adalah penghubung paling lemah yang bisa dipilih. Ia
- *    membaca sebagai "dua hal yang kebetulan bersebelahan", bukan satu nama.
- * 2. Tracking 0.14em membuat TAP terbaca sebagai LABEL antarmuka, sederajat
- *    dengan "ADMIN WORKSPACE" di sidebar, bukan sebagai nama produk.
- * 3. Warnanya var(--accent), dan --accent adalah magenta di tema terang tapi
- *    SIAN di tema gelap. Jadi nama produknya berganti warna mengikuti tema.
- *    Sebuah wordmark tidak boleh melakukan itu.
+ * Tiga aturan lama ikut hilang bersamanya, dan ketiganya memang bermasalah:
  *
- * Sekarang: wordmark Haluan apa adanya (BRAND-SYSTEM.md §7 melarang menyentuh
- * berkas masternya), bersanding dengan badge produk magenta padat. Ini pola
- * induk-plus-produk yang lazim, dan badge-nya sekaligus bersaudara dengan
- * favicon: bidang magenta yang sama, sudut membulat yang sama, marka putih di
- * atasnya. Padat, bukan --gradient-hot: §3.4 membatasi satu gradasi Haluan Hot
- * per viewport, dan header muncul di setiap halaman.
+ * 1. `filter: brightness(0)` meratakan setiap piksel logo jadi hitam di tema
+ *    terang. Ia ada karena aset PNG-nya putih dan hanya dibuat untuk latar
+ *    gelap. SVG memakai currentColor, jadi ia berbalik sendiri tanpa filter.
+ * 2. `.brand img { width: 92px }` diam-diam menimpa `width={107}` yang ditulis
+ *    di sembilan dari sepuluh lockup. Sekarang ukurannya satu sumber.
+ * 3. Badge `.brand strong` dengan seluruh perhitungan tingginya tidak lagi ada:
+ *    TAP kini bagian dari wordmark, bukan lencana di sebelahnya.
  */
 .brand {
   display: flex;
   align-items: center;
-  /* 10px, bukan 12px. Jarak yang lebih rapat mengikat kedua bagiannya jadi satu
-     objek; di 12px badge-nya mulai terbaca sebagai elemen terpisah lagi. */
-  gap: 10px;
   flex-shrink: 0;
   /* Logo adalah tautan ke beranda, jadi ia juga harus bisa disentuh. */
   min-height: 44px;
 }
 
-.brand img {
-  width: 92px;
-  height: auto;
-  /* Aset logonya memang berwarna terang dan dibuat untuk latar gelap, jadi di
-     tema bawaan ia dipakai apa adanya. Di tema terang logonya dijadikan solid
-     gelap alih-alih mengganti berkas, supaya bentuk dan proporsinya tetap sama. */
-}
-
-:root[data-theme="light"] .brand img {
-  filter: brightness(0) saturate(100%);
-  opacity: 0.86;
-}
-
-/**
- * Ukurannya diturunkan dari wordmark-nya, bukan ditebak.
- *
- * Diukur dari public/haluan-logo.png: tinggi kapital "HALUAN" adalah 0,337 dari
- * tinggi kanvas, jadi pada logo setinggi 30px kapitalnya 10,1px. Poppins 700 di
- * 11px memberi kapital ~7,7px: sedikit di bawah induknya, yang memang posisi
- * yang benar untuk badge produk. Versi 12px sebelumnya membuat TAP bersaing
- * dengan HALUAN alih-alih menemaninya.
- *
- * Tingginya 20px, dua pertiga dari logo 30px. Di 22px bidang magentanya terlalu
- * berat untuk wordmark di sebelahnya.
- */
-.brand strong {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  padding: 0 7px;
-  /* 6px, bukan radius-sm: pada kotak setinggi 20px, 8px sudah membulat
-     hampir jadi pil, dan pil terbaca sebagai pil status, bukan badge produk. */
-  border-radius: 6px;
-  /* --cta, bukan --accent: pasangan ini sama di kedua tema, jadi namanya tetap
-     magenta di mana pun. --cta-contrast memang pasangan putihnya. */
-  background: var(--cta);
-  color: var(--cta-contrast);
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: var(--weight-display);
-  /* 0.05em, bukan 0.14em: cukup untuk membuka huruf kapital pada ukuran sekecil
-     ini, tidak sampai mengubahnya jadi label antarmuka. */
-  letter-spacing: 0.05em;
-  line-height: 1;
-  white-space: nowrap;
+.brand-logo {
+  display: block;
+  height: 30px;
+  width: auto;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .brand strong {
-    transition: transform var(--duration-fast) var(--ease-out),
-      filter var(--duration-fast) var(--ease-out);
+  .brand-logo {
+    transition: transform var(--duration-fast) var(--ease-out);
   }
 }
 
-.brand:hover strong {
-  filter: brightness(1.08);
-}
-
-/* Produknya bernama TAP. Menekannya memang seharusnya terasa seperti ketukan. */
-.brand:active strong {
-  transform: scale(0.94);
+/* Produknya bernama TAP. Menekannya memang seharusnya terasa seperti ketukan.
+   0.97, bukan 0.94 seperti badge lama: yang bergerak sekarang seluruh logo,
+   dan pada objek selebar itu skala yang sama terasa berlebihan. */
+.brand:active .brand-logo {
+  transform: scale(0.97);
 }
 
 .nav-links {
@@ -191,16 +140,8 @@
     font-size: var(--text-xs);
   }
 
-  .brand img {
-    width: 78px;
-  }
-
-  /* Badge ikut menyusut bersama wordmark-nya supaya proporsi lockup-nya tetap:
-     logo 78px berarti tinggi 25px, jadi badge-nya turun ke 18px. */
-  .brand strong {
-    height: 18px;
-    padding: 0 6px;
-    font-size: 10px;
+  .brand-logo {
+    height: 25px;
   }
 }
 

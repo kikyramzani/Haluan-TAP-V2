@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import Icon from "./Icon";
+import BrandLogo from "./BrandLogo";
 
 type Props = {
   /** Beranda menautkan ke anchor di halaman yang sama; halaman lain kembali ke home. */
@@ -45,7 +45,7 @@ export default function SiteHeader({ variant = "home", viewer = null }: Props) {
       <header className="site-header" data-scrolled={scrolled}>
         <div className="shell nav">
           <Link className="brand" href="/" aria-label="Haluan TAP, ke beranda">
-            <Image src="/haluan-logo.png" alt="" width={92} height={24} priority /><strong>TAP</strong>
+            <BrandLogo />
           </Link>
 
           <nav className="nav-links" aria-label="Navigasi utama">

@@ -121,6 +121,9 @@
 }
 
 .nav-session {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-size: var(--text-sm);
   color: var(--text-muted);
   white-space: nowrap;
@@ -130,16 +133,56 @@
   color: var(--text);
 }
 
+/* Inisial nama. Bulat, memakai ramp aksi supaya labelnya putih tetap lolos AA
+   (--accent di tema terang adalah magenta pekat, bukan cyan). */
+.nav-session-avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-pill);
+  background: var(--action);
+  color: var(--action-contrast);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: normal;
+}
+
 @media (max-width: 900px) {
   .nav-links {
     display: none;
   }
 }
 
-/* Di layar sempit tautan sesi disembunyikan. "Akun" sudah ada di navigasi
-   bawah, dan CTA dipadatkan supaya header tidak melebihi lebar layar. */
+/* Di layar sempit CTA dipadatkan supaya header tidak melebihi lebar layar. */
 @media (max-width: 600px) {
-  .nav-session {
+  /* Belum masuk: tombol "Gabung sekarang" di sebelahnya sudah membawa aksi
+     yang sama, jadi tautan ini memang mubazir di sini. */
+  .nav-session[data-signed-in="false"] {
+    display: none;
+  }
+
+  /**
+   * Sudah masuk: tinggal inisialnya.
+   *
+   * Ini kondisi yang sebelumnya membuat sisi kanan header kosong sama sekali.
+   * "Gabung sekarang" tidak dirender untuk creator yang sudah masuk, dan
+   * tautan sesi ikut disembunyikan di ambang ini, jadi .nav-actions benar-benar
+   * tidak berisi apa-apa — logo di kiri, ruang mati di kanan, di setiap
+   * halaman publik.
+   */
+  .nav-session[data-signed-in="true"] {
+    /* Target 44px, lingkaran terlihat tetap 30px. Padding-nya yang melebarkan,
+       jadi tidak ada satu piksel pun yang berubah di layar. */
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .nav-session[data-signed-in="true"] .nav-session-label,
+  .nav-session[data-signed-in="true"] .tap-icon {
     display: none;
   }
 
@@ -283,9 +326,30 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--space-3);
+  /* Jarak antar-baris dipegang oleh tinggi tautannya sendiri di bawah, bukan
+     oleh gap. Gap yang besar hanya menambah ruang MATI di antara dua target;
+     tinggi target yang menambah ruang HIDUP. */
+  gap: 0;
   font-size: var(--text-sm);
   color: var(--text-muted);
+}
+
+/**
+ * Tautan footer sebagai target, bukan sebagai teks.
+ *
+ * Sebagai elemen inline, tingginya cuma line-height × 14px ≈ 22px — di bawah
+ * ambang 24px yang WCAG 2.2 kriteria 2.5.8 tuntut, dan jauh di bawah ambang
+ * jempol. Pengecualian "tautan di dalam kalimat" tidak berlaku: ini daftar
+ * navigasi, bukan prosa.
+ *
+ * inline-flex, bukan block: lebar target tetap selebar teksnya, jadi mengetuk
+ * ruang kosong di kanan label tidak ikut memicu navigasi.
+ */
+.footer-col a,
+.footer-legal a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
 }
 
 .footer-col a:hover {
@@ -308,5 +372,23 @@
   .footer-grid {
     grid-template-columns: 1fr;
     gap: var(--space-8);
+  }
+
+  /**
+   * Di ponsel footer jadi satu kolom, jadi ruang vertikal murah dan tiap
+   * tautan bisa jadi baris sentuh penuh 44px. Ini juga yang membuat footer
+   * berhenti terasa seperti teks kecil yang menumpuk dan mulai terbaca
+   * seperti daftar yang memang untuk ditekan.
+   */
+  .footer-col a {
+    min-height: 44px;
+  }
+
+  /* Lantai 24px-nya sudah diberikan bersama .footer-col a di atas — dulu
+     "Privasi" dan "Ketentuan" hanya diurus di dalam blok ini, jadi di 900px
+     dan 1280px keduanya tetap setinggi 18,6px dan tidak pernah memenuhi
+     ambang WCAG 2.5.8 sama sekali. */
+  .footer-legal a {
+    min-height: 44px;
   }
 }

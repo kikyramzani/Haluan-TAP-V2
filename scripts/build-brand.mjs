@@ -247,8 +247,26 @@ function buildMark({ background = null, mono = null, pad = 12 } = {}) {
     // path-nya, jadi ketiganya berbagi satu ruang dan sapuannya melintasi kata,
     // bukan mengulang di tiap huruf.
     `<linearGradient id="hot" gradientUnits="userSpaceOnUse" x1="0" y1="-${CAP}" x2="${letters.width.toFixed(0)}" y2="0">`,
-    // Kedua ujung --gradient-hot (BRAND-SYSTEM.md §3.1).
-    `<stop offset="0" stop-color="#fb007f"/><stop offset="1" stop-color="#d226c7"/>`,
+    /**
+     * Sapuan magenta ke violet, JARAK RONA DILEBARKAN ke ~53°.
+     *
+     * Ujung violetnya dulu #d226c7, yang hanya berjarak 26° dari #fb007f.
+     * Itu persis cacat yang sudah diperbaiki di wordmark: dua warna gelap yang
+     * bertetangga rona terbaca sebagai SATU warna pada ukuran kecil, dan marka
+     * ini hidup di 48px di tab browser dan 96px di badge notifikasi. Sapuan
+     * yang tidak terlihat bukan sapuan; ia hanya biaya render.
+     *
+     * #9a2fe0 berjarak 53° dari #fb007f — sama dengan jarak yang sudah
+     * diverifikasi untuk wordmark (50° terang, 55° gelap) — sehingga marka dan
+     * wordmark akhirnya terbaca sebagai satu benda, bukan dua aset yang
+     * kebetulan sewarna. Kontrasnya di atas kertas #fcfcfc 5,31, jauh di atas
+     * ambang 3,0 untuk objek grafis.
+     *
+     * Ujung magentanya TIDAK berubah. #fb007f adalah warna brand Haluan itu
+     * sendiri (BRAND-SYSTEM.md §2.1); yang boleh disegarkan adalah ke mana ia
+     * menuju, bukan dari mana ia berangkat.
+     */
+    `<stop offset="0" stop-color="#fb007f"/><stop offset="1" stop-color="#9a2fe0"/>`,
     `</linearGradient></defs>`,
     background ? `<rect width="${S}" height="${S}" fill="${background}"/>` : "",
     `<g ${place}>${paths("url(#hot)")}</g>`,

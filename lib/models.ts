@@ -31,4 +31,26 @@ export type TapUser = {
   recipientName?: string;
   address?: string;
   assignedPic?: string;
+  /**
+   * Alamat kirim per BAGIAN, bukan satu blob teks.
+   *
+   * `address` di atas adalah `legacyAddressText` — satu string hasil migrasi
+   * yang tidak bisa dipecah kembali jadi kelurahan/kecamatan/kabupaten. Form
+   * request sample punya tujuh field terpisah, jadi ia butuh bentuk ini kalau
+   * ingin terisi otomatis dari profil yang sudah dilengkapi creator.
+   *
+   * Nama wilayah, bukan id: field di form adalah teks bebas yang dibaca
+   * manusia, dan id BPS tidak berarti apa-apa di sana.
+   */
+  shipping?: {
+    street?: string;
+    rt?: string;
+    rw?: string;
+    village?: string;
+    district?: string;
+    regency?: string;
+    province?: string;
+    postalCode?: string;
+    recipientPhone?: string;
+  };
 };

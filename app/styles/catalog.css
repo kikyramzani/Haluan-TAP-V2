@@ -113,6 +113,33 @@
   background: var(--surface-sunken);
 }
 
+/**
+ * Kotak sentuhnya 44px, lingkarannya tetap 28px.
+ *
+ * Lingkaran 28px adalah keputusan visual yang benar — kotak pencarian hanya
+ * setinggi 48px, dan tombol 44px yang terlihat di dalamnya akan mendominasi
+ * field-nya. Yang salah bukan ukurannya, melainkan bahwa ukuran itu sekaligus
+ * jadi ukuran targetnya: 28px adalah satu-satunya kontrol di bawah 44px pada
+ * permukaan publik utama.
+ *
+ * Pseudo-element tanpa isian memisahkan keduanya. Ia meneruskan klik ke tombol
+ * induknya, jadi targetnya melebar tanpa satu piksel pun berubah di layar.
+ *
+ * Lebarnya dihitung, bukan dikira: lingkarannya berhenti 12px dari tepi field,
+ * jadi kotak 44px membentang 4–48px dari tepi. Padding kanan input di ponsel
+ * persis --space-12 (48px), jadi kotak ini berhenti tepat di tempat teks mulai
+ * dan tidak pernah menutupi satu huruf pun.
+ */
+.search-clear::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+}
+
 .search-clear:hover {
   color: var(--text);
 }
@@ -129,45 +156,6 @@
   .search-field input {
     padding-right: var(--space-12);
   }
-}
-
-/* Saran pencarian */
-.search-suggestions {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  z-index: 30;
-  margin: 0;
-  padding: var(--space-2);
-  list-style: none;
-  background: var(--surface-raised);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  max-height: 320px;
-  overflow-y: auto;
-}
-
-.search-suggestions li {
-  padding: var(--space-3) var(--space-3);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.search-suggestions li[aria-selected="true"],
-.search-suggestions li:hover {
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-}
-
-.search-suggestions .suggestion-meta {
-  color: var(--text-subtle);
-  font-size: var(--text-xs);
 }
 
 /**
@@ -285,6 +273,25 @@
   font-variant-numeric: tabular-nums;
 }
 
+/**
+ * Baris kontrol yang SELALU terlihat: tombol Filter dan pemilih urutan.
+ *
+ * Ia hidup di luar .catalog-facets dengan sengaja. Panel facet dilipat di
+ * ≤900px, dan apa pun yang ada di dalamnya ikut hilang; pengurutan tidak boleh
+ * ikut hilang karena ia bukan filter opsional, melainkan cara utama membaca
+ * ulang katalog yang sama.
+ *
+ * Di desktop tombol Filter tidak dirender, jadi baris ini menyisakan pemilih
+ * urutan saja dan `margin-left: auto` pada .sort-control menempelkannya ke
+ * kanan persis seperti sebelumnya.
+ */
+.catalog-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
 .sort-control {
   display: flex;
   align-items: center;
@@ -293,20 +300,10 @@
   margin-left: auto;
 }
 
-@media (max-width: 900px) {
-  .sort-control {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .sort-control select {
-    flex: 1;
-  }
-}
-
 .sort-control label {
   font-size: var(--text-sm);
   color: var(--text-subtle);
+  white-space: nowrap;
 }
 
 .sort-control select {
@@ -315,8 +312,32 @@
   border-radius: var(--radius-sm);
   border: 1px solid var(--line-strong);
   background: var(--surface);
-  font-size: var(--text-sm);
+  font-size: var(--text-control);
   font-weight: var(--weight-medium);
+}
+
+/**
+ * SETELAH aturan dasarnya, bukan sebelum.
+ *
+ * Media query tidak menambah spesifisitas sama sekali, jadi blok ini hanya
+ * menang karena urutan sumber. Versi sebelumnya diletakkan di ATAS aturan
+ * dasar `.sort-control select` dan selamat semata-mata karena aturan dasar itu
+ * kebetulan tidak pernah mendeklarasikan `flex` — satu properti baru di sana
+ * akan mematikannya tanpa suara.
+ */
+@media (max-width: 900px) {
+  /* Filter selebar isinya, Urutkan mengambil sisa baris. Keduanya tetap dalam
+     satu baris di 390px: tombol Filter ~104px, menyisakan ~230px. */
+  .sort-control {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  .sort-control select {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
 }
 
 .result-line {
@@ -361,8 +382,12 @@
      shorthand `background` lagi di bawah, jadi sapuannya hilang otomatis. */
   background: var(--gradient-wash), var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-card);
   padding: var(--space-6);
+  /* Bayangan sejak DIAM, bukan hanya saat hover. Kartu yang baru mendapat
+     kedalaman ketika disentuh tidak pernah terbaca mengambang di ponsel, dan
+     ponsel adalah tempat katalog ini paling banyak dibuka. */
+  box-shadow: var(--shadow-card);
   transition: transform var(--duration-normal) var(--ease-out),
     border-color var(--duration-normal) var(--ease-out),
     box-shadow var(--duration-normal) var(--ease-out);
@@ -425,7 +450,9 @@
   .deal-card:hover {
     transform: translateY(-2px);
     border-color: var(--line-strong);
-    box-shadow: var(--shadow-card);
+    /* Naik satu langkah elevasi, bukan dari nol ke satu. Kartunya sudah
+       mengambang saat diam; hover mengangkatnya lebih tinggi. */
+    box-shadow: var(--shadow-md);
   }
 
   /* :not() wajib. Tanpa itu aturan ini (0,3,0) mengalahkan
@@ -469,9 +496,19 @@
   cursor: not-allowed;
 }
 
+/**
+ * flex-start, BUKAN center.
+ *
+ * Blok identitas hampir selalu lebih tinggi dari marka 46px di sebelahnya —
+ * di kartu selebar setengah layar, "Beauty & Health · 1 campaign" membungkus
+ * dua sampai tiga baris. Dengan `center`, marka itu turun ke tengah blok dan
+ * nama brand berakhir MELAYANG DI ATAS logonya sendiri, seolah keduanya milik
+ * dua baris berbeda. Rata atas membuat logo sejajar dengan baris pertama nama,
+ * yang memang pasangannya.
+ */
 .deal-card-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-3);
 }
 
@@ -493,8 +530,23 @@
   color: var(--text-muted);
 }
 
+/**
+ * Plat logo dikunci ke KERTAS, bukan ke --surface yang ikut berbalik tema.
+ *
+ * `var(--surface)` bernilai #131218 di tema gelap, dan sebagian besar logo brand
+ * berlatar transparan dengan wordmark bertinta gelap. Hasilnya ubin 46px yang
+ * benar-benar KOSONG: "Everwhite" hilang sepenuhnya di tema gelap, dan yang
+ * selamat di kartu sebelahnya hanya selamat karena logonya kebetulan berwarna
+ * terang. Plat logo bukan permukaan UI — ia pengganti kertas cetak, dan kertas
+ * tidak berubah warna karena aplikasinya dipakai malam hari.
+ *
+ * #fcfcfc di atas kartu gelap #131218 = 18,16:1, jadi tepinya tetap terbaca.
+ * Garisnya diturunkan dari ink supaya tetap terlihat di atas plat terang itu
+ * pada KEDUA tema, bukan dari --line yang di tema gelap adalah putih 8%.
+ */
 .brand-mark.has-logo {
-  background: var(--surface);
+  background: var(--brand-paper);
+  border-color: rgba(9, 10, 10, 0.1);
 }
 
 .brand-mark img {
@@ -553,20 +605,34 @@
 
 .deal-commission-value {
   font-family: var(--font-display);
-  font-size: 42px;
+  /* --text-metric, bukan 42px datar. Token ini dibuat justru karena ada lima
+     ukuran angka berbeda tanpa satu pun tangga; membiarkannya tidak dirujuk
+     berarti tangganya cuma ada di atas kertas. clamp(30px,7vw,46px) juga
+     menyusutkan angka di kartu dua kolom ponsel, tempat 42px paling sesak. */
+  font-size: var(--text-metric);
   font-weight: var(--weight-display);
   letter-spacing: var(--tracking-display);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
-/* Pil ini elemen BARU, bukan .deal-commission-label yang dialihfungsikan:
-   public.spec.ts memeriksa teks .deal-commission-value sendiri, dan label lama
-   membawa dua pesan berbeda yang tidak muat jadi satu pil nowrap. */
+/**
+ * Elemen BARU, bukan .deal-commission-label yang dialihfungsikan:
+ * public.spec.ts memeriksa teks .deal-commission-value sendiri, dan label lama
+ * membawa dua pesan berbeda yang tidak muat jadi satu pil nowrap.
+ *
+ * Bukan .badge lagi. Sebagai pil terisi ia adalah bidang abu berukuran penuh
+ * yang duduk persis di atas angka komisi — dua benda bersaing di tempat yang
+ * seharusnya punya satu pemenang jelas. Sekarang ia teks kecil huruf kapital
+ * yang merenggang: cukup untuk menamai angkanya, tidak cukup untuk menyainginya.
+ */
 .deal-commission-tag {
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
+  color: var(--text-subtle);
 }
 
 .deal-commission-note {
@@ -580,14 +646,15 @@
   font-size: 30px;
 }
 
+/* Tidak lagi memikul `flex: 1` maupun `min-height`: pengganjalan pindah ke
+   .deal-footer di bawah, yang tidak pernah kosong. Keduanya di sini justru
+   penyebab tombol tidak pernah sejajar. */
 .deal-flags {
   display: flex;
   flex-wrap: wrap;
   align-content: start;
   gap: var(--space-1-5);
   margin-top: var(--space-4);
-  min-height: 26px;
-  flex: 1;
 }
 
 /* Kartu Shopee sering tidak punya badge sama sekali. Tanpa aturan ini baris
@@ -597,17 +664,24 @@
   display: none;
 }
 
+/**
+ * margin-top: auto — footer menempel ke DASAR kartu.
+ *
+ * Kartu dalam satu baris grid diregangkan sama tinggi, tapi tombolnya dulu
+ * tidak pernah sejajar: pengganjalnya dititipkan ke `.deal-flags { flex: 1 }`,
+ * dan .deal-flags punya aturan `:empty { display: none }`. Jadi kartu yang
+ * tidak punya badge KEHILANGAN pengganjalnya sama sekali, dan tombolnya naik
+ * — dalam satu baris yang sama, tombol duduk di tiga garis berbeda, dan kartu
+ * tanpa badge menyisakan pita kosong ~60px di bawah tombolnya.
+ *
+ * Dengan margin-top: auto tugas itu pindah ke footer sendiri, yang tidak
+ * pernah kosong. Jaraknya tetap dijaga padding-top di bawah.
+ */
 .deal-footer {
-  margin-top: var(--space-6);
+  margin-top: auto;
   padding-top: var(--space-4);
   border-top: 1px solid var(--line);
   display: flex;
-}
-
-.deal-campaign-count {
-  font-size: var(--text-xs);
-  color: var(--text-subtle);
-  min-width: 0;
 }
 
 .deal-cta {
@@ -616,7 +690,10 @@
   white-space: nowrap;
   min-height: 44px;
   padding: 0 var(--space-4);
-  border-radius: var(--radius-sm);
+  /* Pil. Tombol utama di kedua referensi selalu pil penuh, tidak pernah sudut
+     kecil, dan itu yang membuatnya terbaca sebagai "tekan aku" alih-alih
+     sebagai kotak lain di dalam kartu berkotak. */
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
   /**
    * Action ramp, bukan hot pink. Aturan §6.1 tegas: label ≥15px → #fb007f +
@@ -660,7 +737,7 @@
   text-align: center;
   padding: var(--space-16) var(--space-6);
   border: 1px dashed var(--line-strong);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-card);
   margin-top: var(--space-6);
   display: grid;
   justify-items: center;
@@ -681,13 +758,6 @@
   color: var(--text-muted);
   margin: var(--space-2) auto var(--space-6);
   max-width: 42ch;
-}
-
-.skeleton-card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
-  background: var(--surface);
 }
 
 .skeleton-line {
@@ -886,9 +956,12 @@
   }
 
   /* Facet dilipat di balik satu tombol. Tertutup, halaman langsung menampilkan
-     hasil; terbuka, tidak ada satu pun chip yang tersembunyi. */
+     hasil; terbuka, tidak ada satu pun chip yang tersembunyi. Pengurutan TIDAK
+     ikut terlipat — ia duduk di .catalog-toolbar bersama tombol ini. */
   .facet-toggle {
     display: flex;
+    /* Selebar isinya saja. Sisa baris jadi milik pemilih urutan. */
+    flex: 0 0 auto;
   }
 
   .catalog-facets {
@@ -945,12 +1018,13 @@
   align-items: center;
   gap: 0 var(--space-3);
   padding: var(--space-4);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   border: 1px solid var(--line-strong);
   background: var(--surface);
   min-width: 0;
   transition: border-color var(--duration-fast) var(--ease-out),
     transform var(--duration-fast) var(--ease-out);
+  box-shadow: var(--shadow-card);
 }
 
 .platform-card:hover {
@@ -1068,4 +1142,181 @@
 
 .platform-card--shopee[aria-current="page"] {
   background: var(--platform-shopee-solid);
+}
+
+/* ── Halaman detail deal ─────────────────────────────────────────────── */
+
+/**
+ * Halaman /deal/[campaignId].
+ *
+ * Sampai blok ini ada, halaman itu ditata sepenuhnya lewat dua belas atribut
+ * `style` inline dan tidak punya satu pun kelas sendiri. Gaya inline tidak bisa
+ * dijangkau media query maupun selector tema, jadi ia satu-satunya permukaan
+ * publik yang mustahil diberi perlakuan mobile atau diganti tokennya tanpa
+ * menyunting berkas TSX-nya. Nilainya dipindahkan apa adanya di sini: tampilan
+ * sebelum dan sesudah harus identik.
+ */
+.deal-detail {
+  padding-block: var(--space-12) var(--space-16);
+}
+
+.deal-detail-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.deal-detail-head h1 {
+  font-size: var(--text-h1);
+  margin-top: 4px;
+}
+
+.deal-detail-meta {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.deal-detail-metrics {
+  max-width: 520px;
+  margin-top: var(--space-8);
+}
+
+.deal-detail-note {
+  margin-top: var(--space-4);
+  max-width: 60ch;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.deal-detail-section {
+  margin-top: var(--space-12);
+  max-width: 560px;
+}
+
+.deal-detail-section > h2 {
+  font-size: var(--text-h3);
+}
+
+/**
+ * Jarak bawah paragraf, bukan jarak atas tombol.
+ *
+ * Sebelumnya panel sample menaruhnya di margin-top tombol dan bagian link
+ * menaruhnya di margin-bottom paragraf — dua cara untuk satu jarak yang sama.
+ * Hasil visualnya identik: keduanya --space-4, dan tidak pernah ada satu pun
+ * kasus di mana keduanya berlaku bersamaan.
+ */
+.deal-detail-section > p {
+  margin: var(--space-2) 0 var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.deal-detail-sample {
+  max-width: 720px;
+}
+
+.deal-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.deal-detail-fineprint {
+  margin-top: var(--space-8);
+  color: var(--text-subtle);
+  font-size: var(--text-xs);
+}
+
+/**
+ * Dua kolom di layar lebar — halaman ini sebelumnya yang paling kosong.
+ *
+ * Diukur di tangkapan 1440px: seluruh isi berhenti di x≈690 sementara shell
+ * berakhir di x≈1310. 620px — 43% dari viewport — kosong dari atas sampai
+ * bawah, di halaman yang justru jadi TUJUAN setiap tombol "Dapatkan komisi"
+ * di seluruh situs dan halaman pendaratan setiap link yang dibagikan creator.
+ *
+ * Penempatan eksplisit lewat grid, bukan pembungkus baru di TSX: aksi dan
+ * cetak kecil pindah ke kolom kanan tanpa satu pun elemen tambahan, jadi
+ * urutan DOM — dan karenanya urutan baca serta urutan Tab — tetap persis
+ * seperti semula.
+ */
+@media (min-width: 1000px) {
+  .deal-detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    column-gap: var(--space-12);
+    align-items: start;
+  }
+
+  .deal-detail > .btn-ghost,
+  .deal-detail-head {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  /* max-width dilepas: pembatas 520px dan 560px itu ada untuk mencegah baris
+     teks jadi terlalu panjang di satu kolom penuh. Begitu kolomnya sendiri
+     sudah dibatasi grid, keduanya hanya menyisakan lubang. */
+  .deal-detail-metrics,
+  .deal-detail-note,
+  .deal-detail-section {
+    grid-column: 1;
+    max-width: none;
+  }
+
+  .deal-detail-actions,
+  .deal-detail-fineprint {
+    grid-column: 2;
+  }
+
+  /* Aksi jadi kartu ringkas yang menempel saat digulir, bukan sepasang tombol
+     yang terdampar di ruang kosong. */
+  .deal-detail-actions {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-6));
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-6);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  .deal-detail-fineprint {
+    margin-top: var(--space-4);
+  }
+}
+
+/**
+ * Ubin metrik PERTAMA membawa Haluan Hot dan angka sebesar --text-metric.
+ *
+ * "12%" adalah satu-satunya alasan halaman ini dibuka, tapi ia dirender pada
+ * ukuran dan permukaan yang SAMA PERSIS dengan "Masih berjalan" di sebelahnya.
+ * Dua ubin pucat identik, tidak ada pemenang.
+ *
+ * Ini bidang Haluan Hot SATU-SATUNYA di halaman ini, jadi jatah §3.4 tetap
+ * utuh. Kontras putih dihitung di lima titik sepanjang sapuan: 5,17 · 5,71 ·
+ * 6,28 · 7,04 · 7,67. Terburuk 5,17, dan angkanya ≥30px sehingga ia lolos AA
+ * teks normal sekaligus AAA teks besar di setiap titik.
+ *
+ * Sengaja BUKAN .metric-tile umum: lembar katalog memuat tiga ubin sekaligus,
+ * dan tiga bidang bergradasi berdampingan persis yang §3.4 larang.
+ */
+.deal-detail-metrics .metric-tile:first-child {
+  background: var(--gradient-hot);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.deal-detail-metrics .metric-tile:first-child dt {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.deal-detail-metrics .metric-tile:first-child dd {
+  font-size: var(--text-metric);
+  line-height: 1;
 }

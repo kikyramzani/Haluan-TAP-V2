@@ -90,6 +90,11 @@ export default defineConfig({
         AUTH_EMAIL_MODE: "local",
         AUTH_EMAIL_LOCAL_ENDPOINT: `${emailServerUrl}/__email`,
         CRON_SECRET: "e2e-cron-secret",
+        // Katalog TIDAK boleh di-cache di bawah harness ini. catalog-badges.spec.ts
+        // menyemai satu campaign lalu langsung menuntutnya terlihat di /deals;
+        // cache lima menit akan menyajikan versi sebelum semaian dan tesnya gagal
+        // karena alasan yang tidak ada hubungannya dengan produk.
+        CATALOG_CACHE_TTL: "0",
       },
     },
   ],

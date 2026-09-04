@@ -24,9 +24,52 @@
   }
 }
 
-/* Di lebar ponsel naskah hero rata tengah, bukan rata kiri seperti versi
-   desktop. Blok teks pendek terasa lebih setara dengan ilustrasi di
-   bawahnya yang juga tampil penuh lebar. */
+.hero h1 {
+  /* Nilainya identik dengan clamp yang dulu ditulis di sini — nol piksel
+     berubah — tapi puncak tangga tipografi jadi benar-benar hidup, bukan
+     token yang dideklarasikan lalu tidak pernah dirujuk. */
+  font-size: var(--text-display);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.02;
+  font-weight: var(--weight-display);
+  max-width: 16ch;
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.hero p {
+  margin-top: var(--space-6);
+  max-width: 52ch;
+  font-size: clamp(16px, 1.2vw, 19px);
+  color: var(--text-muted);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+/**
+ * SETELAH aturan dasar .hero h1 / .hero p / .hero-actions di atas, bukan
+ * sebelum. Media query tidak menambah spesifisitas sama sekali, jadi blok ini
+ * hanya menang lewat urutan sumber.
+ *
+ * Ditulis di ATAS aturan dasarnya, LIMA deklarasi di sini mati diam-diam:
+ * `.hero h1 { max-width: none }` kalah dari 16ch; `.hero p` kehilangan
+ * margin-top --space-4 (kalah dari --space-6), max-width 34ch (kalah dari
+ * 52ch), DAN font-size --text-sm (kalah dari clamp 16-19px); serta
+ * `.hero-actions { margin-top: --space-6 }` kalah dari --space-8.
+ *
+ * Artinya perbaikan yang komentarnya sendiri jelaskan — memendekkan paragraf
+ * hero dari lima baris ke tiga supaya gambar tidak terdorong melewati lipatan
+ * di 390px — tidak pernah sekali pun berlaku. Yang selamat hanya `text-align`
+ * dan `margin-inline`, karena aturan dasarnya kebetulan tidak menyebut keduanya.
+ */
 @media (max-width: 600px) {
   .hero-inner {
     text-align: center;
@@ -53,41 +96,66 @@
   }
 }
 
-.hero h1 {
-  font-size: clamp(38px, 5.2vw, 68px);
-  letter-spacing: var(--tracking-display);
-  line-height: 1.02;
-  font-weight: var(--weight-display);
-  max-width: 16ch;
-}
-
-.hero h1 em {
-  font-style: normal;
-  color: var(--accent);
-}
-
-.hero p {
-  margin-top: var(--space-6);
-  max-width: 52ch;
-  font-size: clamp(16px, 1.2vw, 19px);
-  color: var(--text-muted);
-}
-
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-top: var(--space-8);
-}
-
-/* Statistik tipis di bawah hero. Angkanya selalu dihitung dari data, bukan ditulis tangan. */
+/**
+ * Statistik di bawah hero. Angkanya selalu dihitung dari data, bukan ditulis
+ * tangan.
+ *
+ * Dulu sepasang garis 1px yang mengapit teks; sekarang SATU kartu berisi empat
+ * statistik, mengikuti kartu "TODAY SUMMARY" di referensi. Perbedaannya bukan
+ * dekoratif: sebagai strip bergaris, keempat angka ini terbaca seperti bagian
+ * dari alir halaman dan mudah dilewati; sebagai kartu yang mengambang, mereka
+ * terbaca sebagai satu klaim yang berdiri sendiri.
+ */
 .proof-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: var(--space-6);
-  padding-block: var(--space-8);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  padding: var(--space-8) var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+/**
+ * Ubin ikon menggantikan batang 3px.
+ *
+ * Ini pola yang paling sering diulang di kedua referensi dan yang paling
+ * membuat kartu metrik terbaca sebagai kartu, bukan sebagai daftar angka:
+ * ikon dalam ubin pucat, tepat di atas metriknya. Batang warna sebelumnya
+ * sudah membawa kode warnanya, tapi ia tidak pernah memberi tahu statistik itu
+ * TENTANG apa.
+ *
+ * Warnanya tetap diambil dari --proof-accent yang sama, jadi kode warna per
+ * statistik tidak hilang — ia hanya pindah dari batang ke ubin.
+ *
+ * Kontras ikon di atas tint 14%-nya sendiri: 4,02 · 4,86 · 6,02 · dan positif
+ * lolos telak. Semuanya di atas ambang 3,0 untuk objek grafis, dan nilainya
+ * sendiri tertulis penuh sebagai teks di bawahnya.
+ */
+.proof-item {
+  display: flex;
+  flex-direction: column;
+  --proof-accent: var(--surface-magenta);
+}
+
+.proof-item .icon-tile {
+  order: 0;
+  margin-bottom: var(--space-3);
+  background: color-mix(in srgb, var(--proof-accent) 14%, transparent);
+  color: var(--proof-accent);
+}
+
+.proof-item:nth-child(2) {
+  --proof-accent: var(--surface-magenta-deep);
+}
+
+.proof-item:nth-child(3) {
+  --proof-accent: var(--surface-violet);
+}
+
+.proof-item:nth-child(4) {
+  --proof-accent: var(--positive);
 }
 
 .proof-item dt {
@@ -106,11 +174,6 @@
   letter-spacing: var(--tracking-display);
   font-variant-numeric: tabular-nums;
   line-height: 1;
-}
-
-.proof-item {
-  display: flex;
-  flex-direction: column;
 }
 
 /* Langkah "cara kerja" */
@@ -137,8 +200,9 @@
   padding: var(--space-6);
   border: 1px solid var(--line);
   border-top: 3px solid var(--surface-magenta);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
 /* Tiap langkah mengambil satu warna dari set yang sama dengan #kenapa-tap,
@@ -162,23 +226,16 @@
   margin-top: var(--space-2);
 }
 
-/* Kartu platform */
-.platform-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-4);
-  margin-top: var(--space-8);
-}
-
 .platform-card {
   padding: var(--space-8);
   border: 1px solid var(--line);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-card);
   background: var(--surface);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   transition: border-color var(--duration-normal) var(--ease-out);
+  box-shadow: var(--shadow-card);
 }
 
 .platform-card:hover {
@@ -193,14 +250,6 @@
   color: var(--text-muted);
   font-size: var(--text-sm);
   flex: 1;
-}
-
-.platform-count {
-  font-family: var(--font-display);
-  font-size: 30px;
-  font-weight: var(--weight-display);
-  letter-spacing: var(--tracking-display);
-  font-variant-numeric: tabular-nums;
 }
 
 .platform-card a {
@@ -502,7 +551,7 @@
 }
 
 .system-state {
-  min-height: 62vh;
+  min-height: 62dvh;
   display: grid;
   place-content: center;
   text-align: center;
@@ -524,8 +573,9 @@
   gap: var(--space-3);
   padding: var(--space-6);
   border: 1px solid var(--line);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-panel);
   background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
 .platform-panel-label {
@@ -647,10 +697,17 @@
   }
 
   .hero-visual img {
-    /* 28vh, diukur bukan dikira: pada 390x844 tumpukan teks menaruh puncak
+    /* 28svh, diukur bukan dikira: pada 390x844 tumpukan teks menaruh puncak
        gambar di y≈506 dan bottom nav mulai di y=778, jadi ruang nyatanya ~270px.
-       38vh (320px) masih menabrak nav 12px; 28vh (236px) menyisakan jarak. */
-    max-height: 28vh;
+       38svh (320px) masih menabrak nav 12px; 28svh (236px) menyisakan jarak.
+
+       svh, BUKAN vh atau dvh. Batasan ini soal tidak menabrak bottom nav, jadi
+       ia harus diukur terhadap viewport TERKECIL yang mungkin — yaitu saat
+       bilah browser terlihat, dan itulah persis definisi svh. `vh` mengukur
+       viewport saat bilah tersembunyi, jadi ia terlalu longgar dan tabrakannya
+       kembali. `dvh` benar nilainya tapi berubah-ubah saat digulir, sehingga
+       gambarnya ikut mengecil dan membesar — layout shift di hero. */
+    max-height: 28svh;
     width: auto;
     margin-inline: auto;
   }
@@ -693,12 +750,13 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   background: var(--surface);
   text-decoration: none;
   color: inherit;
   transition: border-color var(--duration-fast) var(--ease-out),
     transform var(--duration-fast) var(--ease-out);
+  box-shadow: var(--shadow-card);
 }
 
 .new-sku-card:hover {

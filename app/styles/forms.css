@@ -30,7 +30,7 @@
   padding: var(--space-8);
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-sm);
 }
 
@@ -42,12 +42,6 @@
   color: var(--text-muted);
   font-size: var(--text-sm);
   margin-top: var(--space-2);
-}
-
-.form-grid {
-  display: grid;
-  gap: var(--space-4);
-  margin-top: var(--space-6);
 }
 
 .field {
@@ -100,46 +94,6 @@
   color: var(--danger);
 }
 
-.form-alert {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  margin-top: var(--space-4);
-  border: 1px solid transparent;
-}
-
-.form-alert-error {
-  background: var(--danger-soft);
-  color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 26%, transparent);
-}
-
-.form-alert-success {
-  background: var(--positive-soft);
-  color: var(--positive);
-  border-color: color-mix(in srgb, var(--positive) 26%, transparent);
-}
-
-.form-alert-info {
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  border-color: var(--accent-line);
-}
-
-.form-switch {
-  margin-top: var(--space-6);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--line);
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.form-switch button {
-  color: var(--accent);
-  font-weight: var(--weight-semibold);
-}
-
 /* Dashboard creator */
 .dashboard {
   padding-block: var(--space-12);
@@ -147,29 +101,12 @@
   gap: var(--space-8);
 }
 
-.dashboard-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.dashboard-header h1 {
-  font-size: var(--text-h2);
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-4);
-}
-
 .panel {
   padding: var(--space-6);
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
 
 .panel h2 {
@@ -249,84 +186,6 @@
   font-size: var(--text-xs);
 }
 
-/* Daftar link publik yang bisa disalin */
-.public-link-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--space-2);
-}
-
-.public-link-item {
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  display: grid;
-  gap: var(--space-3);
-}
-
-.public-link-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.public-link-head label {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-}
-
-.public-link-rate {
-  font-size: var(--text-xs);
-  color: var(--text-subtle);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.public-link-row {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.public-link-row input {
-  flex: 1;
-  min-width: 0;
-  min-height: 44px;
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-  background: var(--surface-sunken);
-  font-size: var(--text-xs);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-
-.public-link-row button {
-  flex-shrink: 0;
-  min-height: 44px;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line-strong);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-}
-
-.public-link-row button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.public-link-row .btn {
-  flex-shrink: 0;
-  min-height: 44px;
-  font-size: var(--text-xs);
-  padding-inline: var(--space-4);
-}
-
 /* ── Link affiliate ──────────────────────────────────────────────────── */
 
 .affiliate-link {
@@ -367,7 +226,10 @@
   min-height: 36px;
   color: var(--text);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: var(--text-xs);
+  /* readOnly tetap bisa difokus — creator memang mengetuknya untuk menyorot
+     URL sebelum menyalin — jadi batas 16px Safari iOS berlaku penuh di sini.
+     `readonly` tidak membebaskannya. Lihat --text-control. */
+  font-size: var(--text-control);
   text-overflow: ellipsis;
 }
 

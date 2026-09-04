@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import Icon from "../components/Icon";
 import { requireUser } from "../../lib/auth";
@@ -73,9 +74,20 @@ export default async function CreatorDashboard({ searchParams }: { searchParams:
       </header>
 
       <div className={`activation-card ${user.membership === "verified" ? "verified" : ""}`}>
-        <div className="activation-score">
-          {completeness.percent}
-          <small>%</small>
+        {/* --score adalah DATA, bukan tata letak. Nilainya hanya diketahui saat
+            render, dan custom property memang jalur yang benar untuk
+            memberikannya ke CSS — beda dari gaya inline yang menyalin tata
+            letak ke dalam TSX. Cincinnya sendiri seluruhnya di workspace.css. */}
+        <div className="activation-score" style={{ "--score": completeness.percent } as CSSProperties}>
+          {/* Satu anak, bukan dua. Sebagai dua item flex, `align-items: baseline`
+              menaruh barisnya di CROSS-START kotak, bukan di tengahnya, jadi
+              angkanya menempel ke sisi atas cincin. Dibungkus jadi satu item,
+              container-nya bisa memakai `align-items: center` sementara "%"
+              tetap duduk di garis dasar angkanya secara alami sebagai inline. */}
+          <span>
+            {completeness.percent}
+            <small>%</small>
+          </span>
         </div>
         <div>
           <span>{membershipLabel.toUpperCase()}</span>

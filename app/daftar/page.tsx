@@ -1,5 +1,5 @@
 import AuthClient from "./AuthClient";
-import { getCampaignCatalog } from "../../lib/catalog-db";
+import { getCampaignBrandCount } from "../../lib/catalog-db";
 import { authEmailEnabled } from "../../lib/email-auth";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export default async function DaftarPage({ searchParams }: { searchParams: Promi
   const googleEnabled = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
   let initialDealCount: number | null = null;
   try {
-    initialDealCount = (await getCampaignCatalog("tiktok")).length;
+    initialDealCount = await getCampaignBrandCount("tiktok");
   } catch {
     initialDealCount = null;
   }

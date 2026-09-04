@@ -6,6 +6,7 @@ import { classifyExpiry, expiryLabel, isActionable, isPromotable } from "../../l
 import { formatCommission } from "../../lib/commission";
 import BrandMark from "./BrandMark";
 import Icon from "./Icon";
+import CategoryIcon from "./CategoryIcon";
 import HotBadge, { liveHotBadge } from "./HotBadge";
 
 type Props = {
@@ -54,7 +55,7 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
         <div className="deal-identity">
           <h3 className="deal-brand-name">{campaign.brand}</h3>
           <p className="deal-category">
-            <Icon name="tag" /> {campaign.category} · {campaign.campaignCount} campaign
+            <CategoryIcon category={campaign.category} /> {campaign.category} · {campaign.campaignCount} campaign
           </p>
           {/* Menempel pada kategori, bukan di baris badge bawah: SKU baru adalah
               keterangan tentang brandnya, bukan status campaign seperti sample
@@ -81,7 +82,13 @@ export default function BrandCard({ campaign, onOpen, priority }: Props) {
         </div>
       ) : (
         <div className={`deal-commission${hasCommission ? "" : " deal-commission-unknown"}`}>
-          {hasCommission ? <span className="badge badge-neutral deal-commission-tag">Komisi creator</span> : null}
+          {/* Label mikro, bukan pil terisi. Sebagai .badge ia adalah bidang abu
+              berukuran penuh yang duduk tepat di atas angka komisi dan
+              menyaingi satu-satunya hal yang paling dicari di kartu ini. Di
+              kedua referensi, keterangan di atas angka besar selalu teks kecil
+              yang tenang — "Your Health Score", "TODAY SUMMARY" — tidak pernah
+              bidang berwarna. */}
+          {hasCommission ? <span className="deal-commission-tag">Komisi creator</span> : null}
           <span className="deal-commission-value">{formatCommission(campaign.commission)}</span>
           {hasCommission ? (
             campaign.campaignCount > 1 ? <span className="deal-commission-note">mulai dari komisi terendah</span> : null

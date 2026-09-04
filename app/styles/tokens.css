@@ -93,11 +93,23 @@
   --brand-ink: #090a0a;
   --brand-paper: #fcfcfc;
 
-  /* Permukaan */
+  /**
+   * Permukaan.
+   *
+   * MODEL BARU: kartu MENGAMBANG di atas latar, bukan dibatasi garis dari
+   * latar yang warnanya sama. Ini satu-satunya perubahan struktural di lapisan
+   * warna, dan seluruh kesan referensi bergantung padanya — di Softphone
+   * maupun AI Health tidak ada satu pun layar yang berlatar putih murni;
+   * yang putih justru kartunya.
+   *
+   * Konsekuensinya --bg dan --surface tidak boleh lagi bernilai nyaris sama.
+   * Di tema gelap latarnya ink dan permukaannya diangkat; di tema terang
+   * latarnya diberi rona merah muda pucat dan permukaannya putih penuh.
+   */
   --bg: var(--brand-ink);
-  --surface: #0e0e13;
+  --surface: #131218;
   --surface-sunken: #060607;
-  --surface-raised: #14141b;
+  --surface-raised: #1b1a23;
   --line: rgba(255, 255, 255, 0.1);
   --line-strong: rgba(255, 255, 255, 0.18);
 
@@ -239,13 +251,30 @@
   --surface-magenta-deep: #b8007f;
   --surface-violet: #8b1a9e;
 
-  /* Bayangan */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.55);
-  --shadow-lg: 0 20px 52px rgba(0, 0, 0, 0.7);
-  /* Khusus kartu deal. --shadow-md dipakai bareng modal/sheet, terlalu berat
-     untuk hover kartu yang cuma naik 2px. */
-  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.32);
+  /**
+   * BAYANGAN — skala elevasi, bukan sekadar empat nilai.
+   *
+   * Sebelum ini seluruh 7.000 baris CSS hanya memuat delapan rujukan bayangan;
+   * hierarki dibangun hampir sepenuhnya dari garis 1px. Itu sebabnya tampilan
+   * lama terbaca "rata": semua yang penting dan semua yang tidak penting
+   * memakai penanda yang sama persis.
+   *
+   * Tiap langkah BERLAPIS DUA: satu bayangan sangat rapat untuk tepi kontak,
+   * satu lagi lebar dan sangat pucat untuk isi ruangnya. Satu bayangan tunggal
+   * memaksa memilih antara tepi yang tegas ATAU sebaran yang lembut; dua lapis
+   * memberi keduanya, dan itulah yang membuat kartu di referensi terasa
+   * mengambang alih-alih ditempeli garis abu-abu.
+   *
+   * Empat langkah punya pekerjaan masing-masing:
+   *   sm    kontrol dan chip — nyaris tak terlihat, hanya melepaskannya dari latar
+   *   card  kartu di posisi diam
+   *   md    kartu saat diangkat, dropdown, popover
+   *   lg    lembar, modal — satu-satunya lapisan yang boleh terasa berat
+   */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.36);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.45), 0 14px 32px rgba(0, 0, 0, 0.42);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5), 0 26px 56px rgba(0, 0, 0, 0.55);
 
   /**
    * --gradient-hot kini WHITE-SAFE, mengikuti keputusan "semua label putih".
@@ -267,6 +296,39 @@
     color-mix(in srgb, var(--brand-magenta) 12%, transparent) 0%,
     transparent 62%
   );
+
+  /**
+   * ATMOSFER — lapisan gradasi paling bawah, di belakang seluruh permukaan.
+   *
+   * Peran "atmosfer" di BRAND-SYSTEM.md §3.4: satu rona brand di atas netral,
+   * amplitudo ≤8% di tema terang dan ≤12% di tema gelap, tidak pernah membawa
+   * teks secara langsung, selalu berada DI BAWAH semua kartu. Ia TIDAK
+   * menghabiskan jatah satu-Haluan-Hot-per-viewport, karena ia bukan bidang.
+   *
+   * Alasannya bisa dilihat: sebelum ini, seluruh 1900px latar beranda adalah
+   * #f8f2f6 rata tanpa satu pun variasi, dan hal yang sama di /deals, /daftar,
+   * dan /request-sample. Kartu putih memang sudah mengambang di atasnya, tapi
+   * yang dilayanginya sendiri adalah bidang mati.
+   *
+   * Dua sapuan yang saling berlawanan sudut — magenta dari kanan atas, violet
+   * dari kiri bawah — supaya halaman punya arah, bukan sekadar noda di tengah.
+   *
+   * Kontras dihitung di TITIK TERKUAT tiap sapuan, bukan di tengahnya:
+   * magenta 8% menghasilkan #f8dfec, dan di sana ink 15,82 · --text-muted 6,98
+   * · --text-subtle 4,73. Ketiganya lolos AA. Jangan menaikkan amplitudonya
+   * tanpa menghitung ulang ketiga angka itu.
+   */
+  --bg-atmosphere:
+    radial-gradient(
+      68% 52% at 100% 0%,
+      color-mix(in srgb, var(--brand-magenta) 12%, transparent) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      58% 48% at 0% 96%,
+      color-mix(in srgb, var(--brand-violet) 10%, transparent) 0%,
+      transparent 58%
+    );
 
   /* Jarak. Dua langkah setengah ada khusus untuk padding badge dan chip, yang
      terlihat terlalu tinggi bila dipaksa ke kelipatan 4. */
@@ -315,7 +377,28 @@
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-2xl: 24px;
+  --radius-3xl: 28px;
   --radius-pill: 999px;
+
+  /**
+   * Radius SEMANTIK — dipilih menurut peran, bukan menurut angka.
+   *
+   * Dua langkah teratas tangga di atas nyaris tidak pernah dipakai: --radius-xl
+   * tujuh kali dan --radius-2xl hanya TIGA kali di seluruh repo, sementara
+   * hampir semua kartu berhenti di --radius-lg. Kelembutan yang menandai kedua
+   * referensi hidup persis di dua langkah kosong itu; keduanya memakai sekitar
+   * 20–28px pada kartu.
+   *
+   * Ditulis sebagai token peran supaya "naikkan sudut semua kartu" jadi satu
+   * suntingan di sini, bukan pencarian-ganti pada delapan berkas.
+   *
+   * --radius-control TIDAK ikut naik. Sudut besar pada input dan tombol persegi
+   * memakan ruang teksnya sendiri, dan referensi pun menahannya di sana:
+   * kartunya membulat murah hati, field-nya tidak.
+   */
+  --radius-control: var(--radius-md);
+  --radius-card: var(--radius-2xl);
+  --radius-panel: var(--radius-3xl);
 
   /**
    * Tipografi. Poppins untuk display, Open Sans untuk isi (§4.1).
@@ -331,15 +414,51 @@
   --font-display: Poppins, system-ui, sans-serif;
   --font-body: "Open Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
-  --text-display: clamp(40px, 6vw, 76px);
+  --text-display: clamp(38px, 5.2vw, 68px);
   --text-h1: clamp(32px, 4.2vw, 52px);
   --text-h2: clamp(25px, 2.6vw, 34px);
   --text-h3: clamp(19px, 1.5vw, 22px);
+
+  /**
+   * Angka utama. Puncak tangga yang selama ini tidak ada.
+   *
+   * 178 dari 221 rujukan ukuran huruf di repo ini (81%) adalah 14px atau 12px,
+   * dan --text-display tidak pernah dirujuk sekali pun — tinggi hero-nya
+   * ditulis sebagai clamp() sendiri di home.css, sehingga tangganya punya
+   * puncak di atas kertas tapi tidak di layar. Nilai --text-display di atas
+   * kini disamakan persis dengan clamp() yang sudah dipakai hero itu, jadi
+   * menyambungkannya tidak mengubah satu piksel pun.
+   *
+   * --text-metric adalah langkah yang benar-benar baru, dan ia yang paling
+   * menentukan: di kedua referensi, SATU angka besar di tengah kartu adalah
+   * perangkat yang paling sering diulang — 92%, 96 BPM, 88 BPM, 120/80. Angka
+   * itu bukan judul dan bukan isi; ia butuh langkahnya sendiri.
+   */
+  --text-metric: clamp(30px, 7vw, 46px);
   /* Empat langkah saja di rentang kecil. */
   --text-lead: 18px;
   --text-body: 16px;
   --text-sm: 14px;
   --text-xs: 12px;
+
+  /**
+   * Ukuran huruf SETIAP kontrol yang bisa difokus dan diketik: input, select,
+   * textarea. Nilainya sama dengan --text-body, tapi ia token tersendiri
+   * karena alasannya berbeda dan lebih keras.
+   *
+   * 16px di sini BUKAN pilihan desain, melainkan batas Safari iOS. Begitu
+   * sebuah field ber-font-size di bawah 16px menerima fokus, Safari
+   * memperbesar seluruh viewport supaya field-nya terbaca — halaman bergeser,
+   * header ikut terpotong, dan pengguna harus mencubit keluar setelah selesai
+   * mengetik. Tidak ada cara mematikannya lewat CSS: user-scalable=no memang
+   * menghentikannya, tapi itu kegagalan aksesibilitas (lihat catatan
+   * touch-action di base.css yang menolak alasan yang sama).
+   *
+   * Jadi jangan pernah menurunkan nilai ini, dan jangan menulis --text-sm
+   * pada kontrol yang bisa diketik meski secara visual terlihat lebih rapi.
+   * Kerapatan diambil dari padding dan tinggi baris, bukan dari ukuran huruf.
+   */
+  --text-control: 16px;
 
   /**
    * Bobot kelipatan 100. Poppins di Google Fonts TIDAK variable, jadi 550/650/
@@ -370,6 +489,32 @@
 }
 
 /**
+ * TANGGA BREAKPOINT. Empat nilai, tidak lebih.
+ *
+ * Nilainya tidak bisa jadi custom property: `@media (max-width: var(--x))`
+ * tidak sah di CSS, dan `@custom-media` belum didukung tanpa build step. Jadi
+ * penegakannya lewat daftar ini — tulis salah satu dari empat angka berikut,
+ * jangan mengarang angka kelima.
+ *
+ *   900px  Navigasi berubah. Bottom nav menyala, header ringkas, facet katalog
+ *          terlipat. Satu-satunya ambang yang menyentuh navigasi.
+ *   768px  Tata letak berubah. Grid multi-kolom jatuh jadi satu kolom, dan
+ *          dialog samping jadi bottom sheet.
+ *   600px  Ponsel sempit. Detail sekunder mulai disembunyikan (petunjuk ⌘K,
+ *          kolom tabel opsional).
+ *   380px  Ponsel sangat sempit. Hanya untuk grid yang benar-benar pecah di
+ *          bawah 380px.
+ *
+ * Sebelum daftar ini ada, tiga angka berbeda dipakai untuk SATU maksud yang
+ * sama — 720px untuk bottom sheet, 760px untuk kartu aktivasi, 768px untuk
+ * sisanya — sehingga di pita 721–768px sebagian tata letak sudah menumpuk dan
+ * sebagian lagi belum. Tidak ada satu pun viewport uji yang jatuh di pita itu,
+ * jadi ketidakcocokannya tidak pernah muncul di CI, hanya di perangkat nyata.
+ *
+ * `(max-height: …)` adalah sumbu yang berbeda dan tidak terikat daftar ini.
+ */
+
+/**
  * Tema terang memakai paper #fcfcfc dari deck, bukan krem warisan hcommerce.
  *
  * Cyan tidak pernah membawa teks di sini (2,12 di atas paper). Hanya bidang
@@ -378,12 +523,34 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg: var(--brand-paper);
+  /**
+   * LATAR BERNUANSA, KARTU PUTIH.
+   *
+   * Sebelumnya --bg #fcfcfc dan --surface #ffffff — beda tiga poin, praktis
+   * satu warna. Kartu karenanya hanya bisa dibedakan lewat garis 1px, dan
+   * seluruh halaman terbaca sebagai satu bidang putih datar.
+   *
+   * #f8f2f6 adalah kertas yang sama dengan sedikit rona --brand-pink-tint di
+   * dalamnya. Cukup untuk membuat putih terbaca sebagai "diangkat", masih
+   * cukup netral untuk tidak terlihat seperti halaman berwarna.
+   *
+   * Kontras terhadap latar baru ini justru NAIK, bukan turun, karena latarnya
+   * sedikit lebih gelap dari sebelumnya: ink 17,96 (dulu 18,7 — keduanya jauh
+   * di atas ambang), --text-subtle #63636e 5,30, dan di --surface-sunken yang
+   * paling ketat --text-subtle masih 5,01. Ketiganya lolos AA.
+   *
+   * --surface-sunken kini lebih PEKAT dari latar, bukan lebih pucat. Dengan
+   * kartu yang mengambang, "tenggelam" harus berarti masuk ke dalam halaman;
+   * #f9f9f9 yang lama justru lebih terang dari latar barunya.
+   */
+  --bg: #f8f2f6;
   --surface: #ffffff;
-  --surface-sunken: #f9f9f9;
+  --surface-sunken: #f3ebf1;
   --surface-raised: #ffffff;
-  --line: rgba(9, 10, 10, 0.12);
-  --line-strong: rgba(9, 10, 10, 0.2);
+  /* Garis melemah karena bayangan kini yang memikul pemisahan. Ia jadi
+     penegas tepi, bukan lagi satu-satunya penanda bahwa ini benda terpisah. */
+  --line: rgba(9, 10, 10, 0.08);
+  --line-strong: rgba(9, 10, 10, 0.16);
 
   --text: var(--brand-ink);
   --text-muted: #4a4a55;
@@ -432,11 +599,33 @@
   --platform-tiktok: #0a8f88;
   --platform-shopee: #ee4d2d;
 
-  /* Hanya bayangan tema TERANG yang ditulis ulang: warnanya diturunkan dari
-     ink, dan ink berubah dari #08080a ke #090a0a. Bayangan tema gelap memakai
-     rgba(0,0,0,...) murni, jadi tidak terpengaruh. */
-  --shadow-sm: 0 1px 2px rgba(9, 10, 10, 0.06);
-  --shadow-md: 0 4px 14px rgba(9, 10, 10, 0.08);
-  --shadow-lg: 0 18px 48px rgba(9, 10, 10, 0.14);
-  --shadow-card: 0 2px 10px rgba(9, 10, 10, 0.05);
+  /**
+   * Bayangan tema terang: SANGAT pucat, tapi lebar.
+   *
+   * Ini pasangan wajib dari latar bernuananya. Bayangan gelap pekat di atas
+   * latar terang terbaca sebagai kotoran; yang membuat kartu referensi terasa
+   * mengambang justru sebaran lebar dengan opasitas di bawah 10%.
+   *
+   * Warnanya diturunkan dari ink, bukan hitam murni, supaya bayangannya tidak
+   * terasa lebih dingin dari halaman yang menaunginya.
+   */
+  --shadow-sm: 0 1px 2px rgba(9, 10, 10, 0.04);
+  --shadow-card: 0 1px 2px rgba(9, 10, 10, 0.04), 0 6px 18px rgba(9, 10, 10, 0.05);
+  --shadow-md: 0 2px 4px rgba(9, 10, 10, 0.04), 0 14px 32px rgba(9, 10, 10, 0.08);
+  --shadow-lg: 0 4px 10px rgba(9, 10, 10, 0.05), 0 26px 56px rgba(9, 10, 10, 0.12);
+
+  /* Amplitudo tema terang DIPOTONG ke batas §3.4 (≤8%). Nilai tema gelap di
+     atas (12% dan 10%) memang boleh lebih kuat karena mata jauh lebih toleran
+     terhadap rona di atas ink daripada di atas kertas. */
+  --bg-atmosphere:
+    radial-gradient(
+      68% 52% at 100% 0%,
+      color-mix(in srgb, var(--brand-magenta) 8%, transparent) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      58% 48% at 0% 96%,
+      color-mix(in srgb, var(--brand-violet) 7%, transparent) 0%,
+      transparent 58%
+    );
 }

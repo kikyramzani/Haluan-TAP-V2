@@ -11,7 +11,7 @@
 .admin-app {
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr);
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
 }
 
@@ -24,7 +24,7 @@
   background: var(--surface);
   position: sticky;
   top: 0;
-  height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
 }
 
@@ -140,6 +140,32 @@
   color: var(--text-subtle);
 }
 
+/**
+ * Batang eyebrow yang sama dengan permukaan publik (lihat .eyebrow di base.css).
+ *
+ * Ini BAHASA VISUAL, bukan pola tata letak — jadi ia memang boleh menyeberang
+ * ke ruang kerja dan CMS, sementara kartu besar dan bottom sheet tidak. Tanpa
+ * ini, label bagian di admin dan dashboard adalah satu-satunya di seluruh
+ * produk yang tidak membawa penanda bagian.
+ */
+/* :not(.admin-profile) WAJIB. .admin-header punya DUA anak div langsung — blok
+   label bagian dan blok profil admin — dan `> div > span` mengenai keduanya.
+   Blok profil memuat <span><b>nama</b><small>peran</small></span>, dan span itu
+   `display: grid` (lihat .admin-profile span di bawah), jadi ::before di sana
+   bukan sekadar batang yang salah tempat: ia menjadi ITEM GRID dan menambah
+   baris, menggeser tinggi seluruh header. */
+.admin-header > div:not(.admin-profile) > span::before,
+.dashboard-title > div > span::before {
+  content: "";
+  display: inline-block;
+  vertical-align: -0.1em;
+  width: 3px;
+  height: 1em;
+  margin-right: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
 .admin-header h1 {
   font-size: var(--text-h2);
   margin-top: 4px;
@@ -228,6 +254,26 @@
     gap: var(--space-2);
     border-right: 0;
     border-bottom: 1px solid var(--line);
+    /**
+     * Takik dan sudut membulat.
+     *
+     * .admin-main sudah sadar safe-area, tapi strip navigasi ini belum, dan
+     * ia justru satu-satunya elemen admin yang menempel ke KEDUA tepi layar.
+     * Di ponsel bertakik yang dimiringkan, link pertama dan terakhir berjalan
+     * di balik sudut membulat — tepat pada strip yang memang harus digulir
+     * sampai ujung untuk menemukan menu terakhirnya.
+     *
+     * max(), bukan penjumlahan: di perangkat tanpa takik env() bernilai 0 dan
+     * padding-nya tetap persis --space-4 seperti sebelumnya.
+     */
+    padding-right: max(var(--space-4), env(safe-area-inset-right));
+    padding-left: max(var(--space-4), env(safe-area-inset-left));
+    /* Strip yang bisa digulir tidak punya penanda apa pun bahwa ia bergulir
+       (scrollbar-width: none), jadi item setelah kira-kira yang kelima tidak
+       terlihat tanpa petunjuk. Pudar di tepi kanan mengembalikan petunjuknya
+       tanpa menambah tinggi. */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
   }
 
   .admin-sidebar::-webkit-scrollbar {
@@ -253,57 +299,6 @@
     padding-left: max(var(--space-4), env(safe-area-inset-left));
   }
 
-  /* Strip sidebar yang bisa digulir tidak punya penanda apa pun bahwa ia
-     bergulir (scrollbar-width: none), jadi item setelah kira-kira yang kelima
-     tidak terlihat tanpa petunjuk. Pudar di tepi kanan mengembalikan
-     petunjuknya tanpa menambah tinggi. */
-  .admin-sidebar {
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
-    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
-  }
-}
-
-/* ── Peringatan dan notifikasi admin ─────────────────────────────────── */
-
-.admin-data-warning {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--warning-soft);
-  border: 1px solid color-mix(in srgb, var(--warning) 26%, transparent);
-  font-size: var(--text-sm);
-}
-
-.admin-data-warning b {
-  display: block;
-  color: var(--warning);
-}
-
-.admin-data-warning span {
-  color: var(--text-muted);
-}
-
-.admin-data-warning code {
-  flex-shrink: 0;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  font-size: var(--text-xs);
-}
-
-/* Baris netral selama pemuatan awal, supaya tabel kosong tidak terbaca seperti
-   "memang tidak ada data" padahal permintaannya masih berjalan. */
-.admin-loading {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-sm);
-  background: var(--surface-sunken);
-  color: var(--text-subtle);
-  border: 1px solid var(--line);
-  font-size: var(--text-sm);
 }
 
 .admin-notice,
@@ -432,7 +427,7 @@
   gap: var(--space-2);
   padding: var(--space-3) var(--space-2);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   background: var(--surface);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
@@ -441,6 +436,7 @@
   color: var(--text);
   transition: border-color var(--duration-fast) var(--ease-out),
     background var(--duration-fast) var(--ease-out);
+  box-shadow: var(--shadow-card);
 }
 
 .quick-action-icon {
@@ -541,7 +537,7 @@
   background: none;
   outline: none;
   color: var(--text);
-  font-size: var(--text-sm);
+  font-size: var(--text-control);
 }
 
 /*
@@ -561,7 +557,7 @@
   background: var(--surface);
   outline: none;
   color: var(--text);
-  font-size: var(--text-sm);
+  font-size: var(--text-control);
 }
 
 /* admin.css duplicates this table job as .table-wrap/.admin-table. Check
@@ -637,27 +633,89 @@
   color: var(--text-muted);
 }
 
+/**
+ * Varian mobile-nya hidup DI SINI, bukan di admin.css.
+ *
+ * Ia sebelumnya ditulis di admin.css di dalam @media (max-width: 768px), dan
+ * tidak pernah sekali pun berlaku: spesifisitasnya sama persis dengan aturan
+ * dasar di atas (0,1,0), dan app/layout.tsx mengimpor admin.css SEBELUM
+ * workspace.css — jadi `display: flex` di atas selalu menang, di lebar mana
+ * pun. Pagination admin di ponsel tetap tiga baris teks tak berbentuk,
+ * persis kondisi yang aturan itu tulis untuk diperbaiki.
+ *
+ * .admin-page-count yang mengandalkan grid ini tetap di admin.css: ia tidak
+ * punya deklarasi saingan di mana pun, jadi ia langsung bekerja begitu
+ * induknya benar-benar menjadi grid.
+ */
+@media (max-width: 768px) {
+  .admin-pagination {
+    /* Hitungan halaman di tengah, tombolnya mengapit — bukan tiga baris
+       teks tak berbentuk seperti sebelumnya. */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
+}
+
 .primary-btn,
 .submit-btn,
 .auth-submit {
+  /* inline-flex + gap: tanpa keduanya, ikon panah menempel langsung ke huruf
+     terakhir — "Buat akun↗" tanpa satu spasi pun. Bandingkan dengan .btn yang
+     sudah punya gap sejak awal. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   min-height: 44px;
   padding: 0 var(--space-6);
   border-radius: var(--radius-pill);
-  background: var(--accent);
-  color: var(--accent-contrast);
+  background: var(--cta);
+  color: var(--cta-contrast);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
 }
 
+/**
+ * --cta, BUKAN --accent. Ini menyatukan dua sistem tombol utama yang selama ini
+ * hidup berdampingan.
+ *
+ * --accent berganti RONA antar tema: magenta #c90063 di tema terang, cyan
+ * #00bef3 di tema gelap. --cta magenta pekat #d60069 di keduanya. Akibatnya di
+ * satu layar gelap yang sama, "Masuk creator" tampil CYAN sementara "Gabung
+ * sekarang" di header halaman itu juga tampil MAGENTA — dua warna yang
+ * sama-sama mengaku sebagai aksi utama.
+ *
+ * Cyan tetap punya tempatnya: batang eyebrow, ubin ikon, dan garis dekoratif
+ * lewat --accent. Yang tidak boleh lagi ia pegang adalah isian tombol utama.
+ *
+ * Kontras tidak berubah: putih di atas #d60069 = 5,17 di kedua tema, sama
+ * persis dengan yang sudah dipakai .btn-primary di header.
+ */
 .primary-btn:hover,
 .submit-btn:hover,
 .auth-submit:hover {
-  background: var(--accent-strong);
+  background: var(--cta-hover);
 }
 
+/**
+ * Permukaan nonaktif eksplisit, bukan opacity.
+ *
+ * catalog.css sudah menuliskan alasannya untuk .deal-card-expired: menurunkan
+ * opacity satu elemen menurunkan kontras SELURUH teks di dalamnya sekaligus.
+ * Aturan ini dulu melakukan persis hal yang dilarang itu — opacity 0.55 pada
+ * tombol berlabel putih di atas magenta menjatuhkan labelnya jauh di bawah
+ * ambang keterbacaan.
+ *
+ * Menukar permukaannya, bukan meredupkannya, membuat keadaan nonaktif justru
+ * lebih jelas terbaca sebagai "tidak bisa ditekan" — bukan sebagai "tombol yang
+ * agak pudar".
+ */
 .submit-btn[disabled],
 .auth-submit[disabled] {
-  opacity: 0.55;
+  background: var(--surface-sunken);
+  color: var(--text-subtle);
+  border: 1px solid var(--line-strong);
   cursor: not-allowed;
 }
 
@@ -705,24 +763,6 @@
 .intel-formula {
   font-size: var(--text-xs);
   color: var(--text-subtle);
-}
-
-.admin-intel-hero {
-  display: grid;
-  gap: var(--space-3);
-  padding: var(--space-6);
-  border: 1px dashed var(--line-strong);
-  border-radius: var(--radius-md);
-  text-align: center;
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-}
-
-.activation-score {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: var(--weight-display);
-  font-variant-numeric: tabular-nums;
 }
 
 /* ── Form: admin, auth, dashboard, sample ────────────────────────────── */
@@ -785,7 +825,7 @@
   border: 1px solid var(--line-strong);
   background: var(--surface);
   color: var(--text);
-  font-size: var(--text-sm);
+  font-size: var(--text-control);
   transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
 }
 
@@ -872,7 +912,7 @@
 /* ── Auth ────────────────────────────────────────────────────────────── */
 
 .auth-main {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -962,29 +1002,102 @@
   box-shadow: var(--shadow-sm);
 }
 
-.auth-tabs {
+/**
+ * KONTROL TERSEGMENTASI — satu primitif, dua pemakai.
+ *
+ * Pola pil tersegmentasi ini sudah ada di repo sebagai .auth-tabs sejak sebelum
+ * perombakan, dan ia kebetulan persis kontrol yang dipakai kedua referensi
+ * ("Overview / My Calls / Messages", "All Doctors / Featured / Nearest").
+ * Yang salah bukan polanya, melainkan bahwa ia hanya dipakai di satu tempat
+ * sementara /dashboard/profil menggambar POLA KETIGA sendiri — empat pil
+ * berkontur yang membungkus, tanpa jalur, tanpa keadaan aktif yang sama.
+ *
+ * Digabungkan di sini, bukan disalin: satu daftar selektor, satu perilaku.
+ *
+ * `overflow-x: auto` dengan `flex: 1 0 auto` menangani KEDUA kasus tanpa media
+ * query. Dua tab pendek (auth) membagi jalur rata; empat tab panjang (profil)
+ * melampaui lebar ponsel dan jalurnya menggulir, persis seperti baris tab di
+ * referensi. Alternatifnya — memaksa empat label ke dalam 390px — memberi tiap
+ * tab sekitar 85px dan memotong "Social media" jadi tidak terbaca.
+ *
+ * Keadaan aktif dibawa TIGA sinyal, bukan hanya warna: isian berubah dari
+ * jalur ke permukaan, warna teks naik dari muted ke penuh, dan bayangan muncul.
+ * Ditambah aria-selected pada markupnya.
+ *
+ * .admin-tabs SENGAJA tidak ikut. Ia membawa sampai dua belas tujuan pada satu
+ * baris yang menggulir; jalur pil dengan dua belas segmen berhenti terbaca
+ * sebagai kontrol tersegmentasi dan berubah jadi deretan tombol. Garis bawah
+ * adalah pola yang benar di sana, dan menyeragamkannya hanya demi keseragaman
+ * akan membuat alat kerjanya lebih buruk.
+ */
+.auth-tabs,
+.profil-tab-nav {
   display: flex;
   gap: var(--space-1);
   padding: var(--space-1);
   border-radius: var(--radius-pill);
   background: var(--surface-sunken);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.auth-tabs::-webkit-scrollbar,
+.profil-tab-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.auth-tabs {
   margin-bottom: var(--space-6);
 }
 
-.auth-tabs button {
-  flex: 1;
+.auth-tabs button,
+.profil-tab-nav button {
+  flex: 1 0 auto;
   min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
   border-radius: var(--radius-pill);
+  background: none;
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   color: var(--text-muted);
-  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+  white-space: nowrap;
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
 }
 
-.auth-tabs button.active {
+.auth-tabs button:hover,
+.profil-tab-nav button:hover {
+  color: var(--text);
+}
+
+.auth-tabs button.active,
+.profil-tab-nav button.active {
   background: var(--surface);
   color: var(--text);
   box-shadow: var(--shadow-sm);
+}
+
+/**
+ * Empat tab profil dirapatkan di ponsel sempit supaya SEMUANYA muat.
+ *
+ * Diukur, bukan dikira: dengan padding --space-4 keempat tab butuh 421px,
+ * jadi di 390px ada 31px yang tersembunyi dan tab terakhir ("Kategori")
+ * terpotong. Jalur ini memang bisa digulir, tapi `scrollbar-width: none`
+ * membuatnya tidak punya satu pun penanda bahwa ia bisa digulir — tab keempat
+ * praktis tidak ditemukan.
+ *
+ * Merapatkan padding ke --space-2 menghemat 64px dan membawa totalnya ke 357px.
+ * Ini lebih baik daripada menambah pudar di tepi: yang terbaik bukan memberi
+ * petunjuk bahwa ada yang tersembunyi, melainkan tidak menyembunyikannya.
+ *
+ * Di 600px ke atas keempatnya sudah muat tanpa ini (terukur: meluber 0px),
+ * jadi aturannya berhenti di sana.
+ */
+@media (max-width: 600px) {
+  .profil-tab-nav button {
+    padding: 0 var(--space-2);
+  }
 }
 
 /* Kepala kartu: label kecil, judul, satu kalimat penjelas. Sebelumnya ketiganya
@@ -1099,7 +1212,7 @@
 /* ── Dashboard creator ───────────────────────────────────────────────── */
 
 .creator-app {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
 }
 
@@ -1336,17 +1449,69 @@
   gap: var(--space-6);
   padding: var(--space-6);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
+/**
+ * SATU deklarasi, bukan tiga.
+ *
+ * Sebelumnya .activation-score ditulis di tiga tempat berbeda di berkas ini.
+ * Yang pertama mengulang persis empat properti tipografi yang blok ini juga
+ * tetapkan, jadi ia tidak pernah berpengaruh sama sekali. Yang ketiga —
+ * beratus baris di bawah — membatalkan `display: grid` di sini dengan `flex`,
+ * sehingga membaca blok ini saja memberi gambaran yang keliru tentang tata
+ * letak isinya.
+ *
+ * flex baseline, bukan grid: angka dan tanda "%" harus berdiri sebaris dengan
+ * garis dasar yang sama; place-items membuat "%" jatuh ke baris berikutnya.
+ */
+/**
+ * CINCIN progres, bukan cakram berwarna.
+ *
+ * Ini perangkat yang paling sering diulang di kedua referensi: satu angka besar
+ * di tengah lingkaran, dengan busur yang menggambarkan angka itu mengelilinginya
+ * — 92%, 96 BPM, "Identity Verification 77%". Sebelumnya lingkaran ini hanya
+ * bidang --accent-soft rata, jadi angkanya harus dibaca untuk tahu seberapa
+ * lengkap profilnya; sekarang bentuknya sudah menjawab lebih dulu.
+ *
+ * Dua lapisan background pada SATU elemen, bukan pseudo-element:
+ *   - conic-gradient menggambar busurnya, berhenti di --score persen
+ *   - radial-gradient menutup bagian tengahnya dengan warna kartu
+ * Pendekatan pseudo-element akan menuntut z-index untuk mengangkat angkanya,
+ * dan angka itu adalah TEXT NODE telanjang — ia tidak bisa menerima z-index
+ * sama sekali. Dengan dua lapisan background, teksnya duduk di atas keduanya
+ * tanpa satu pun aturan tambahan.
+ *
+ * closest-side 78%/79%: tebal cincinnya sekitar 8px pada lingkaran 76px.
+ *
+ * Cincinnya TIDAK menjadi satu-satunya pembawa informasi — angkanya tertulis
+ * penuh di tengahnya — jadi ia tidak melanggar "jangan sampaikan lewat warna
+ * saja", dan pembaca layar tetap membaca persentasenya, bukan bentuknya.
+ */
 .activation-score {
+  --ring: var(--accent);
+  --ring-track: var(--accent-soft);
   width: 76px;
   height: 76px;
+  flex-shrink: 0;
   border-radius: var(--radius-pill);
-  display: grid;
-  place-items: center;
-  background: var(--accent-soft);
+  /**
+   * center, BUKAN baseline.
+   *
+   * Angka dan "%" kini satu elemen inline (lihat catatan di dashboard/page.tsx),
+   * jadi hubungan garis dasar di antara keduanya sudah ditangani konteks inline
+   * dan flex-nya tinggal menaruh blok itu di tengah cincin. `align-items:
+   * baseline` di sini justru menempelkan angkanya ke sisi ATAS lingkaran.
+   */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  background:
+    radial-gradient(closest-side, var(--surface) 78%, transparent 79% 100%),
+    conic-gradient(var(--ring) calc(var(--score, 0) * 1%), var(--ring-track) 0);
   color: var(--accent-strong);
   font-family: var(--font-display);
   font-size: 22px;
@@ -1358,8 +1523,11 @@
   font-size: var(--text-xs);
 }
 
+/* Hanya menukar dua warna cincinnya; resep dua lapisan background di atas
+   tidak ditulis ulang, jadi bentuk dan tebalnya mustahil melenceng. */
 .activation-card.verified .activation-score {
-  background: var(--positive-soft);
+  --ring: var(--positive);
+  --ring-track: var(--positive-soft);
   color: var(--positive);
 }
 
@@ -1399,7 +1567,8 @@
   background: var(--accent-strong);
 }
 
-@media (max-width: 760px) {
+/* 768px, bukan 760px — lihat tangga breakpoint di tokens.css. */
+@media (max-width: 768px) {
   .activation-card {
     grid-template-columns: 1fr;
     justify-items: start;
@@ -1438,42 +1607,6 @@
   color: var(--text-subtle);
 }
 
-.request-timeline {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.request-timeline article {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-}
-
-.request-timeline b {
-  font-weight: var(--weight-semibold);
-}
-
-.request-timeline small {
-  display: block;
-  font-size: var(--text-xs);
-  color: var(--text-subtle);
-  margin-top: 2px;
-}
-
-.request-timeline span[class^="status-"] {
-  flex-shrink: 0;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  text-transform: capitalize;
-}
-
 /* text-align WAJIB direset. Blok .admin-panel-empty/.dashboard-empty di atas
    (spesifisitas sama, urutan lebih awal) menyetel `text-align: center`, dan blok
    ini tidak pernah membatalkannya. Akibatnya item grid dirapatkan ke kiri
@@ -1503,86 +1636,11 @@
   font-weight: var(--weight-semibold);
 }
 
-/* Tiga akses utama */
-.dashboard-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-4);
-}
-
-.dashboard-actions article {
-  display: grid;
-  gap: var(--space-2);
-  align-content: start;
-  padding: var(--space-6);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  transition: border-color var(--duration-normal) var(--ease-out),
-    transform var(--duration-normal) var(--ease-out);
-}
-
 @media (hover: hover) {
   .dashboard-actions article:hover {
     border-color: var(--line-strong);
     transform: translateY(-2px);
   }
-}
-
-.dashboard-actions i {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-md);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  display: grid;
-  place-items: center;
-  font-style: normal;
-  margin-bottom: var(--space-2);
-}
-
-.dashboard-actions h3 {
-  font-size: var(--text-lead);
-}
-
-.dashboard-actions p {
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-}
-
-.dashboard-actions a {
-  margin-top: var(--space-2);
-  color: var(--accent);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-}
-
-/* Profil creator */
-.profile-preview {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
-  gap: var(--space-8);
-  align-items: start;
-  padding-top: var(--space-8);
-  border-top: 1px solid var(--line);
-  scroll-margin-top: calc(var(--header-height) + var(--space-4));
-}
-
-.profile-preview > div {
-  display: grid;
-  gap: var(--space-3);
-  align-content: start;
-}
-
-.profile-preview h2 {
-  font-size: var(--text-h2);
-  letter-spacing: var(--tracking-tight);
-}
-
-.profile-preview p {
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-  max-width: 44ch;
 }
 
 @media (max-width: 900px) {
@@ -1592,36 +1650,9 @@
   }
 }
 
-/* /dashboard/profil: empat tab, masing-masing dengan Server Action sendiri. */
-.profil-tab-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.profil-tab-nav button {
-  min-height: 40px;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
-}
-
-.profil-tab-nav button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.profil-tab-nav button.active {
-  background: var(--accent-soft);
-  border-color: var(--accent);
-  color: var(--accent-strong);
-  font-weight: var(--weight-semibold);
-}
+/* /dashboard/profil: empat tab, masing-masing dengan Server Action sendiri.
+   Tampilannya dibagi dengan .auth-tabs — lihat blok kontrol tersegmentasi di
+   atas. Tidak ada aturan tersendiri lagi di sini; itu justru masalahnya dulu. */
 
 /* ── Keadaan memuat pada halaman sample ──────────────────────────────── */
 
@@ -1689,7 +1720,7 @@
   justify-items: start;
   padding: var(--space-8);
   border: 1px dashed var(--line-strong);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   background: var(--surface);
 }
 
@@ -1714,6 +1745,10 @@
 }
 
 .share-deal-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   min-height: 44px;
   padding: 0 var(--space-6);
   border-radius: var(--radius-pill);
@@ -1734,6 +1769,7 @@
   min-height: 44px;
   display: inline-flex;
   align-items: center;
+  gap: var(--space-2);
 }
 
 .back-link:hover {
@@ -1783,11 +1819,6 @@
   border-color: color-mix(in srgb, var(--danger) 24%, transparent);
 }
 
-.verification-migrated {
-  background: var(--surface-sunken);
-  color: var(--text-muted);
-}
-
 .status-submitted,
 .status-review,
 .status-on_hold {
@@ -1809,9 +1840,41 @@ main:has(> .form-panel) {
   min-width: 0;
 }
 
+/**
+ * Baris kepala panel form: label di kiri, perkiraan waktu di kanan.
+ *
+ * Sebelumnya aturan ini hanya `font-size: var(--text-h1)` pada sebuah <div>
+ * berisi dua elemen INLINE. Hasilnya keduanya menempel tanpa satu spasi pun
+ * DAN dirender setinggi 32–52px: "Request formSekitar 2 menit" sebagai satu
+ * judul raksasa. --text-h1 memang tidak pernah dimaksudkan untuk elemen ini —
+ * ia bukan heading, melainkan baris label.
+ *
+ * space-between, bukan gap: perkiraan waktu adalah keterangan sekunder dan
+ * tempatnya di ujung kanan, bukan menempel di belakang labelnya.
+ */
 .form-heading {
-  font-size: var(--text-h1);
-  letter-spacing: var(--tracking-display);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+/* Pola eyebrow yang sama dengan .auth-heading > span, supaya kepala panel form
+   di /request-sample dan /daftar terbaca sebagai komponen yang sama. */
+.form-heading > span {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+.form-heading > b {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--text-subtle);
+  white-space: nowrap;
 }
 
 .form-intro {
@@ -1829,20 +1892,13 @@ main:has(> .form-panel) {
 
 /* Tiga kolom sekarang: ubin ikon, nomor, lalu teks. Ubinnya `auto` supaya baris
    tanpa ikon (kalau ada) tetap sejajar. */
+/* Dua kolom, bukan tiga: nomor langkahnya sudah dihapus dan ubin ikon di
+   kirinya yang jadi kepala baris — pola yang sama dengan .step di beranda. */
 .steps > div {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-3);
   align-items: start;
-}
-
-.steps strong {
-  font-family: var(--font-display);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-wide);
-  color: var(--accent);
-  padding-top: var(--space-half);
 }
 
 .steps span {
@@ -1917,44 +1973,6 @@ main:has(> .form-panel) {
 .success-state a + a:hover {
   background: var(--surface-sunken);
   color: var(--text);
-}
-
-/* Tombol simpan profil. Tanpa aturan ini ia tampil sebagai teks biasa. */
-.profile-form button[type="submit"] {
-  justify-self: start;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 var(--space-6);
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-  color: var(--accent-contrast);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-}
-
-.profile-form button[type="submit"]:hover {
-  background: var(--accent-strong);
-}
-
-.profile-form button[type="submit"][disabled] {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.profile-form p[role="status"] {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-}
-
-/* Angka dan satuan berdiri sebaris; sebelumnya "%" jatuh ke baris berikutnya. */
-.activation-score {
-  flex-direction: row;
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 1px;
 }
 
 /* Panel keadaan sudah punya bingkai putus-putusnya sendiri; membungkusnya lagi
@@ -2033,9 +2051,10 @@ main:has(> .form-panel) {
   gap: var(--space-4);
   padding: var(--space-5) var(--space-6);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   background: var(--surface);
   margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-card);
 }
 
 .push-toggle b {

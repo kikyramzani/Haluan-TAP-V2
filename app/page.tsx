@@ -71,18 +71,30 @@ export default async function HomePage() {
           <section className="shell">
             <dl className="proof-bar">
               <div className="proof-item">
+                <i className="icon-tile icon-tile-sm" aria-hidden="true">
+                  <Icon name="storefront" />
+                </i>
                 <dt>brand dengan deal aktif</dt>
                 <dd>{tiktok.length}</dd>
               </div>
               <div className="proof-item">
+                <i className="icon-tile icon-tile-sm" aria-hidden="true">
+                  <Icon name="megaphone" />
+                </i>
                 <dt>campaign TikTok Shop</dt>
                 <dd>{totalCampaigns}</dd>
               </div>
               <div className="proof-item">
+                <i className="icon-tile icon-tile-sm" aria-hidden="true">
+                  <Icon name="gift" />
+                </i>
                 <dt>brand membuka request sample</dt>
                 <dd>{withSample}</dd>
               </div>
               <div className="proof-item">
+                <i className="icon-tile icon-tile-sm" aria-hidden="true">
+                  <Icon name="shield-check" />
+                </i>
                 <dt>biaya untuk creator Haluan</dt>
                 <dd>0</dd>
               </div>

@@ -66,8 +66,34 @@ export default function SiteHeader({ variant = "home", viewer = null }: Props) {
           </nav>
 
           <div className="nav-actions">
-            <a className="nav-session" href={viewer ? "/dashboard" : "/daftar?mode=login"}>
-              {viewer ? `${viewer.name.split(" ")[0]} · Dashboard` : "Masuk creator"} <Icon name="arrow-up-right" />
+            {/**
+             * data-signed-in, bukan dua elemen berbeda: di ≤600px keduanya
+             * berperilaku berlawanan. Saat belum masuk, tautan ini disembunyikan
+             * karena tombol "Gabung sekarang" di sebelahnya sudah membawa aksi
+             * yang sama. Saat SUDAH masuk, tombol itu tidak dirender sama sekali
+             * — dan sebelumnya tautan ini pun ikut disembunyikan, sehingga sisi
+             * kanan header benar-benar kosong di setiap ponsel bagi setiap
+             * creator yang sudah masuk.
+             *
+             * Yang tersisa di ≤600px adalah inisialnya saja: satu target bulat
+             * 44px yang tetap menjadi satu-satunya jalan dari header menuju
+             * dashboard.
+             */}
+            <a
+              className="nav-session"
+              data-signed-in={viewer ? "true" : "false"}
+              href={viewer ? "/dashboard" : "/daftar?mode=login"}
+              aria-label={viewer ? `${viewer.name.split(" ")[0]}, buka dashboard` : undefined}
+            >
+              {viewer ? (
+                <span className="nav-session-avatar" aria-hidden="true">
+                  {viewer.name.trim().charAt(0).toUpperCase()}
+                </span>
+              ) : null}
+              <span className="nav-session-label">
+                {viewer ? `${viewer.name.split(" ")[0]} · Dashboard` : "Masuk creator"}
+              </span>
+              <Icon name="arrow-up-right" />
             </a>
             {viewer ? null : (
               <Link className="btn btn-primary" href="/daftar">

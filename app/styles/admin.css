@@ -95,8 +95,9 @@
   position: relative;
   overflow-x: auto;
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
 .admin-table {
@@ -321,7 +322,7 @@
   border: 1px solid var(--line-strong);
   background: var(--surface);
   color: var(--text);
-  font-size: var(--text-sm);
+  font-size: var(--text-control);
   transition: border-color var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out);
 }
@@ -340,9 +341,13 @@
   cursor: not-allowed;
 }
 
+/* Monospace, tapi TIDAK dikecilkan. Ini field yang diketik, jadi ia terikat
+   batas 16px yang sama seperti field lain (lihat --text-control). Tautan
+   afiliasi memang jadi lebih cepat terpotong di layar sempit; itu ditangani
+   scroll horizontal di dalam field, bukan dengan mengecilkan hurufnya. */
 .tier-row input[type="url"] {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: var(--text-xs);
+  font-size: var(--text-control);
 }
 
 .tier-actions {
@@ -711,13 +716,11 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .admin-pagination {
-    /* Hitungan halaman di tengah, tombolnya mengapit — bukan tiga baris
-       teks tak berbentuk seperti sebelumnya. */
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2);
-  }
+  /* Aturan mobile .admin-pagination PINDAH ke workspace.css, tepat di bawah
+     aturan dasarnya. Di sini ia tidak pernah berlaku: workspace.css
+     mendeklarasikan .admin-pagination tanpa syarat dengan spesifisitas yang
+     SAMA (0,1,0), dan app/layout.tsx mengimpornya SESUDAH admin.css — jadi
+     urutan sumber memenangkan aturan dasar di semua lebar. */
 
   .admin-page-count {
     grid-column: 1 / -1;

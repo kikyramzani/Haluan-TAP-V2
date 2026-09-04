@@ -222,20 +222,53 @@ export default function CampaignCatalog({
             )}
           </div>
 
-          <button
-            className="facet-toggle"
-            type="button"
-            aria-expanded={facetsOpen}
-            aria-controls="catalog-facets"
-            onClick={() => setFacetsOpen((value) => !value)}
-          >
-            <span>Filter</span>
-            {activeFacets > 0 ? <span className="facet-toggle-count">{activeFacets}</span> : null}
-            {/* Satu ikon diputar, bukan dua entri baru: Icon.tsx sudah di ambang
-                ~40 entri yang komentarnya sendiri tetapkan, dan glyph dekoratif
-                tidak sepadan dengan pemecahan berkas itu. */}
-            <Icon name="arrow-down" className="facet-toggle-caret" />
-          </button>
+          {/**
+           * Filter dan Urutkan duduk berdampingan, DI LUAR panel facet.
+           *
+           * Sebelumnya kontrol urutan ikut di dalam .catalog-facets, dan panel
+           * itu `display: none` sampai tombol Filter ditekan. Akibatnya di
+           * SETIAP ponsel satu-satunya cara mengurutkan katalog adalah membuka
+           * panel bernama "Filter" — nama yang justru tidak menjanjikan
+           * pengurutan — lalu menggulir melewati tiga deret chip. Tidak ada
+           * satu pun tanda bahwa pengurutan ada di sana: hitungan pada tombol
+           * Filter sengaja tidak menghitung urutan, karena urutan selalu
+           * terisi dan angka yang tidak pernah nol berhenti berarti.
+           *
+           * Dikeluarkan dari panel, keduanya jadi jujur: Filter menyembunyikan
+           * hal yang opsional, Urutkan selalu terlihat, dan hitungannya tetap
+           * hanya mencacah filter yang benar-benar aktif.
+           */}
+          <div className="catalog-toolbar">
+            <button
+              className="facet-toggle"
+              type="button"
+              aria-expanded={facetsOpen}
+              aria-controls="catalog-facets"
+              onClick={() => setFacetsOpen((value) => !value)}
+            >
+              <span>Filter</span>
+              {activeFacets > 0 ? <span className="facet-toggle-count">{activeFacets}</span> : null}
+              {/* Satu ikon diputar, bukan dua entri baru: Icon.tsx sudah di ambang
+                  ~40 entri yang komentarnya sendiri tetapkan, dan glyph dekoratif
+                  tidak sepadan dengan pemecahan berkas itu. */}
+              <Icon name="arrow-down" className="facet-toggle-caret" />
+            </button>
+
+            <div className="sort-control">
+              <label htmlFor="catalog-sort">Urutkan</label>
+              <select
+                id="catalog-sort"
+                value={sort}
+                onChange={(event) => setSort(event.target.value as SortId)}
+              >
+                {sorts.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <div className="catalog-facets" id="catalog-facets" data-open={facetsOpen}>
           {badgedTotal > 0 ? (
@@ -286,23 +319,6 @@ export default function CampaignCatalog({
                   <CategoryIcon category={name} /> {name} <span className="chip-count">{count}</span>
                 </button>
               ))}
-            </div>
-          </div>
-
-          <div className="filter-row">
-            <div className="sort-control">
-              <label htmlFor="catalog-sort">Urutkan</label>
-              <select
-                id="catalog-sort"
-                value={sort}
-                onChange={(event) => setSort(event.target.value as SortId)}
-              >
-                {sorts.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 

@@ -45,3 +45,8 @@ yarn-error.log*
 # rendered audit reports stay outside source control
 AUDIT-*.html
 IMPROVEMENT-PLAN.html
+
+# Memuat password plaintext untuk akun demo. Repo ini PUBLIK — skrip ini
+# tidak boleh pernah masuk riwayat git. Pindahkan kredensialnya ke env kalau
+# skrip ini memang masih dibutuhkan.
+scripts/create-demo-accounts.mjs

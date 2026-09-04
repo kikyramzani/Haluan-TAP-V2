@@ -19,7 +19,11 @@
 
 // Dinaikkan saat isi offline.html berubah, supaya klien yang sudah memasang
 // PWA tidak menyimpan cangkang versi lama.
-const CACHE_NAME = "tap-offline-v2";
+// v3: marka inline di offline.html ditulis ulang saat ujung gradasi berubah
+// dari #d226c7 ke #9a2fe0. Tanpa menaikkan angka ini, PWA yang sudah terpasang
+// akan terus menyajikan cangkang offline versi lama selamanya — cache-nya hanya
+// dibuang oleh handler `activate` ketika NAMANYA berbeda.
+const CACHE_NAME = "tap-offline-v3";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {

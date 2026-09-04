@@ -96,41 +96,54 @@ export default async function DealDetail({ params }: DealPageProps) {
     <>
       <SiteHeader variant="subpage" viewer={user ? { name: user.name } : null} />
 
-      <main className="shell" style={{ paddingBlock: "var(--space-12) var(--space-16)" }}>
+      {/**
+       * Seluruh tata letak halaman ini ada di catalog.css sebagai .deal-detail*.
+       *
+       * Sebelumnya ia ditata lewat dua belas atribut `style` inline dan tidak
+       * punya satu pun kelas sendiri. Konsekuensinya bukan cuma soal rapi:
+       * gaya inline tidak bisa dijangkau media query maupun tema, jadi halaman
+       * ini adalah satu-satunya permukaan publik yang tidak bisa diberi
+       * perlakuan mobile atau diganti tokennya tanpa menyunting TSX-nya.
+       */}
+      <main className="shell deal-detail">
         <Link className="btn btn-ghost" href={`/deals${platform === "Shopee" ? "?platform=shopee" : ""}`}>
           <Icon name="arrow-left" /> Semua deal
         </Link>
 
-        <header style={{ display: "flex", gap: "var(--space-4)", alignItems: "center", marginTop: "var(--space-6)" }}>
+        <header className="deal-detail-head">
           <BrandMark brand={brand} logoOverride={campaign?.image} size={64} />
           <div>
             <p className="eyebrow">{platform} campaign</p>
-            <h1 style={{ fontSize: "var(--text-h1)", marginTop: 4 }}>{brand}</h1>
-            <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", marginTop: 4 }}>
+            <h1>{brand}</h1>
+            <p className="deal-detail-meta">
               {campaign?.category ?? "Campaign affiliate"} · {campaign?.platform ?? "TikTok Shop"}
             </p>
           </div>
         </header>
 
-        <dl className="sheet-metrics" style={{ maxWidth: 520, marginTop: "var(--space-8)" }}>
+        <dl className="sheet-metrics deal-detail-metrics">
           <div className="metric-tile">
             <dt>Komisi creator</dt>
             <dd>{formatCommission(campaign?.commission ?? null)}</dd>
           </div>
-          <div className="metric-tile">
+          {/* metric-tile-text: nilainya kalimat, bukan angka, jadi ia tidak
+              memakai ukuran display milik ubin metrik. Sebelumnya tiga ubin ini
+              memakai tiga ukuran berbeda — --text-lead dua kali dan 17px sekali,
+              yang tidak berasal dari tangga mana pun. */}
+          <div className="metric-tile metric-tile-text">
             <dt>Status campaign</dt>
-            <dd style={{ fontSize: "var(--text-lead)" }}>{stillRunning ? "Masih berjalan" : "Sudah berakhir"}</dd>
+            <dd>{stillRunning ? "Masih berjalan" : "Sudah berakhir"}</dd>
           </div>
           {hasSample !== null ? (
-            <div className="metric-tile metric-tile-wide">
+            <div className="metric-tile metric-tile-text metric-tile-wide">
               <dt>Sample</dt>
-              <dd style={{ fontSize: 17 }}>{hasSample ? "Sample tersedia" : "Belum tersedia"}</dd>
+              <dd>{hasSample ? "Sample tersedia" : "Belum tersedia"}</dd>
             </div>
           ) : null}
           {expiresAt ? (
-            <div className="metric-tile metric-tile-wide">
+            <div className="metric-tile metric-tile-text metric-tile-wide">
               <dt>Berlaku hingga</dt>
-              <dd style={{ fontSize: "var(--text-lead)" }}>
+              <dd>
                 {expiresAt}
                 {expiryNote ? <span className="metric-note">{expiryNote}</span> : null}
               </dd>
@@ -139,29 +152,24 @@ export default async function DealDetail({ params }: DealPageProps) {
         </dl>
 
         {campaign && campaign.campaignCount > 1 ? (
-          <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", marginTop: "var(--space-4)", maxWidth: "60ch" }}>
+          <p className="deal-detail-note">
             Brand ini punya beberapa campaign dengan komisi berbeda. Yang dibagikan di sini adalah campaign dengan
             komisi terendah, sama dengan angka di atas.
           </p>
         ) : null}
 
-        <section style={{ marginTop: "var(--space-12)", maxWidth: 560 }}>
-          <h2 style={{ fontSize: "var(--text-h3)" }}>Link affiliate</h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", margin: "var(--space-2) 0 var(--space-4)" }}>
-            Salin linknya atau buka langsung etalasenya. Link ini dapat diakses tanpa login.
-          </p>
+        <section className="deal-detail-section">
+          <h2>Link affiliate</h2>
+          <p>Salin linknya atau buka langsung etalasenya. Link ini dapat diakses tanpa login.</p>
           {primary ? <AffiliateLinkField url={primary.url} openUrl={`/go/${campaignId}`} /> : null}
         </section>
 
         {hasSample ? (
-          <section className="panel" style={{ marginTop: "var(--space-12)", maxWidth: 720 }}>
+          <section className="panel deal-detail-section deal-detail-sample">
             <h2>Perlu produk untuk membuat konten?</h2>
-            <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", marginTop: "var(--space-2)" }}>
-              Login untuk mengajukan sample dan memantau statusnya.
-            </p>
+            <p>Login untuk mengajukan sample dan memantau statusnya.</p>
             <Link
               className="btn btn-primary"
-              style={{ marginTop: "var(--space-4)" }}
               href={`/request-sample?brand=${encodeURIComponent(brand)}&platform=${platform}`}
             >
               Request sample <Icon name="arrow-up-right" />
@@ -169,7 +177,7 @@ export default async function DealDetail({ params }: DealPageProps) {
           </section>
         ) : null}
 
-        <div style={{ marginTop: "var(--space-8)", display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}>
+        <div className="deal-detail-actions">
           <ShareDealButton brand={brand} />
           {savedCampaignState ? (
             <SaveCampaignButton
@@ -181,7 +189,7 @@ export default async function DealDetail({ params }: DealPageProps) {
           ) : null}
         </div>
 
-        <p style={{ color: "var(--text-subtle)", fontSize: "var(--text-xs)", marginTop: "var(--space-8)" }}>
+        <p className="deal-detail-fineprint">
           Ketersediaan link dan benefit dapat berubah mengikuti periode campaign di platform.
         </p>
       </main>

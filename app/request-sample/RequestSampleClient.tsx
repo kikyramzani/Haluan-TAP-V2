@@ -14,6 +14,12 @@ type Viewer = {
   tiktokUsername?: string;
   recipientName?: string;
   address?: string;
+  /** Alamat kirim per bagian dari profil creator. Lihat TapUser.shipping. */
+  shipping?: {
+    street?: string; rt?: string; rw?: string;
+    village?: string; district?: string; regency?: string; province?: string;
+    postalCode?: string; recipientPhone?: string;
+  };
 };
 type SampleOption = { brand: string; platform: "TikTok" | "Shopee" };
 type GateCheck = { allowed: true } | { allowed: false; reason: string; message: string };
@@ -151,6 +157,19 @@ export default function RequestSampleClient({ art }: Props) {
     ? `https://www.tiktok.com/@${viewer.tiktokUsername.replace(/^@/, "")}`
     : "";
 
+  /**
+   * Alamat kirim dari profil yang sudah dilengkapi creator.
+   *
+   * Sebelumnya tujuh field alamat di bawah tidak punya defaultValue sama
+   * sekali, jadi creator yang sudah mengisi seluruh alamatnya di
+   * /dashboard/profil tetap harus mengetik ulang semuanya di sini — provinsi,
+   * kabupaten, kecamatan, kelurahan, RT/RW, kode pos, jalan.
+   */
+  const ship = viewer?.shipping ?? {};
+
+  /** Profil menyimpan RT dan RW terpisah; field ini satu kotak "001/002". */
+  const rtRw = [ship.rt, ship.rw].filter(Boolean).join("/");
+
   return (
     <main>
       <nav className="nav shell">
@@ -174,17 +193,14 @@ export default function RequestSampleClient({ art }: Props) {
           <div className="steps">
             <div>
               <i className="icon-tile icon-tile-sm"><Icon name="storefront" /></i>
-              <strong>01</strong>
               <span><b>Pilih campaign</b>Hanya brand dengan sample aktif yang tampil.</span>
             </div>
             <div>
               <i className="icon-tile icon-tile-sm"><Icon name="shield-check" /></i>
-              <strong>02</strong>
               <span><b>Review Haluan</b>Profil, brief, dan kuota akan diperiksa.</span>
             </div>
             <div>
               <i className="icon-tile icon-tile-sm"><Icon name="package" /></i>
-              <strong>03</strong>
               <span><b>Pantau pengiriman</b>Status selalu tersedia di dashboard.</span>
             </div>
           </div>
@@ -260,21 +276,21 @@ export default function RequestSampleClient({ art }: Props) {
             <form onSubmit={submit}>
               <div className="form-heading"><span>Request form</span><b>Sekitar 2 menit</b></div>
               <label><span>Cari campaign dengan sample tersedia</span><input name="campaign" list="sample-campaign-options" value={campaignQuery} onChange={(event) => { setCampaignQuery(event.target.value); setCampaignError(""); }} placeholder="Ketik nama brand lalu pilih dari daftar…" autoComplete="off" aria-invalid={campaignError ? "true" : "false"} aria-describedby={campaignError ? "campaign-error" : undefined} required/><datalist id="sample-campaign-options">{campaigns.map((item) => <option key={`${item.platform}-${item.brand}`} value={`${item.brand} · ${item.platform}`}/>)}</datalist>{campaignError && <small id="campaign-error" className="field-error" role="alert">{campaignError}</small>}{!campaignError && gateChecking && <small className="field-hint">Memeriksa ketersediaan sample…</small>}{!campaignError && !gateChecking && gateResult && !gateResult.allowed && <small className="field-error" role="alert">{gateResult.message}</small>}</label>
-              <div className="two-col"><label><span>Nama penerima</span><input name="recipientName" defaultValue={viewer.recipientName || viewer.name} placeholder="Nama lengkap" autoComplete="name" required /></label><label><span>Nomor WhatsApp</span><input name="phone" type="tel" inputMode="tel" defaultValue={viewer.phone} placeholder="08xxxxxxxxxx" autoComplete="tel" required /></label></div>
+              <div className="two-col"><label><span>Nama penerima</span><input name="recipientName" defaultValue={viewer.recipientName || viewer.name} placeholder="Nama lengkap" autoComplete="name" required /></label><label><span>Nomor WhatsApp</span><input name="phone" type="tel" inputMode="tel" defaultValue={ship.recipientPhone || viewer.phone} placeholder="08xxxxxxxxxx" autoComplete="tel" required /></label></div>
               <label><span>Username creator</span><input name="username" defaultValue={viewer.tiktokUsername || ""} placeholder="@username" autoComplete="off" required /></label>
               <label><span>Link profil creator</span><input name="profile" type="url" defaultValue={profileUrl} placeholder="https://tiktok.com/@username" inputMode="url" required /></label>
-              <label><span>Alamat lengkap (nama jalan, nomor, patokan)</span><textarea name="street" rows={2} placeholder="Jl. Contoh No. 12, RT sebutkan di bawah" autoComplete="street-address" required /></label>
+              <label><span>Alamat lengkap (nama jalan, nomor, patokan)</span><textarea name="street" rows={2} defaultValue={ship.street ?? ""} placeholder="Jl. Contoh No. 12, RT sebutkan di bawah" autoComplete="street-address" required /></label>
               <div className="two-col">
-                <label><span>RT / RW</span><input name="rtRw" placeholder="001/002" autoComplete="off" required /></label>
-                <label><span>Kelurahan / Desa</span><input name="kelurahan" placeholder="Kelurahan" autoComplete="off" required /></label>
+                <label><span>RT / RW</span><input name="rtRw" defaultValue={rtRw} placeholder="001/002" autoComplete="off" required /></label>
+                <label><span>Kelurahan / Desa</span><input name="kelurahan" defaultValue={ship.village ?? ""} placeholder="Kelurahan" autoComplete="off" required /></label>
               </div>
               <div className="two-col">
-                <label><span>Kecamatan</span><input name="kecamatan" placeholder="Kecamatan" autoComplete="address-level3" required /></label>
-                <label><span>Kabupaten / Kota</span><input name="kabupaten" placeholder="Kabupaten atau Kota" autoComplete="address-level2" required /></label>
+                <label><span>Kecamatan</span><input name="kecamatan" defaultValue={ship.district ?? ""} placeholder="Kecamatan" autoComplete="address-level3" required /></label>
+                <label><span>Kabupaten / Kota</span><input name="kabupaten" defaultValue={ship.regency ?? ""} placeholder="Kabupaten atau Kota" autoComplete="address-level2" required /></label>
               </div>
               <div className="two-col">
-                <label><span>Provinsi</span><input name="provinsi" placeholder="Provinsi" autoComplete="address-level1" required /></label>
-                <label><span>Kode pos</span><input name="kodePos" inputMode="numeric" pattern="[0-9]{5}" maxLength={5} placeholder="12345" autoComplete="postal-code" required /></label>
+                <label><span>Provinsi</span><input name="provinsi" defaultValue={ship.province ?? ""} placeholder="Provinsi" autoComplete="address-level1" required /></label>
+                <label><span>Kode pos</span><input name="kodePos" inputMode="numeric" pattern="[0-9]{5}" maxLength={5} defaultValue={ship.postalCode ?? ""} placeholder="12345" autoComplete="postal-code" required /></label>
               </div>
               <label className="checkbox"><input name="commitment" type="checkbox" required /><span>Saya bersedia membuat konten sesuai brief dan timeline campaign.</span></label>
               <button className="submit-btn" type="submit" disabled={busy || gateResult?.allowed === false}>{busy ? "Menyimpan…" : "Kirim request"} <Icon name="arrow-up-right" /></button>

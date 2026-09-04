@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { requireUser } from "../../../lib/auth";
 import { prisma } from "../../../lib/db";
 import { computeProfileCompleteness } from "../../../lib/profile-completeness";
@@ -62,9 +63,12 @@ export default async function ProfilPage() {
           </div>
         </div>
         <div className={`activation-card ${completeness.complete ? "verified" : ""}`}>
-          <div className="activation-score">
-            {completeness.percent}
-            <small>%</small>
+          {/* Lihat catatan --score di app/dashboard/page.tsx. */}
+          <div className="activation-score" style={{ "--score": completeness.percent } as CSSProperties}>
+            <span>
+              {completeness.percent}
+              <small>%</small>
+            </span>
           </div>
           <div>
             <span>STATUS PROFIL</span>

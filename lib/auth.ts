@@ -17,7 +17,30 @@ const PENDING_EXPIRY_MS = 60 * 60 * 1000;
 const SESSION_COOKIE = "tap_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 
-const userInclude = { creator: { include: { address: true } } } satisfies Prisma.UserInclude;
+/**
+ * Relasi wilayah ikut ditarik, tapi HANYA kolom `name`-nya.
+ *
+ * Keempatnya lookup primary key, jadi murah; yang mahal adalah menarik seluruh
+ * baris Village/District/Regency/Province pada setiap pengecekan sesi. `select`
+ * sempit membuat yang melintas hanya empat string.
+ *
+ * Dibutuhkan supaya form request sample bisa terisi otomatis dari profil yang
+ * sudah dilengkapi creator — lihat TapUser.shipping di lib/models.ts.
+ */
+const userInclude = {
+  creator: {
+    include: {
+      address: {
+        include: {
+          province: { select: { name: true } },
+          regency: { select: { name: true } },
+          district: { select: { name: true } },
+          village: { select: { name: true } },
+        },
+      },
+    },
+  },
+} satisfies Prisma.UserInclude;
 type UserRecord = Prisma.UserGetPayload<{ include: typeof userInclude }>;
 
 function normalizeEmail(value: string) {
@@ -107,6 +130,19 @@ function toTapUser(user: UserRecord): TapUser {
     recipientName: creator?.recipientName ?? undefined,
     address: creator?.address?.legacyAddressText ?? undefined,
     assignedPic: creator?.assignedPic ?? undefined,
+    shipping: creator?.address
+      ? {
+          street: creator.address.detailAddress ?? undefined,
+          rt: creator.address.rt ?? undefined,
+          rw: creator.address.rw ?? undefined,
+          village: creator.address.village?.name ?? undefined,
+          district: creator.address.district?.name ?? undefined,
+          regency: creator.address.regency?.name ?? undefined,
+          province: creator.address.province?.name ?? undefined,
+          postalCode: creator.address.postalCode ?? undefined,
+          recipientPhone: creator.address.recipientPhone ?? undefined,
+        }
+      : undefined,
   };
 }
 

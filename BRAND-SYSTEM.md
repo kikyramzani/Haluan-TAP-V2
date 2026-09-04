@@ -132,16 +132,30 @@ Skala permukaan `tokens.css` yang sekarang sudah benar bentuknya. Yang berubah h
 
 | Token | Hex | Catatan |
 |---|---|---|
-| `--bg` | `#FCFCFC` | paper deck |
-| `--surface` | `#FFFFFF` | |
-| `--surface-sunken` | `#F9F9F9` | varian paper deck |
+| `--bg` | `#F8F2F6` | kertas bernuansa merah muda |
+| `--surface` | `#FFFFFF` | kartu, mengambang di atas latar |
+| `--surface-sunken` | `#F3EBF1` | lebih pekat dari latar, bukan lebih pucat |
 | `--surface-raised` | `#FFFFFF` | |
-| `--line` | `rgba(9,10,10,0.12)` | |
-| `--line-strong` | `rgba(9,10,10,0.20)` | |
+| `--line` | `rgba(9,10,10,0.08)` | melemah; bayangan yang memikul pemisahan |
+| `--line-strong` | `rgba(9,10,10,0.16)` | |
 
-Teks di tema terang: `--text: #090A0A` (19.32 di atas paper), `--text-muted: #4A4A55` (8.52), `--text-subtle: #63636E` (5.78). Ketiganya lolos AA di seluruh permukaan terang di atas.
+Teks di tema terang: `--text: #090A0A` (17.96 di atas latar), `--text-muted: #4A4A55` (7.92), `--text-subtle: #63636E` (5.30). Di `--surface-sunken` yang paling ketat, `--text-subtle` masih 5.07 dan `--positive` 4.58. Semuanya lolos AA.
 
-Perubahan yang perlu dicatat: tema terang sekarang memakai `--surface-sunken: #f4f3f0`, krem warisan hcommerce. Nilai itu tidak ada di deck Haluan dan diganti `#F9F9F9`.
+#### Kartu mengambang, bukan kartu bergaris
+
+Ini satu-satunya perubahan STRUKTURAL di lapisan warna, dan seluruh kesan visual bergantung padanya.
+
+Sebelumnya `--bg` `#FCFCFC` dan `--surface` `#FFFFFF` — beda tiga poin, praktis satu warna. Kartu karenanya hanya bisa dibedakan dari halaman lewat garis 1px, dan seluruh permukaan terang terbaca sebagai satu bidang putih datar. Itu juga yang membuat skala elevasi tidak pernah terpakai: bayangan di atas latar yang sewarna dengan kartunya memang tidak menghasilkan apa-apa.
+
+`#F8F2F6` adalah kertas yang sama dengan sedikit rona `--brand-pink-tint` di dalamnya. Cukup untuk membuat putih terbaca sebagai "diangkat", masih cukup netral untuk tidak terlihat seperti halaman berwarna.
+
+Konsekuensi yang harus dipegang:
+
+- **`--surface-sunken` kini lebih PEKAT dari latar, bukan lebih pucat.** Dengan kartu yang mengambang, "tenggelam" harus berarti masuk ke dalam halaman. `#F9F9F9` yang lama justru lebih terang dari latar barunya, jadi ia akan terbaca naik, bukan turun.
+- **Garis melemah, bayangan menguat.** `--line` turun dari 12% ke 8% karena ia kini penegas tepi, bukan lagi satu-satunya penanda bahwa sesuatu adalah benda terpisah.
+- **Kontras justru NAIK, bukan turun**, karena latarnya sedikit lebih gelap dari sebelumnya.
+
+Tema gelap mengikuti model yang sama dari arah berlawanan: `--surface` dinaikkan dari `#0E0E13` ke `#131218` dan `--surface-raised` dari `#14141B` ke `#1B1A23`, supaya jarak antara latar dan kartu benar-benar terlihat. Pasangan wordmark gelap diverifikasi ulang terhadap permukaan baru itu: `#FF209D` 5.27 dan `#B46FF5` 5.79.
 
 ### 2.4 Status dan platform
 
@@ -210,10 +224,30 @@ Bentuknya dipertahankan dari yang sudah ada di `tokens.css`, hanya hue-nya digan
 
 ### 3.4 Aturan gradasi
 
+#### Tiga peran, bukan satu kata
+
+Versi pertama aturan ini memakai satu kata — "gradasi" — untuk tiga benda yang perannya berbeda, dan justru itulah yang mematikan seluruh bahasa gradasi di produk ini. Buktinya ada di kode: seluruh 7.000 baris CSS hanya memuat enam rujukan gradasi, dan komentar di `tokens.css` menolak gradasi pada kartu dengan alasan "dua bidang bergradasi tidak boleh bersentuhan" — padahal yang diusulkan di sana bukan bidang.
+
+Batasnya tetap ada. Yang berubah: ia sekarang mengikat **peran**, bukan kata.
+
+**1. Atmosfer.** Sapuan satu rona brand di atas netral, amplitudo **≤8% di tema terang** dan **≤12% di tema gelap**, tidak pernah membawa teks secara langsung, dan selalu berada **di bawah** seluruh permukaan. Contoh: latar halaman, `--gradient-wash` di sudut kartu, alas ilustrasi.
+→ **Tidak menghabiskan jatah.** Boleh ada di setiap halaman, dan boleh bersentuhan dengan peran lain.
+→ Syaratnya: kontras teks dihitung di **titik terkuat** sapuan, bukan di tengahnya.
+
+**2. Aksen garis.** Gradasi pada garis, batang, cincin, atau isian ikon setebal **≤4px**, atau pada bentuk yang nilainya sudah tertulis sebagai teks di sebelahnya.
+→ **Tidak menghabiskan jatah.** Ia terlalu tipis untuk bersaing memperebutkan perhatian.
+→ Syaratnya: kalau ia menyampaikan informasi (mis. cincin progres), informasinya wajib tersedia juga sebagai teks.
+
+**3. Bidang.** Permukaan terisi yang **membawa teks**. Inilah yang aturan satu-per-viewport ada untuk mengatur, dan inilah satu-satunya peran yang menghabiskan jatah.
+
+Uji cepatnya satu kalimat: **kalau teks duduk langsung di atasnya dan ia lebih tebal dari 4px, ia bidang.** Selain itu, bukan.
+
+#### Aturan
+
 - **Label di gradasi Haluan selalu ink.** Ini kebalikan dari `--gradient-cta` yang sekarang, yang berakhir di `#8B1A9E` — di sana ink cuma 2.59 dan putih 7.67, jadi gradasi lama itu white-safe. Dua sistem yang berlawanan. **Jangan pernah mencampurnya**; kalau `--gradient-hot` masuk, `--gradient-cta` lama harus keluar bersamaan, bukan bertahap.
-- Gradasi tidak pernah berada di bawah teks ≤14px. Untuk teks kecil, pakai isian solid.
-- Tidak ada dua bidang bergradasi yang bersentuhan. Selalu ada permukaan solid di antaranya.
-- Maksimal satu Haluan Hot per viewport. Kalau ada dua, salah satunya bukan yang utama dan harus turun jadi solid.
+- Gradasi tidak pernah berada di bawah teks ≤14px. Untuk teks kecil, pakai isian solid. *(Berlaku untuk **bidang**. Atmosfer boleh berada di bawah teks ukuran apa pun, karena amplitudonya dibatasi ≤8%/≤12% dan kontrasnya dihitung di titik terkuat.)*
+- Tidak ada dua **bidang** bergradasi yang bersentuhan. Selalu ada permukaan solid di antaranya. *(Atmosfer dan aksen garis boleh bersentuhan dengan apa pun.)*
+- Maksimal satu Haluan Hot per viewport — dihitung sebagai **bidang**. Kalau ada dua, salah satunya bukan yang utama dan harus turun jadi solid.
 - **Logo TIDAK dihitung.** Gradasi pada kata "TAP" di Logo Haluan TAP berada di luar tiga aturan di atas: ia tidak menghabiskan jatah satu-per-viewport, boleh bersentuhan dengan bidang bergradasi lain, dan boleh berada pada ukuran teks kecil. Alasannya bukan kelonggaran, melainkan perbedaan peran. Aturan-aturan itu ada untuk mencegah gradasi SALING BERSAING memperebutkan perhatian di antara kontrol. Logo tidak ikut lomba itu: ia identitas yang justru harus tampil sama persis di setiap halaman, dan orang berhenti "melihat"-nya setelah kunjungan kedua. Yang tetap mengikat logo: gradasinya dua perhentian dalam rona bertetangga, dan tidak pernah diletakkan di atas bidang bergradasi lain.
 - Gradasi tidak dianimasikan. Sapuan yang bergerak menarik perhatian ke arah yang tidak membawa informasi.
 
@@ -300,18 +334,28 @@ Subset latin + latin-ext. Poppins 400 tidak perlu diunduh — Poppins hanya dipa
 
 ### 4.6 Skala
 
-Tidak berubah dari `tokens.css`. Skalanya sudah proporsional dan sudah teruji di breakpoint yang ada.
-
 ```css
---text-display: clamp(40px, 6vw, 76px);
---text-h1: clamp(32px, 4.2vw, 52px);
---text-h2: clamp(25px, 2.6vw, 34px);
---text-h3: clamp(19px, 1.5vw, 22px);
---text-lead: 18px;
---text-body: 16px;
---text-sm: 14px;
---text-xs: 12px;
+--text-display: clamp(38px, 5.2vw, 68px);
+--text-metric:  clamp(30px, 7vw, 46px);
+--text-h1:      clamp(32px, 4.2vw, 52px);
+--text-h2:      clamp(25px, 2.6vw, 34px);
+--text-h3:      clamp(19px, 1.5vw, 22px);
+--text-lead:    18px;
+--text-body:    16px;
+--text-control: 16px;
+--text-sm:      14px;
+--text-xs:      12px;
 ```
+
+Dua langkah butuh penjelasan, karena keduanya menutup lubang yang nyata.
+
+**`--text-metric`** — angka utama. Di kedua case study rujukan, SATU angka besar di tengah kartu adalah perangkat yang paling sering diulang: 92%, 96 BPM, 120/80. Angka itu bukan judul dan bukan isi; ia butuh langkahnya sendiri. Sebelumnya tidak ada, sehingga tiap komponen mengarang ukurannya sendiri — 42px di kartu deal, 26px di KPI admin, 24px di ubin metrik, 22px di skor aktivasi, 17px di salah satu ubin halaman deal. Lima angka, nol tangga.
+
+**`--text-control`** — ukuran huruf SETIAP kontrol yang bisa difokus dan diketik. Nilainya sama dengan `--text-body`, tapi ia token tersendiri karena alasannya berbeda dan lebih keras: **16px di sini bukan pilihan desain, melainkan batas Safari iOS.** Field ber-`font-size` di bawah 16px memaksa seluruh viewport membesar saat difokus. Tidak ada cara mematikannya lewat CSS selain menaikkan ukurannya; `user-scalable=no` memang menghentikannya, tapi itu kegagalan aksesibilitas. Jangan pernah menurunkan nilai ini, dan jangan menulis `--text-sm` pada kontrol yang bisa diketik meski secara visual terlihat lebih rapat — kerapatan diambil dari padding dan tinggi baris, bukan dari ukuran huruf.
+
+**`--text-display`** disamakan persis dengan `clamp()` yang sudah dipakai hero di `home.css`. Sebelumnya token ini **tidak pernah dirujuk sekali pun** — hero menulis clamp-nya sendiri — sehingga tangga tipografi punya puncak di atas kertas tapi tidak di layar. Menyambungkannya tidak mengubah satu piksel pun.
+
+Catatan yang perlu dipegang saat menata ulang: **178 dari 221 rujukan ukuran huruf (81%) di repo ini adalah 14px atau 12px.** Tangga ini bagian bawahnya sangat padat dan bagian atasnya nyaris kosong.
 
 ---
 
@@ -331,15 +375,40 @@ Tidak berubah dari `tokens.css`. Skalanya sudah proporsional dan sudah teruji di
 **Radius** — pil hanya untuk badge dan kontrol ringkas:
 
 ```
---radius-sm 8  --radius-md 12  --radius-lg 16
---radius-xl 20  --radius-2xl 24  --radius-pill 999
+--radius-sm 8   --radius-md 12  --radius-lg 16
+--radius-xl 20  --radius-2xl 24 --radius-3xl 28  --radius-pill 999
 ```
+
+Di atasnya ada tiga token **peran**, dan komponen memakai token peran ini, bukan angkanya:
+
+```
+--radius-control  = --radius-md   (12)  input, select, tombol persegi
+--radius-card     = --radius-2xl  (24)  kartu konten
+--radius-panel    = --radius-3xl  (28)  lembar penuh, panel besar
+```
+
+Alasannya bukan kosmetik. Sebelum token peran ada, `--radius-xl` dipakai tujuh kali dan `--radius-2xl` hanya **tiga kali** di seluruh repo — hampir setiap kartu berhenti di `--radius-lg`, jadi dua langkah teratas tangga ini praktis mati. Dengan token peran, "naikkan sudut semua kartu" jadi satu suntingan di `tokens.css`, bukan pencarian-ganti di delapan berkas.
+
+`--radius-control` sengaja **tidak** ikut naik: sudut besar pada input dan tombol persegi memakan ruang teksnya sendiri.
 
 **Ikon** — `--icon-sm 16`, `--icon-md 20`, `--icon-lg 24`, `--icon-xl 28`. Disetel lewat `font-size`, bukan prop `size`, karena Phosphor default-nya `1em`.
 
 **Layout** — `--shell-width 1180px`, `--header-height 64px`, `--bottom-nav-height 64px`, `--bottom-nav-inset` sudah termasuk `env(safe-area-inset-bottom)`.
 
-**Bayangan** — empat langkah, ditulis ulang per tema (bukan dibalik). `--shadow-card` sengaja terpisah dari `--shadow-md` karena kartu deal hanya naik 2px saat hover.
+**Bayangan** — empat langkah, ditulis ulang per tema (bukan dibalik), dan tiap langkah **berlapis dua**:
+
+```
+--shadow-sm     kontrol dan chip — nyaris tak terlihat, hanya melepaskannya dari latar
+--shadow-card   kartu di posisi diam
+--shadow-md     kartu saat diangkat, dropdown, popover
+--shadow-lg     lembar dan modal — satu-satunya lapisan yang boleh terasa berat
+```
+
+Dua lapis, bukan satu: satu bayangan sangat rapat untuk tepi kontak, satu lagi lebar dan sangat pucat untuk isi ruangnya. Bayangan tunggal memaksa memilih antara tepi tegas ATAU sebaran lembut; dua lapis memberi keduanya.
+
+Di tema terang opasitasnya **di bawah 10%** dan warnanya diturunkan dari ink, bukan hitam murni. Bayangan gelap pekat di atas latar terang terbaca sebagai kotoran, bukan sebagai kedalaman.
+
+Ini bagian yang paling kurang dipakai sebelum perombakan: seluruh 7.000 baris CSS hanya memuat **delapan** rujukan bayangan, dan hierarki dibangun hampir sepenuhnya dari garis 1px. Itu sebabnya tampilan lama terbaca rata — yang penting dan yang tidak penting memakai penanda yang sama persis.
 
 **Gerak** — `--duration-fast 150ms`, `--duration-normal 250ms`, `--duration-slow 350ms`, `--ease-out cubic-bezier(0.16, 1, 0.3, 1)`, `--ease-in-out cubic-bezier(0.4, 0, 0.2, 1)`.
 
@@ -349,7 +418,18 @@ Aturan gerak yang bersifat brand:
 - Gradasi tidak bergerak (§3.4).
 - Semua gerak dekoratif hormat pada `prefers-reduced-motion`. `app/components/Parallax.tsx` sudah menjadi contohnya.
 
-**Breakpoint** — perlu dinormalisasi. `STITCH-DESIGN-SPEC.md` §6.5 menyebut 320 / 375 / 768 / 1024 / 1440, tapi CSS-nya sebenarnya memakai campuran `900px` (12×), `600px` (6×), `768px` (3×), `720px` (3×), `760px` (2×), `380px` (1×), dan `1100px` (1×) — tujuh ambang untuk lima yang didokumentasikan. Ini bukan masalah brand, tapi harus diberesi sebelum restyling, kalau tidak setiap perbaikan visual akan dikerjakan dua kali.
+**Breakpoint** — sudah dinormalisasi jadi **empat ambang**, masing-masing dengan pekerjaan yang berbeda:
+
+```
+900px  Navigasi berubah. Bottom nav menyala, header ringkas, facet katalog terlipat.
+768px  Tata letak berubah. Grid multi-kolom jadi satu kolom, dialog samping jadi bottom sheet.
+600px  Ponsel sempit. Detail sekunder disembunyikan (petunjuk ⌘K, kolom tabel opsional).
+380px  Ponsel sangat sempit. Hanya untuk grid yang benar-benar pecah di bawahnya.
+```
+
+Sebelumnya ada tiga angka berbeda untuk SATU maksud yang sama — `720px` untuk bottom sheet, `760px` untuk kartu aktivasi, `768px` untuk sisanya — sehingga di pita 721–768px sebagian tata letak sudah menumpuk dan sebagian belum. Tidak ada satu pun viewport uji yang jatuh di pita itu, jadi ketidakcocokannya tidak pernah muncul di CI, hanya di perangkat nyata.
+
+Nilainya tidak bisa jadi custom property: `@media (max-width: var(--x))` tidak sah di CSS. Penegakannya lewat daftar ini dan komentar di `tokens.css`. `(max-height: …)` adalah sumbu berbeda dan tidak terikat daftar ini.
 
 ---
 
@@ -465,7 +545,13 @@ Detail khasnya ada pada huruf **t** di kata "tap": palangnya memanjang ke kiri d
 - Tidak diregangkan, tidak dimiringkan, tidak diberi bayangan. `scaleX()` dan `font-stretch` dilarang §4.2; karena logonya outline, penskalaan proporsional memang satu-satunya yang mungkin.
 - **Gradasi logo tidak dihitung dalam jatah §3.4.** Pengecualian itu ditulis di sana beserta alasannya. Yang tetap berlaku: dua perhentian saja, rona bertetangga, dan logo tidak pernah diletakkan di atas bidang bergradasi lain.
 
-**Marka aplikasi.** Kata **"TAP"** kapital, satu baris, dengan gradasi `#fb007f` → `#d226c7` (kedua ujung `--gradient-hot`) menyapu melintasi ketiga hurufnya.
+**Marka aplikasi.** Kata **"TAP"** kapital, satu baris, dengan gradasi `#fb007f` → `#9a2fe0` menyapu melintasi ketiga hurufnya.
+
+**Ujung violetnya dilebarkan, dan itu perbaikan yang sama dengan yang sudah dilakukan pada wordmark.** Sebelumnya ujungnya `#d226c7`, yang hanya berjarak **26 derajat** rona dari `#fb007f`. Dua warna gelap yang bertetangga rona terbaca sebagai satu warna pada ukuran kecil — dan marka ini hidup di 48px di tab browser dan 96px di badge notifikasi. Sapuan yang tidak terlihat bukan sapuan; ia hanya biaya render. Persis alasan yang membuat pasangan wordmark dilebarkan ke sekitar 55 derajat.
+
+`#9a2fe0` berjarak **53 derajat** dari `#fb007f` — sama dengan jarak yang sudah diverifikasi untuk wordmark (50° terang, 55° gelap) — sehingga marka dan wordmark akhirnya terbaca sebagai satu benda, bukan dua aset yang kebetulan sewarna. Kontrasnya di atas paper `#fcfcfc` adalah **5.31**, jauh di atas ambang 3.0 untuk objek grafis.
+
+Ujung magentanya **tidak** berubah. `#fb007f` adalah warna brand Haluan itu sendiri (§2.1); yang boleh disegarkan adalah ke mana ia menuju, bukan dari mana ia berangkat. Bentuk hurufnya juga tidak berubah sama sekali — hanya warnanya.
 
 Kapital, bukan huruf kecil seperti wordmark-nya, dan itu keputusan teknis: kapital tidak punya ascender maupun descender, jadi pada kanvas persegi hurufnya bisa jauh lebih besar. Hurufnya juga ditebalkan lewat stroke yang mengikuti fill-nya sendiri — Poppins Bold adalah bobot terberat yang ada di repo ini, dan pada ukuran favicon ia masih terlalu ramping. Stroke yang sama sekaligus membulatkan sudutnya.
 

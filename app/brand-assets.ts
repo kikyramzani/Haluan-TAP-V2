@@ -29,6 +29,10 @@ const LOCAL_LOGO_ALIASES: Array<[RegExp, string]> = [
   [/^(?:boj|beauty\s+of\s+j[eo]a?os[eo]n)/i, "beauty-of-joseon"],
   [/^blp(?:\s+beauty)?$/i, "blp-beauty"],
   [/^had[aa]\s*labo$/i, "hada-labo"],
+  // Logonya SUDAH ada di disk sebagai kojis.jpg, tapi nama katalognya "Kojis
+  // Body Care" menghasilkan kunci "kojis-body-care" dan tidak pernah cocok —
+  // jadi kartunya menampilkan kotak inisial "KB" padahal berkasnya ada.
+  [/^kojis(?:\s+body\s+care)?$/i, "kojis"],
   [/^labore(?:\s*\(paragon\))?$/i, "labore"],
   [/^(?:lrp\s*\/\s*)?la\s+roche[ -]posay$/i, "la-roche-posay"],
   [/^l['’]?oreal/i, "loreal"],

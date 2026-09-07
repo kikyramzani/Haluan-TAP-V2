@@ -7,7 +7,9 @@ import { brandKey as computeBrandKey } from "../../../lib/brand-key.ts";
  * hard rules for every helper in this file:
  *
  * 1. NEVER create, update, or delete a Brand/Campaign/CampaignTier/CampaignLink
- *    row that isn't prefixed `e2e-` (brandKey). The real migrated catalog
+ *    row that isn't an e2e fixture: campaign slugs are prefixed `e2e-`, and
+ *    brand keys start with `e2e` (brandKey() strips every non-alphanumeric
+ *    character, so the hyphen never survives into a brandKey). The real migrated catalog
  *    (691 brands) is the one thing this whole rebuild was never allowed to touch.
  * 2. Every throwaway User/Creator/Session/SampleRequest a spec creates must be
  *    cleaned up by that spec (usually in a `finally` or after the assertions),
@@ -351,4 +353,96 @@ export async function completeCreatorProfileAndVerify(email: string) {
     },
   });
   return creator;
+}
+
+/**
+ * Membership VERIFIED tanpa alamat — untuk menguji jalur "profil kirim belum
+ * lengkap" di /request-sample. completeCreatorProfileAndVerify() menyetel
+ * keduanya sekaligus; di sini sengaja hanya membership.
+ */
+export async function verifyMembershipOnly(email: string) {
+  const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+  return prisma.creator.update({ where: { userId: user.id }, data: { membership: "VERIFIED" } });
+}
+
+/** Request sample terbaru milik creator ber-email ini, apa adanya dari basis data. */
+export async function readLatestSampleRequestFor(email: string) {
+  const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+  const creator = await prisma.creator.findUniqueOrThrow({ where: { userId: user.id } });
+  return prisma.sampleRequest.findFirst({
+    where: { creatorId: creator.id },
+    orderBy: { requestedAt: "desc" },
+    select: { id: true, status: true, recipientName: true, recipientPhone: true, legacyAddressText: true, username: true, profileUrl: true },
+  });
+}
+
+/**
+ * Bersihkan brand (dan seluruh turunannya) yang brandKey-nya berawalan
+ * `e2e-…` tertentu — untuk brand yang dibuat lewat CMS oleh spec perjalanan.
+ * Urutan penghapusan eksplisit supaya tidak bergantung pada aturan cascade.
+ */
+export async function cleanupBrandsByKeyPrefix(prefix: string) {
+  // brandKey() membuang semua non-alfanumerik, jadi awalan fixture di brandKey adalah "e2e", bukan "e2e-".
+  if (!prefix.startsWith("e2e")) throw new Error("hanya brand e2e… yang boleh dihapus");
+  const brands = await prisma.brand.findMany({ where: { brandKey: { startsWith: prefix } }, select: { id: true } });
+  const brandIds = brands.map((b) => b.id);
+  if (!brandIds.length) return 0;
+  const campaigns = await prisma.campaign.findMany({ where: { brandId: { in: brandIds } }, select: { id: true } });
+  const campaignIds = campaigns.map((c) => c.id);
+  if (campaignIds.length) {
+    await prisma.sampleRequest.deleteMany({ where: { campaignId: { in: campaignIds } } });
+    await prisma.linkClick.deleteMany({ where: { campaignId: { in: campaignIds } } });
+    await prisma.savedCampaign.deleteMany({ where: { campaignId: { in: campaignIds } } });
+    await prisma.campaignLink.deleteMany({ where: { campaignId: { in: campaignIds } } });
+    await prisma.campaignTier.deleteMany({ where: { campaignId: { in: campaignIds } } });
+    await prisma.campaign.deleteMany({ where: { id: { in: campaignIds } } });
+  }
+  await prisma.brand.updateMany({ where: { mergedIntoId: { in: brandIds } }, data: { mergedIntoId: null } });
+  await prisma.brand.deleteMany({ where: { id: { in: brandIds } } });
+  return brandIds.length;
+}
+
+/**
+ * Satu SampleRequest milik creator ber-email tertentu, ditanam langsung —
+ * untuk menguji antrean admin tanpa melewati form. SHIPPED ikut membawa kurir
+ * dan resi supaya tampilan logistiknya bisa diuji.
+ */
+export async function seedSampleRequestFor(
+  email: string,
+  input: { brandName?: string; status?: "PENDING" | "APPROVED" | "SHIPPED" | "COMPLETED" | "REJECTED" | "CANCELLED" } = {},
+) {
+  const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+  const creator = await prisma.creator.findUniqueOrThrow({ where: { userId: user.id } });
+  const status = input.status ?? "PENDING";
+  return prisma.sampleRequest.create({
+    data: {
+      creatorId: creator.id,
+      brandNameSnapshot: input.brandName ?? `${FIXTURE_PREFIX}brand-${Date.now()}`,
+      status,
+      commitment: true,
+      ...(status === "SHIPPED" ? { shippedAt: new Date(), carrier: "E2E Kurir", trackingNumber: "E2E1234567890" } : {}),
+      ...(status === "APPROVED" || status === "SHIPPED" ? { approvedAt: new Date() } : {}),
+    },
+  });
+}
+
+export async function cleanupSampleRequests(ids: string[]) {
+  if (!ids.length) return;
+  await prisma.sampleRequest.deleteMany({ where: { id: { in: ids } } });
+}
+
+/** Brand e2e-… terbaru yang brandKey-nya berawalan `prefix` — untuk menemukan brand yang baru dibuat lewat CMS. */
+export async function findBrandByKeyPrefix(prefix: string) {
+  if (!prefix.startsWith("e2e")) throw new Error("hanya brand e2e… yang boleh dicari lewat prefix");
+  return prisma.brand.findFirst({ where: { brandKey: { startsWith: prefix } }, orderBy: { createdAt: "desc" }, select: { id: true, brandKey: true, displayName: true } });
+}
+
+/** Keadaan brand apa adanya — untuk memverifikasi hasil penggabungan (hidden + mergedIntoId). */
+export async function readBrandById(id: string) {
+  return prisma.brand.findUnique({ where: { id }, select: { id: true, displayName: true, hidden: true, mergedIntoId: true, featured: true } });
+}
+
+/** Menyetel peran pengguna langsung — /admin/pengguna hanya mendaftar ADMIN dan SUPER_ADMIN. */
+export async function setUserRole(email: string, role: "CREATOR" | "ADMIN" | "SUPER_ADMIN") {
+  return prisma.user.update({ where: { email }, data: { role } });
 }

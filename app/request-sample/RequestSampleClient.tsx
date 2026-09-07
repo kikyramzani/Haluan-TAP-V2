@@ -6,19 +6,23 @@ import { track } from "@vercel/analytics";
 import Icon from "../components/Icon";
 import ArtSlot from "../components/ArtSlot";
 import BrandLogo from "../components/BrandLogo";
+import { composeShippingFromProfile, defaultProfileUrl } from "../../lib/shipping-profile";
 
 type Viewer = {
   name: string;
   phone: string;
   membership: "pending" | "verified" | "rejected";
   tiktokUsername?: string;
+  shopeeUsername?: string;
   recipientName?: string;
   address?: string;
+  shippingComplete?: boolean;
+  shippingMissing?: string[];
   /** Alamat kirim per bagian dari profil creator. Lihat TapUser.shipping. */
   shipping?: {
     street?: string; rt?: string; rw?: string;
     village?: string; district?: string; regency?: string; province?: string;
-    postalCode?: string; recipientPhone?: string;
+    postalCode?: string; recipientPhone?: string; recipientName?: string;
   };
 };
 type SampleOption = { brand: string; platform: "TikTok" | "Shopee" };
@@ -109,17 +113,9 @@ export default function RequestSampleClient({ art }: Props) {
     setNotice("");
     setCampaignError("");
     const values = Object.fromEntries(new FormData(event.currentTarget));
-    // Brands want the components spelled out and never merged into one blurred line,
-    // so each is captured in its own field and composed here into the record.
-    const address = [
-      values.street,
-      values.rtRw ? `RT/RW ${values.rtRw}` : "",
-      values.kelurahan ? `Kel. ${values.kelurahan}` : "",
-      values.kecamatan ? `Kec. ${values.kecamatan}` : "",
-      values.kabupaten,
-      values.provinsi,
-      values.kodePos,
-    ].map((part) => String(part ?? "").trim()).filter(Boolean).join(", ");
+    // Penerima, nomor, dan alamat TIDAK dikirim: server menyusunnya dari
+    // profil creator (lib/shipping-profile.ts). Yang dikirim hanya yang memang
+    // per-request — campaign, identitas creator di platform itu, komitmen.
     try {
       const response = await fetch("/api/sample-requests", {
         method: "POST",
@@ -129,9 +125,6 @@ export default function RequestSampleClient({ art }: Props) {
           platform: selectedCampaign.platform,
           username: values.username,
           profileUrl: values.profile,
-          recipientName: values.recipientName,
-          phone: values.phone,
-          address,
           commitment: values.commitment === "on",
         }),
       });
@@ -153,22 +146,18 @@ export default function RequestSampleClient({ art }: Props) {
   const gateResult = gateEntry?.result ?? null;
   const gateChecking = Boolean(selectedCampaign) && viewer?.membership === "verified" && !gateEntry;
   const returnTo = `/request-sample${selectedCampaign ? `?brand=${encodeURIComponent(selectedCampaign.brand)}&platform=${selectedCampaign.platform}` : ""}`;
-  const profileUrl = viewer?.tiktokUsername
-    ? `https://www.tiktok.com/@${viewer.tiktokUsername.replace(/^@/, "")}`
-    : "";
-
   /**
-   * Alamat kirim dari profil yang sudah dilengkapi creator.
-   *
-   * Sebelumnya tujuh field alamat di bawah tidak punya defaultValue sama
-   * sekali, jadi creator yang sudah mengisi seluruh alamatnya di
-   * /dashboard/profil tetap harus mengetik ulang semuanya di sini — provinsi,
-   * kabupaten, kecamatan, kelurahan, RT/RW, kode pos, jalan.
+   * Identitas creator di platform yang dipilih. Username TikTok dan Shopee
+   * disimpan terpisah di profil; yang mana yang dipakai mengikuti campaign yang
+   * dipilih. Kedua field di-`key` dengan platform supaya nilai bawaannya ikut
+   * berganti saat creator mengganti pilihan.
    */
-  const ship = viewer?.shipping ?? {};
+  const platformKey = selectedCampaign?.platform ?? "TikTok";
+  const usernameDefault = (platformKey === "Shopee" ? viewer?.shopeeUsername : viewer?.tiktokUsername) ?? "";
+  const profileUrl = defaultProfileUrl(platformKey, usernameDefault);
 
-  /** Profil menyimpan RT dan RW terpisah; field ini satu kotak "001/002". */
-  const rtRw = [ship.rt, ship.rw].filter(Boolean).join("/");
+  /** Ringkasan tujuan paket dari profil — yang server akan pakai apa adanya. */
+  const shipping = viewer ? composeShippingFromProfile(viewer) : null;
 
   return (
     <main>
@@ -263,6 +252,22 @@ export default function RequestSampleClient({ art }: Props) {
               <Link className="primary-btn" href="/dashboard#profile">Buka dashboard <Icon name="arrow-up-right" /></Link>
               <Link className="member-link" href="/deals">Lihat katalog sementara</Link>
             </div>
+          ) : viewer.shippingComplete === false || !shipping ? (
+            /* Profil kirim belum lengkap. Dulu creator tetap disuguhi form
+               panjang berisi alamat, mengisinya, lalu ditolak gerbang dengan
+               PROFILE_INCOMPLETE. Sekarang: alamat hanya diisi di satu tempat,
+               dan halaman ini menunjukkan persis apa yang masih kurang. */
+            <div className="sample-access-state">
+              <span className="sample-access-icon"><Icon name="clipboard-text" /></span>
+              <span className="kicker">Lengkapi profil kirim</span>
+              <h2>Alamat pengiriman belum lengkap.</h2>
+              <p>
+                Sample dikirim ke alamat di profilmu, jadi ia hanya diisi sekali di sana — bukan di setiap request.
+                {viewer.shippingMissing?.length ? ` Masih perlu: ${viewer.shippingMissing.join(", ")}.` : ""}
+              </p>
+              <Link className="primary-btn" href="/dashboard/profil">Lengkapi di profil <Icon name="arrow-up-right" /></Link>
+              <Link className="member-link" href="/deals">Lihat katalog dulu</Link>
+            </div>
           ) : campaigns.length === 0 ? (
             <div className="sample-access-state">
               <span className="sample-access-icon"><Icon name="gift" /></span>
@@ -274,24 +279,21 @@ export default function RequestSampleClient({ art }: Props) {
             </div>
           ) : (
             <form onSubmit={submit}>
-              <div className="form-heading"><span>Request form</span><b>Sekitar 2 menit</b></div>
+              <div className="form-heading"><span>Request form</span><b>Alamat dari profil</b></div>
               <label><span>Cari campaign dengan sample tersedia</span><input name="campaign" list="sample-campaign-options" value={campaignQuery} onChange={(event) => { setCampaignQuery(event.target.value); setCampaignError(""); }} placeholder="Ketik nama brand lalu pilih dari daftar…" autoComplete="off" aria-invalid={campaignError ? "true" : "false"} aria-describedby={campaignError ? "campaign-error" : undefined} required/><datalist id="sample-campaign-options">{campaigns.map((item) => <option key={`${item.platform}-${item.brand}`} value={`${item.brand} · ${item.platform}`}/>)}</datalist>{campaignError && <small id="campaign-error" className="field-error" role="alert">{campaignError}</small>}{!campaignError && gateChecking && <small className="field-hint">Memeriksa ketersediaan sample…</small>}{!campaignError && !gateChecking && gateResult && !gateResult.allowed && <small className="field-error" role="alert">{gateResult.message}</small>}</label>
-              <div className="two-col"><label><span>Nama penerima</span><input name="recipientName" defaultValue={viewer.recipientName || viewer.name} placeholder="Nama lengkap" autoComplete="name" required /></label><label><span>Nomor WhatsApp</span><input name="phone" type="tel" inputMode="tel" defaultValue={ship.recipientPhone || viewer.phone} placeholder="08xxxxxxxxxx" autoComplete="tel" required /></label></div>
-              <label><span>Username creator</span><input name="username" defaultValue={viewer.tiktokUsername || ""} placeholder="@username" autoComplete="off" required /></label>
-              <label><span>Link profil creator</span><input name="profile" type="url" defaultValue={profileUrl} placeholder="https://tiktok.com/@username" inputMode="url" required /></label>
-              <label><span>Alamat lengkap (nama jalan, nomor, patokan)</span><textarea name="street" rows={2} defaultValue={ship.street ?? ""} placeholder="Jl. Contoh No. 12, RT sebutkan di bawah" autoComplete="street-address" required /></label>
-              <div className="two-col">
-                <label><span>RT / RW</span><input name="rtRw" defaultValue={rtRw} placeholder="001/002" autoComplete="off" required /></label>
-                <label><span>Kelurahan / Desa</span><input name="kelurahan" defaultValue={ship.village ?? ""} placeholder="Kelurahan" autoComplete="off" required /></label>
+              {/* Tujuan paket dari profil — baca-saja di sini. Mengubahnya
+                  hanya di satu tempat supaya tidak ada dua versi alamat. */}
+              <div className="shipping-summary" data-testid="shipping-summary">
+                <div>
+                  <span className="kicker">Dikirim ke</span>
+                  <b>{shipping.recipientName}</b>
+                  <p>{shipping.phone}</p>
+                  <p className="shipping-summary-address">{shipping.address}</p>
+                </div>
+                <Link href="/dashboard/profil">Ubah di profil <Icon name="arrow-up-right" /></Link>
               </div>
-              <div className="two-col">
-                <label><span>Kecamatan</span><input name="kecamatan" defaultValue={ship.district ?? ""} placeholder="Kecamatan" autoComplete="address-level3" required /></label>
-                <label><span>Kabupaten / Kota</span><input name="kabupaten" defaultValue={ship.regency ?? ""} placeholder="Kabupaten atau Kota" autoComplete="address-level2" required /></label>
-              </div>
-              <div className="two-col">
-                <label><span>Provinsi</span><input name="provinsi" defaultValue={ship.province ?? ""} placeholder="Provinsi" autoComplete="address-level1" required /></label>
-                <label><span>Kode pos</span><input name="kodePos" inputMode="numeric" pattern="[0-9]{5}" maxLength={5} defaultValue={ship.postalCode ?? ""} placeholder="12345" autoComplete="postal-code" required /></label>
-              </div>
+              <label><span>Username creator ({platformKey})</span><input key={`u-${platformKey}`} name="username" defaultValue={usernameDefault} placeholder="@username" autoComplete="off" required /></label>
+              <label><span>Link profil creator</span><input key={`p-${platformKey}`} name="profile" type="url" defaultValue={profileUrl} placeholder={platformKey === "Shopee" ? "https://shopee.co.id/username" : "https://tiktok.com/@username"} inputMode="url" required /></label>
               <label className="checkbox"><input name="commitment" type="checkbox" required /><span>Saya bersedia membuat konten sesuai brief dan timeline campaign.</span></label>
               <button className="submit-btn" type="submit" disabled={busy || gateResult?.allowed === false}>{busy ? "Menyimpan…" : "Kirim request"} <Icon name="arrow-up-right" /></button>
               {notice && <p className="form-error" role="alert">{notice}</p>}

@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "./db.ts";
 import type { TapUser, MembershipStatus, UserRole, VerificationSource } from "./models.ts";
 import { hashPassword } from "./password.ts";
+import { computeProfileCompleteness } from "./profile-completeness.ts";
 import { recordAudit } from "./audit.ts";
 import { strongerVerification } from "./user-migration.ts";
 
@@ -107,6 +108,18 @@ function verificationSourceToLegacy(source: UserRecord["verificationSource"]): V
  */
 function toTapUser(user: UserRecord): TapUser {
   const creator = user.creator;
+  const address = creator?.address ?? null;
+  const completeness = computeProfileCompleteness({
+    name: user.name,
+    phone: user.phone,
+    provinceId: address?.provinceId,
+    regencyId: address?.regencyId,
+    districtId: address?.districtId,
+    villageId: address?.villageId,
+    detailAddress: address?.detailAddress,
+    postalCode: address?.postalCode,
+    recipientPhone: address?.recipientPhone,
+  });
   return {
     id: user.id,
     name: user.name,
@@ -141,8 +154,11 @@ function toTapUser(user: UserRecord): TapUser {
           province: creator.address.province?.name ?? undefined,
           postalCode: creator.address.postalCode ?? undefined,
           recipientPhone: creator.address.recipientPhone ?? undefined,
+          recipientName: creator.address.recipientName ?? undefined,
         }
       : undefined,
+    shippingComplete: completeness.complete,
+    shippingMissing: completeness.missingFields,
   };
 }
 

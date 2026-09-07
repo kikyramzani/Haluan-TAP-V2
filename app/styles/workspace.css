@@ -1852,6 +1852,60 @@ main:has(> .form-panel) {
  * space-between, bukan gap: perkiraan waktu adalah keterangan sekunder dan
  * tempatnya di ujung kanan, bukan menempel di belakang labelnya.
  */
+/* Tujuan paket dari profil, di dalam form request sample. Kartu cekung,
+   bukan field: ia informasi yang dipakai apa adanya, dan satu-satunya aksi
+   adalah pergi ke profil untuk mengubahnya. */
+.shipping-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+.shipping-summary .kicker {
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+.shipping-summary b {
+  display: block;
+  font-weight: var(--weight-semibold);
+}
+
+.shipping-summary p {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.shipping-summary-address {
+  text-wrap: pretty;
+}
+
+.shipping-summary > a {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .shipping-summary {
+    flex-direction: column;
+  }
+}
+
 .form-heading {
   display: flex;
   align-items: baseline;

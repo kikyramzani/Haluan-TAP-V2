@@ -4,6 +4,7 @@ import { createSampleRequest, listUserSampleRequests } from "../../../lib/reques
 import { cleanText, clientIp, sameOrigin } from "../../../lib/security";
 import { hashIp } from "../../../lib/hash-ip";
 import { SAMPLE_GATE_MESSAGES } from "../../../lib/sample-gate";
+import { composeShippingFromProfile } from "../../../lib/shipping-profile";
 import { evaluateSampleGate } from "./gate-check";
 
 export async function GET() {
@@ -24,26 +25,27 @@ export async function POST(request: Request) {
     const rate = await checkRateLimit("sample", `${user.id}:${hashIp(clientIp(request))}`, 5, 300);
     if (!rate.allowed) return Response.json({ error: "Terlalu banyak request sample dalam waktu singkat. Coba lagi sebentar lagi." }, { status: 429, headers: { "retry-after": String(rate.retryAfterSeconds) } });
     const body = await request.json();
-    const input = {
-      userId: user.id,
-      brand: cleanText(body.brand, 100),
-      platform: cleanText(body.platform, 30),
-      username: cleanText(body.username, 80).replace(/^@/, ""),
-      profileUrl: cleanText(body.profileUrl, 300),
-      recipientName: cleanText(body.recipientName, 100),
-      phone: cleanText(body.phone, 24),
-      address: cleanText(body.address, 500),
-      commitment: body.commitment === true,
-    };
-    if (!input.brand || !["TikTok", "Shopee", "Instagram"].includes(input.platform) || !input.username || !/^https:\/\//i.test(input.profileUrl) || !input.recipientName || input.phone.replace(/\D/g, "").length < 9 || input.address.length < 12 || !input.commitment) {
+    const brand = cleanText(body.brand, 100);
+    const platform = cleanText(body.platform, 30);
+    const username = cleanText(body.username, 80).replace(/^@/, "");
+    const profileUrl = cleanText(body.profileUrl, 300);
+    const commitment = body.commitment === true;
+    if (!brand || !["TikTok", "Shopee", "Instagram"].includes(platform) || !username || !/^https:\/\//i.test(profileUrl) || !commitment) {
       return Response.json({ error: "Lengkapi seluruh data request dengan benar." }, { status: 400 });
     }
     // Never trust a client-side pre-check alone (see /api/sample-requests/gate) -
     // the full 5-reason gate is re-evaluated here, server-side, right before the
-    // row is created.
-    const { result } = await evaluateSampleGate(user, input.brand, input.platform);
+    // row is created. PROFILE_INCOMPLETE diperiksa paling awal di dalamnya.
+    const { result } = await evaluateSampleGate(user, brand, platform);
     if (!result.allowed) return Response.json({ error: SAMPLE_GATE_MESSAGES[result.reason] }, { status: 409 });
-    const saved = await createSampleRequest(input);
+    /**
+     * Penerima, nomor, dan alamat DISUSUN DARI PROFIL — apa pun yang klien
+     * kirim untuk ketiganya diabaikan. Gerbang di atas sudah menjamin profilnya
+     * lengkap; null di sini hanya pengaman kedua. Lihat lib/shipping-profile.ts.
+     */
+    const shipping = composeShippingFromProfile(user);
+    if (!shipping) return Response.json({ error: SAMPLE_GATE_MESSAGES.PROFILE_INCOMPLETE }, { status: 409 });
+    const saved = await createSampleRequest({ userId: user.id, brand, platform, username, profileUrl, commitment, ...shipping });
     // Only the id is ever read by the client (app/request-sample/page.tsx) -
     // no reason to hand back the full creator/campaign relation graph.
     return Response.json({ request: { id: saved.id, status: saved.status } }, { status: 201 });

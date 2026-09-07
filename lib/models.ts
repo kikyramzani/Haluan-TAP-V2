@@ -52,5 +52,21 @@ export type TapUser = {
     province?: string;
     postalCode?: string;
     recipientPhone?: string;
+    /**
+     * Nama penerima paket dari tab Alamat — BUKAN Creator.recipientName.
+     * Ada dua kolom bernama sama: Creator.recipientName adalah sisa model
+     * lama, CreatorAddress.recipientName yang form alamat tulis. Tanpa field
+     * ini, nama yang creator isi di tab Alamat tidak pernah sampai ke request
+     * sample — yang tampil nama akunnya.
+     */
+    recipientName?: string;
   };
+  /**
+   * Kelengkapan profil kirim, dihitung server dari aturan YANG SAMA dengan
+   * gerbang sample (lib/profile-completeness.ts). Klien membacanya untuk
+   * memutuskan apakah form request boleh tampil — bukan menghitung ulang
+   * dengan aturannya sendiri yang bisa menyimpang.
+   */
+  shippingComplete?: boolean;
+  shippingMissing?: string[];
 };

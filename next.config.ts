@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
    * Admin yang sudah menandai halaman lamanya tidak boleh mendarat di 404.
    * Permanen: struktur ini tidak akan dikembalikan.
    */
+  /**
+   * /favicon.ico dijawab 404 pada setiap kunjungan. Metadata layout sudah
+   * menunjuk favicon.svg dan icon-192.png, tetapi browser dan crawler tetap
+   * meminta /favicon.ico secara default; ditemukan detektor bug e2e sebagai
+   * 404 berulang. Dilayani dari PNG 192px yang sudah ada — tanpa aset baru.
+   */
+  async rewrites() {
+    return [{ source: "/favicon.ico", destination: "/icon-192.png" }];
+  },
   async redirects() {
     return [
       { source: "/admin/produk", destination: "/admin/campaign/produk", permanent: true },

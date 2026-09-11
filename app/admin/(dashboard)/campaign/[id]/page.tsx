@@ -55,6 +55,7 @@ export default async function EditCampaignPage({ params }: { params: Promise<{ i
           status: campaign.status,
           sampleQuota: campaign.sampleQuota,
           sampleQuotaRemaining: campaign.sampleQuotaRemaining,
+          hasSample: campaign.hasSample,
           brief: campaign.brief,
           creatorRequirements: campaign.creatorRequirements,
           displayOrderWeight: campaign.displayOrderWeight,

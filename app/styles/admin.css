@@ -754,6 +754,25 @@
   margin-top: var(--space-2);
 }
 
+/* Pratinjau logo yang tersimpan. Latar kotak-kotak supaya logo ber-latar
+   transparan (kebanyakan logo brand) tetap terbaca tepinya, bukan melebur ke
+   permukaan form. object-fit: contain karena logonya bukan foto — memotongnya
+   untuk mengisi kotak justru menghilangkan bagian yang menentukan. */
+.logo-preview {
+  margin-top: var(--space-2);
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-sunken);
+  background-image: linear-gradient(45deg, var(--line) 25%, transparent 25%, transparent 75%, var(--line) 75%),
+    linear-gradient(45deg, var(--line) 25%, transparent 25%, transparent 75%, var(--line) 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 6px 6px;
+  padding: 3px;
+}
+
 /**
  * Tombol simpan berdampingan dengan konfirmasinya.
  *

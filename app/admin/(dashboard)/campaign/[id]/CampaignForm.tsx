@@ -8,6 +8,7 @@ type Campaign = {
   status: string;
   sampleQuota: number | null;
   sampleQuotaRemaining: number | null;
+  hasSample: boolean | null;
   brief: string | null;
   creatorRequirements: string | null;
   displayOrderWeight: number;
@@ -31,12 +32,34 @@ export default function CampaignForm({ campaign }: { campaign: Campaign }) {
             <option value="HIDDEN">Disembunyikan</option>
           </select>
         </div>
+        {/* Ketersediaan sample dan kuotanya bersebelahan karena keduanya sering
+            disalahpahami sebagai satu hal. Kuota = kapasitas, field di bawah =
+            kebijakan. Mengisi kuota saja tidak membuka sample. */}
+        <div className="field">
+          <label htmlFor="campaign-has-sample">Sample</label>
+          <select id="campaign-has-sample" name="hasSample" defaultValue={campaign.hasSample === null ? "" : campaign.hasSample ? "yes" : "no"}>
+            <option value="">Belum ditentukan</option>
+            <option value="yes">Buka request sample</option>
+            <option value="no">Tidak buka sample</option>
+          </select>
+          <span className="field-hint">
+            Yang menentukan kartu creator menampilkan &quot;Sample tersedia&quot; dan tombol requestnya muncul.
+          </span>
+        </div>
         <div className="field">
           <label htmlFor="campaign-quota">Kuota sample</label>
           <input id="campaign-quota" name="sampleQuota" type="number" min={0} step={1} defaultValue={campaign.sampleQuota ?? ""} placeholder="Tanpa batas" />
           <span className="field-hint">
             Tersisa saat ini: {campaign.sampleQuotaRemaining ?? "—"}. Menaikkan kuota otomatis menambah sisa sebesar selisihnya.
           </span>
+          {/* Gejala yang paling sering dilaporkan, disuarakan tepat di tempat
+              orang mencarinya: kuota terisi tapi sample tetap tertutup. */}
+          {campaign.hasSample !== true && (campaign.sampleQuota ?? 0) > 0 ? (
+            <span className="field-hint field-hint-warn">
+              Kuota sudah terisi, tapi campaign ini belum dibuka untuk sample — creator masih melihat &quot;Belum tersedia&quot;. Ubah
+              field Sample di sebelah kiri jadi &quot;Buka request sample&quot;.
+            </span>
+          ) : null}
         </div>
         <div className="field">
           <label htmlFor="campaign-weight">Bobot urutan tampil</label>

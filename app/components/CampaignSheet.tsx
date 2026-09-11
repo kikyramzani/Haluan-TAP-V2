@@ -10,7 +10,7 @@ import AffiliateLinkField from "./AffiliateLinkField";
 import { useFocusTrap } from "./useFocusTrap";
 import Icon from "./Icon";
 
-type PrimaryLink = {
+type SheetLink = {
   label: string;
   url: string;
   commission: number | null;
@@ -26,9 +26,12 @@ type Props = {
 /**
  * Detail brand.
  *
- * Hanya satu link yang ditawarkan. Tier dengan komisi terkecil - jadi creator
- * tidak perlu memilih apa pun. Linknya ditampilkan apa adanya supaya bisa
- * disalin, bukan disembunyikan di balik tombol.
+ * SELURUH link campaign ditampilkan, bukan hanya satu. Sebelumnya hanya tier
+ * dengan komisi terkecil yang muncul, sehingga campaign bertingkat kehilangan
+ * dua dari tiga linknya — admin memasukkan tiga, creator cuma melihat satu.
+ * Urutannya datang dari API: komisi terendah dulu, karena itu angka yang
+ * dijanjikan kartu brand. Linknya ditampilkan apa adanya supaya bisa disalin,
+ * bukan disembunyikan di balik tombol.
  *
  * Pembungkus ini memasang ulang isinya lewat `key`, sehingga berpindah brand
  * mengosongkan state dengan sendirinya, tanpa efek yang menyetel state.
@@ -39,7 +42,7 @@ export default function CampaignSheet({ campaign, onClose }: Props) {
 }
 
 function SheetContent({ campaign, onClose }: { campaign: Campaign; onClose: () => void }) {
-  const [link, setLink] = useState<PrimaryLink | null>(null);
+  const [links, setLinks] = useState<SheetLink[] | null>(null);
   const [failed, setFailed] = useState(false);
   const containerRef = useFocusTrap(true, onClose);
 
@@ -47,14 +50,16 @@ function SheetContent({ campaign, onClose }: { campaign: Campaign; onClose: () =
     const controller = new AbortController();
     fetch(`/api/campaigns/${encodeURIComponent(campaign.id)}/links`, { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : Promise.reject(new Error("unavailable"))))
-      .then((payload) => setLink(payload.link ?? null))
+      // `link` tunggal dipakai sebagai cadangan supaya sheet tetap merender
+      // kalau ia berbicara dengan server versi lama yang belum punya `links`.
+      .then((payload) => setLinks(payload.links ?? (payload.link ? [payload.link] : [])))
       .catch((error) => {
         if ((error as Error).name !== "AbortError") setFailed(true);
       });
     return () => controller.abort();
   }, [campaign.id]);
 
-  const loading = link === null && !failed;
+  const loading = links === null && !failed;
   const expiry = classifyExpiry(campaign.expiresAt);
   const expiryNote = expiryLabel(expiry);
   const isShopee = campaign.platform === "Shopee Affiliate";
@@ -111,13 +116,27 @@ function SheetContent({ campaign, onClose }: { campaign: Campaign; onClose: () =
           </dl>
 
           <section className="sheet-section">
-            <h3>Link affiliate</h3>
+            <h3>{links && links.length > 1 ? "Link affiliate per tier" : "Link affiliate"}</h3>
             {loading ? (
               <span className="skeleton-line" style={{ width: "100%", height: 44 }} />
-            ) : failed || !link ? (
+            ) : failed || !links?.length ? (
               <p className="sheet-note">Link affiliate belum bisa dimuat. Coba tutup dan buka lagi sebentar.</p>
             ) : (
-              <AffiliateLinkField url={link.url} openUrl={link.openUrl} />
+              links.map((link, index) => (
+                <AffiliateLinkField
+                  key={link.openUrl}
+                  url={link.url}
+                  openUrl={link.openUrl}
+                  /**
+                   * Label hanya dipasang saat linknya lebih dari satu. Dengan satu
+                   * link, judul seksi di atas sudah cukup dan sheet merender persis
+                   * seperti sebelumnya; dengan beberapa, tiap field butuh nama
+                   * aksesibel sendiri supaya pembaca layar tidak mengumumkan tiga
+                   * "Link affiliate" yang identik.
+                   */
+                  label={links.length > 1 ? `${link.label || `Tier ${index + 1}`} · ${formatCommission(link.commission)}` : undefined}
+                />
+              ))
             )}
           </section>
         </div>

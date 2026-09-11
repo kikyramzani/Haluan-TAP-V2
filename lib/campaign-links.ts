@@ -97,6 +97,13 @@ export async function getCampaignCatalog(platform: "tiktok" | "shopee") {
  * bergeser dan link yang ditampilkan jadi bukan milik komisi yang dijanjikan.
  */
 export type TapLink = {
+  /**
+   * CampaignLink.id. Opsional karena parser sheet lama di berkas ini tidak
+   * punya baris basis data untuk dirujuk; hanya jalur Postgres
+   * (lib/catalog-db.ts) yang mengisinya. Dipakai /go/[campaignId]?l= untuk
+   * menunjuk link tertentu tanpa memakai indeks posisional.
+   */
+  id?: string;
   url: string;
   brand: string;
   label: string;

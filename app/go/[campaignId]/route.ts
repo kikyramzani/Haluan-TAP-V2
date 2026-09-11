@@ -1,5 +1,6 @@
 import { getCurrentUser } from "../../../lib/auth";
-import { getPrimaryTapLink } from "../../../lib/catalog-db";
+import { pickPrimaryLink } from "../../../lib/campaign-links";
+import { getTapLinks } from "../../../lib/catalog-db";
 import { recordClick } from "../../../lib/events";
 import { checkRateLimit } from "../../../lib/rate-limit";
 import { clientIp } from "../../../lib/security";
@@ -8,12 +9,18 @@ import { hashIp } from "../../../lib/hash-ip";
 /**
  * Pengalih ke etalase brand.
  *
- * Tidak ada lagi parameter `variant`. Satu brand hanya punya satu link yang
- * ditawarkan. Tier dengan komisi terkecil - dan link itu diselesaikan di sini,
- * bukan dititipkan lewat URL. Ini juga memperbaiki link lama yang sudah beredar
- * dengan `?variant=` di dalamnya: sebelumnya nilai di luar jangkauan dijepit ke
- * link terakhir, sehingga creator bisa mendarat di tier yang tidak pernah
- * ditampilkan di kartu.
+ * `?variant=` dulu dihapus karena parameternya berupa INDEKS: nilai di luar
+ * jangkauan dijepit ke link terakhir, sehingga creator bisa mendarat di tier
+ * yang tidak pernah ditampilkan di kartu. Yang salah adalah penjepitannya,
+ * bukan keberadaan parameternya — dan tanpa parameter apa pun, dua dari tiga
+ * link sebuah campaign tidak punya jalur ber-tracking sama sekali, padahal
+ * LinkClick adalah satu-satunya sumber angka di /dashboard/performa.
+ *
+ * Penggantinya `?l=` memakai CampaignLink.id, bukan posisi. Id yang tidak
+ * dikenal tidak bisa dijepit ke apa pun: ia tidak ketemu, dan yang dipakai
+ * adalah link utama. Link `?variant=` lama yang masih beredar jatuh ke jalur
+ * yang sama. Daftarnya sudah tersaring per campaign, jadi id milik campaign
+ * lain juga tidak pernah cocok.
  */
 export async function GET(request: Request, context: { params: Promise<{ campaignId: string }> }) {
   const url = new URL(request.url);
@@ -30,7 +37,9 @@ export async function GET(request: Request, context: { params: Promise<{ campaig
   let user = null;
   try { user = await getCurrentUser(); } catch { user = null; }
   try {
-    const deal = await getPrimaryTapLink(campaignId);
+    const links = await getTapLinks(campaignId);
+    const requested = url.searchParams.get("l");
+    const deal = (requested ? links.find((link) => link.id === requested) : null) ?? pickPrimaryLink(links);
     if (!deal) return Response.redirect(new URL("/deals?error=deal_unavailable", url.origin));
     try {
       await recordClick({

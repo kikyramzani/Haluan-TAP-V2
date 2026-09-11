@@ -1,13 +1,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import type { Platform, CommissionType } from "@prisma/client";
 import { requireAdmin } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/db";
 import { recordAudit } from "../../../../lib/audit";
 import { brandSlug } from "../../../../lib/brand-key";
 import { notifyNewCampaign } from "../../../../lib/notifications";
+import { CAMPAIGN_CATALOG_TAG } from "../../../../lib/catalog-db";
 import { recomputeBrandPlatformStat } from "./stats";
 
 function revalidateCampaignSurfaces(id?: string) {
@@ -15,6 +16,19 @@ function revalidateCampaignSurfaces(id?: string) {
   if (id) revalidatePath(`/admin/campaign/${id}`);
   revalidatePath("/admin/campaign/produk");
   revalidatePath("/admin/campaign/link");
+  /**
+   * Sampai sekarang hanya halaman /admin yang disegarkan, sementara katalog
+   * publik di-cache 300 detik (lib/catalog-db.ts) tanpa ada yang pernah
+   * membatalkannya — status, kuota, hasSample, dan komisi tier yang baru
+   * disimpan admin butuh sampai lima menit untuk terlihat creator.
+   *
+   * updateTag, bukan revalidateTag(tag, "max"): profil "max" tetap menyajikan
+   * data basi sambil menyegarkan di latar, jadi admin yang langsung memeriksa
+   * hasil suntingannya akan melihat angka lama. Hanya sah dari Server Action —
+   * di dalam route handler (cron) ia melempar, dan di sana "max" justru pas
+   * karena tidak ada yang menunggu.
+   */
+  updateTag(CAMPAIGN_CATALOG_TAG);
 }
 
 export async function createCampaign(_prevState: unknown, formData: FormData) {
@@ -78,6 +92,24 @@ export async function updateCampaignAction(_prevState: unknown, formData: FormDa
     sampleQuotaRemaining = (before.sampleQuotaRemaining ?? 0) + (sampleQuota - before.sampleQuota);
   }
 
+  /**
+   * Kuota dan hasSample adalah dua kolom yang berdiri sendiri: kuota adalah
+   * KAPASITAS, hasSample adalah KEBIJAKAN ("brand ini membuka sample"). Sampai
+   * sekarang tidak ada satu pun permukaan admin yang menulis hasSample — hanya
+   * skrip migrasi sekali jalan dan semaian e2e — sehingga mengisi kuota 100
+   * tidak mengubah apa pun: katalog tetap membaca hasSample dan menampilkan
+   * "Belum tersedia", dan checkSampleGate menolak requestnya sebagai
+   * CAMPAIGN_INACTIVE, bukan NO_QUOTA.
+   *
+   * Tiga nilai, bukan checkbox: kolomnya Boolean? dan checkbox yang tidak
+   * dicentang TIDAK terkirim di FormData — tidak terbedakan dari "belum
+   * ditentukan". Satu penyimpanan biasa akan menulis false ke ratusan campaign
+   * yang masih null, dan ubin publiknya berubah dari disembunyikan jadi
+   * mengumumkan "Belum tersedia".
+   */
+  const hasSampleRaw = String(formData.get("hasSample") ?? "");
+  const hasSample = hasSampleRaw === "yes" ? true : hasSampleRaw === "no" ? false : null;
+
   const brief = String(formData.get("brief") ?? "").trim() || null;
   const creatorRequirements = String(formData.get("creatorRequirements") ?? "").trim() || null;
   const displayOrderWeightRaw = String(formData.get("displayOrderWeight") ?? "0").trim();
@@ -90,7 +122,7 @@ export async function updateCampaignAction(_prevState: unknown, formData: FormDa
 
   const updated = await prisma.campaign.update({
     where: { id },
-    data: { status, sampleQuota, sampleQuotaRemaining, brief, creatorRequirements, displayOrderWeight, newSku, specialLivePrice, validUntil },
+    data: { status, sampleQuota, sampleQuotaRemaining, hasSample, brief, creatorRequirements, displayOrderWeight, newSku, specialLivePrice, validUntil },
   });
 
   await recordAudit({
@@ -101,6 +133,7 @@ export async function updateCampaignAction(_prevState: unknown, formData: FormDa
       status: before.status,
       sampleQuota: before.sampleQuota,
       sampleQuotaRemaining: before.sampleQuotaRemaining,
+      hasSample: before.hasSample,
       brief: before.brief,
       creatorRequirements: before.creatorRequirements,
       displayOrderWeight: before.displayOrderWeight,
@@ -112,6 +145,7 @@ export async function updateCampaignAction(_prevState: unknown, formData: FormDa
       status: updated.status,
       sampleQuota: updated.sampleQuota,
       sampleQuotaRemaining: updated.sampleQuotaRemaining,
+      hasSample: updated.hasSample,
       brief: updated.brief,
       creatorRequirements: updated.creatorRequirements,
       displayOrderWeight: updated.displayOrderWeight,

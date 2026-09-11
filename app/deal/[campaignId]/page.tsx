@@ -59,6 +59,13 @@ export default async function DealDetail({ params }: DealPageProps) {
   const hasSample = campaign?.hasSample ?? (links.some((link) => link.hasSample) ? true : null);
   const platform = sourcePlatform === "shopee" ? "Shopee" : "TikTok";
   const primary = pickPrimaryLink(links);
+  /**
+   * Link utama lebih dulu, sisanya ikut urutan sortIndex — sama seperti
+   * /api/campaigns/[campaignId]/links. Dulu halaman ini hanya merender
+   * `primary` dan menutupnya dengan paragraf permintaan maaf, sehingga dua dari
+   * tiga link yang diisi admin tidak punya jalan keluar sama sekali.
+   */
+  const orderedLinks = primary ? [primary, ...links.filter((link) => link !== primary)] : links;
   // Tanggal dinilai lewat aturan yang sama dengan kartu brand. Sebelumnya string
   // mentah dicetak apa adanya, jadi tanggal yang sudah lewat pun tetap tampil
   // seolah campaign masih berjalan.
@@ -153,15 +160,22 @@ export default async function DealDetail({ params }: DealPageProps) {
 
         {campaign && campaign.campaignCount > 1 ? (
           <p className="deal-detail-note">
-            Brand ini punya beberapa campaign dengan komisi berbeda. Yang dibagikan di sini adalah campaign dengan
-            komisi terendah, sama dengan angka di atas.
+            Brand ini punya beberapa campaign dengan komisi berbeda. Angka di atas adalah yang terendah, dan linknya
+            ada di urutan pertama; sisanya menyusul di bawahnya.
           </p>
         ) : null}
 
         <section className="deal-detail-section">
-          <h2>Link affiliate</h2>
+          <h2>{orderedLinks.length > 1 ? "Link affiliate per tier" : "Link affiliate"}</h2>
           <p>Salin linknya atau buka langsung etalasenya. Link ini dapat diakses tanpa login.</p>
-          {primary ? <AffiliateLinkField url={primary.url} openUrl={`/go/${campaignId}`} /> : null}
+          {orderedLinks.map((link, index) => (
+            <AffiliateLinkField
+              key={link.id ?? link.url}
+              url={link.url}
+              openUrl={link === primary || !link.id ? `/go/${campaignId}` : `/go/${campaignId}?l=${encodeURIComponent(link.id)}`}
+              label={orderedLinks.length > 1 ? `${link.label || `Tier ${index + 1}`} · ${formatCommission(link.commission)}` : undefined}
+            />
+          ))}
         </section>
 
         {hasSample ? (

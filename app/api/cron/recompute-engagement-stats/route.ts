@@ -1,5 +1,7 @@
+import { revalidateTag } from "next/cache";
 import { recordAudit } from "../../../../lib/audit";
 import { recordCronRun } from "../../../../lib/cron-status";
+import { CAMPAIGN_CATALOG_TAG } from "../../../../lib/catalog-db";
 import { recomputeAllCampaignEngagementStats } from "../../../admin/(dashboard)/campaign/engagement-stats";
 
 /**
@@ -28,6 +30,11 @@ export async function GET(request: Request) {
     try {
       await recordAudit({ actorId: "system:cron", action: "engagement_stats.recompute", targetId: "campaign-engagement-stat", after: { statsRecomputed } });
     } catch { /* The recompute already succeeded; the trail must not undo it. */ }
+
+    // Badge Hot Deals ikut terbaca katalog (catalogInclude.engagementStat), jadi
+    // hasil hitungan semalam ini perlu membatalkan cache-nya. "max", bukan
+    // updateTag: updateTag melempar di dalam route handler.
+    revalidateTag(CAMPAIGN_CATALOG_TAG, "max");
     return Response.json({ statsRecomputed });
   } catch (error) {
     await recordCronRun({

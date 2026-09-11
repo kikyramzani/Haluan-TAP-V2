@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { brandInitials, brandLogo } from "../brand-assets";
+import { normalizeLogoUrl } from "../../lib/logo-url";
 
 type Props = {
   brand: string;
@@ -15,7 +16,13 @@ type Props = {
  * inisial. Tidak pernah mengambil gambar dari internet secara spekulatif.
  */
 export default function BrandMark({ brand, logoOverride, size = 46, priority }: Props) {
-  const logo = logoOverride || brandLogo(brand);
+  /**
+   * logoOverride kini benar-benar berisi Brand.logoUrl (lib/catalog-db.ts),
+   * bukan lagi selalu null. Kolom itu input teks bebas di CMS, jadi disaring
+   * sekali di sini supaya satu nilai rusak jatuh ke aset lokal alih-alih
+   * melempar di tengah render kartu dan menjatuhkan seluruh katalog.
+   */
+  const logo = normalizeLogoUrl(logoOverride) || brandLogo(brand);
 
   return (
     <span
@@ -25,7 +32,10 @@ export default function BrandMark({ brand, logoOverride, size = 46, priority }: 
     >
       {logo ? (
         logo.startsWith("data:") ? (
-          // Logo unggahan tersimpan sebagai data URL, di luar jangkauan next/image.
+          // Peninggalan CMS lama: sebagian logo tersimpan sebagai data URL, di
+          // luar jangkauan next/image. Unggahan baru TIDAK lagi berbentuk ini —
+          // lib/image-upload.ts mengembalikan URL https Vercel Blob, yang lewat
+          // cabang next/image di bawah.
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={logo}

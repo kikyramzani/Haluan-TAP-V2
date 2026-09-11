@@ -40,6 +40,14 @@ export async function seedCatalogFixtures() {
       brandKey: computeBrandKey(singleName),
       displayName: singleName,
       categoryId: category.id,
+      /**
+       * Satu-satunya fixture yang punya logo dari CMS. Nama fixture tidak
+       * pernah cocok dengan tabel aset lokal di app/brand-assets.ts, jadi tanpa
+       * kolom ini lambangnya selalu jatuh ke inisial — dan itulah keadaan yang
+       * dulu berlaku untuk SEMUA brand, karena katalog memaku image: null dan
+       * tidak pernah membaca Brand.logoUrl.
+       */
+      logoUrl: "/brand-logos/3ce.webp",
       campaigns: {
         create: {
           platform: "TIKTOK_SHOP",

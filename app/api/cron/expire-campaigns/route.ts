@@ -1,5 +1,7 @@
+import { revalidateTag } from "next/cache";
 import { prisma } from "../../../../lib/db";
 import { recordAudit } from "../../../../lib/audit";
+import { CAMPAIGN_CATALOG_TAG } from "../../../../lib/catalog-db";
 import { recordCronRun } from "../../../../lib/cron-status";
 import { notifyCampaignEndingSoon } from "../../../../lib/notifications";
 
@@ -51,6 +53,16 @@ export async function GET(request: Request) {
         after: { campaignsExpired: expired.count, endingSoonNotified: endingSoon.length },
       });
     } catch { /* The sweep already succeeded; the trail must not undo it. */ }
+
+    /**
+     * Sapuan ini mengubah `status`, yang dibaca katalog publik. Tanpa ini
+     * campaign yang baru ditandai ENDED masih ditawarkan sampai TTL cache habis.
+     *
+     * revalidateTag dengan profil "max", bukan updateTag: updateTag melempar di
+     * dalam route handler, dan "max" memang pas di sini karena tidak ada satu
+     * pun manusia yang sedang menunggu hasilnya.
+     */
+    if (expired.count > 0) revalidateTag(CAMPAIGN_CATALOG_TAG, "max");
 
     return Response.json({ campaignsExpired: expired.count, endingSoonNotified: endingSoon.length });
   } catch (error) {

@@ -27,6 +27,20 @@ test("file teks biasa berekstensi gambar tetap ditolak (byte sungguhan diperiksa
   assert.deepEqual(result, { ok: false, reason: "NOT_AN_IMAGE" });
 });
 
+test("HEIC dari iPhone punya alasan sendiri, bukan NOT_AN_IMAGE", async () => {
+  // Kotak ftyp minimal: 4 byte panjang, "ftyp", lalu merek "heic". libvips
+  // bawaan sharp tidak bisa mendekodenya, dan tanpa pemeriksaan ini admin
+  // diberi tahu "bukan gambar yang didukung" — benar secara teknis, tapi
+  // membuatnya mengira fotonya rusak alih-alih formatnya yang perlu diubah.
+  const heic = Buffer.concat([
+    Buffer.from([0, 0, 0, 24]),
+    Buffer.from("ftypheic", "ascii"),
+    Buffer.alloc(12),
+  ]);
+  const result = await processAndUploadLogo(heic, "IMG_4821");
+  assert.deepEqual(result, { ok: false, reason: "HEIC_UNSUPPORTED" });
+});
+
 test("XML tanpa tag <svg> tidak salah ditolak sebagai SVG (hanya XML biasa)", async () => {
   const xml = Buffer.from('<?xml version="1.0"?><root>plain data</root>');
   const result = await processAndUploadLogo(xml, "data.xml");

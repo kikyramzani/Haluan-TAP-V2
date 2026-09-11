@@ -25,13 +25,24 @@ export async function GET(request: Request, context: { params: Promise<{ campaig
     const primary = pickPrimaryLink(links);
     if (!primary) return Response.json({ error: "Link etalase tidak tersedia." }, { status: 404 });
 
-    // Hanya satu link yang dikembalikan: tier dengan komisi terkecil, angka yang
-    // sama dengan yang dijanjikan kartu brand.
+    /**
+     * Link utama lebih dulu, sisanya menyusul dalam urutan sortIndex. Kartu
+     * brand menjanjikan komisi TERENDAH, jadi link yang menepati janji itu
+     * harus jadi yang pertama terbaca di bawah judulnya.
+     */
+    const ordered = [primary, ...links.filter((link) => link !== primary)];
+
     return Response.json(
       {
         brand: primary.brand,
         hasSample: links.some((link) => link.hasSample),
         expiresAt: links.find((link) => link.expiresAt)?.expiresAt ?? null,
+        /**
+         * `link` tunggal DIPERTAHANKAN apa adanya: ia sudah jadi kontrak publik
+         * dan dipegang tes. Yang baru adalah `links` — dulu campaign dengan
+         * tiga tier hanya memunculkan satu linknya, dan dua sisanya tidak punya
+         * jalan keluar sama sekali.
+         */
         link: {
           label: primary.label,
           url: primary.url,
@@ -39,6 +50,17 @@ export async function GET(request: Request, context: { params: Promise<{ campaig
           hasSample: primary.hasSample,
           openUrl: `/go/${campaignId}`,
         },
+        links: ordered.map((link) => ({
+          id: link.id ?? null,
+          label: link.label,
+          url: link.url,
+          commission: link.commission,
+          hasSample: link.hasSample,
+          // Link utama tetap memakai /go/<slug> polos: itu bentuk yang sudah
+          // beredar dibagikan creator, dan ia memang menunjuk ke tier terendah.
+          openUrl: link === primary || !link.id ? `/go/${campaignId}` : `/go/${campaignId}?l=${encodeURIComponent(link.id)}`,
+          isPrimary: link === primary,
+        })),
       },
       { headers: { "cache-control": "private, no-store" } },
     );

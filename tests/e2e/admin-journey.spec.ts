@@ -110,10 +110,30 @@ test("perjalanan super admin: brand → campaign → tier/link → kreator → a
   // 4. Sunting campaign + tier/link.
   await page.locator('textarea[name="brief"], input[name="brief"]').first().fill("Brief uji perjalanan admin");
   await page.locator('input[name="sampleQuota"]').fill("3");
+  /**
+   * Kuota saja TIDAK membuka sample — itu keluhan yang memicu perbaikan ini.
+   * hasSample adalah kolom terpisah, dan sampai ada field ini tidak ada satu
+   * pun permukaan admin yang menulisnya.
+   */
+  await page.locator('select[name="hasSample"]').selectOption("yes");
   await page.getByRole("button", { name: "Simpan campaign" }).click();
   await page.waitForTimeout(500);
   await page.goto(campaignUrl);
   await expect(page.locator('textarea[name="brief"], input[name="brief"]').first()).toHaveValue("Brief uji perjalanan admin");
+  await expect(page.locator('select[name="hasSample"]')).toHaveValue("yes");
+
+  /**
+   * Regresi yang akan dibawa checkbox: menyimpan form TANPA menyentuh field
+   * sample sama sekali tidak boleh mengubah nilainya. Checkbox yang tidak
+   * dicentang tidak terkirim di FormData dan tidak terbedakan dari "belum
+   * ditentukan", sehingga satu penyimpanan biasa akan menulis false ke ratusan
+   * campaign yang sebenarnya belum dinilai.
+   */
+  await page.locator('input[name="displayOrderWeight"]').fill("1");
+  await page.getByRole("button", { name: "Simpan campaign" }).click();
+  await page.waitForTimeout(500);
+  await page.goto(campaignUrl);
+  await expect(page.locator('select[name="hasSample"]')).toHaveValue("yes");
   await page.getByLabel("Komisi tier 1").fill("12");
   await page.getByLabel("Link tier 1").fill("https://affiliate.example.com/e2e-journey");
   await page.locator("button.submit-btn[type=button]").first().click();

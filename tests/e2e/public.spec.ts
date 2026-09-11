@@ -196,6 +196,21 @@ test("halaman brand memakai thumbnail lokal dan menampilkan tiap campaign", asyn
   await expect(page.locator(".affiliate-link-field input")).toHaveValue(/^https:\/\//);
 });
 
+test("logo dari CMS dipakai kartu katalog, bukan hanya tersimpan di basis data", async ({ page }) => {
+  /**
+   * Keluhan aslinya: admin mengganti logo brand, menyimpan, dan kartunya tidak
+   * berubah sama sekali. Penyebabnya bukan cache — lib/catalog-db.ts memaku
+   * `image: null`, jadi Brand.logoUrl tidak pernah dibaca siapa pun dan kartu
+   * selamanya memakai aset lokal yang dicocokkan lewat NAMA brand.
+   */
+  await page.goto(`/deal/${fixtures.single.campaigns[0].slug}`);
+  const mark = page.locator(".brand-mark img").first();
+  await expect(mark).toBeVisible();
+  // next/image menulis ulang src-nya jadi /_next/image?url=..., jadi yang
+  // diperiksa adalah berkas sumbernya yang ikut ter-encode di dalamnya.
+  await expect(mark).toHaveAttribute("src", /brand-logos.*3ce/);
+});
+
 test("public API publishes real campaign data without raw partner links", async ({ request }) => {
   const response = await request.get("/api/campaigns");
   expect(response.ok()).toBeTruthy();
@@ -213,8 +228,14 @@ test("public API publishes real campaign data without raw partner links", async 
   const publicLinks = await request.get(`/api/campaigns/${fixtures.single.campaigns[0].slug}/links`);
   expect(publicLinks.ok()).toBeTruthy();
   const publicLinkBody = await publicLinks.json();
+  // `link` tunggal tetap ada: ia kontrak yang sudah beredar. `links` adalah
+  // tambahannya, dan untuk brand satu tier keduanya menunjuk hal yang sama.
   expect(publicLinkBody.link.url).toMatch(/^https:\/\//);
   expect(publicLinkBody.link.openUrl).toMatch(/^\/go\//);
+  expect(publicLinkBody.links).toHaveLength(1);
+  expect(publicLinkBody.links[0].url).toBe(publicLinkBody.link.url);
+  expect(publicLinkBody.links[0].isPrimary).toBe(true);
+  expect(publicLinkBody.links[0].openUrl).toBe(publicLinkBody.link.openUrl);
 });
 
 test("angka GMV internal tidak pernah keluar ke permukaan publik", async ({ request }) => {
@@ -275,18 +296,53 @@ test("campaign kedaluwarsa tidak actionable dan tidak memakai badge promosi", as
   await expect(live.getByRole("button", { name: /Dapatkan komisi/ })).toBeEnabled();
 });
 
-test("brand bertingkat hanya memunculkan satu link, milik komisi terkecil", async ({ page }) => {
+/**
+ * Tes ini dulu menuntut kebalikannya — "hanya memunculkan satu link" — dan itu
+ * justru memaku bug yang dilaporkan dari CMS: admin memasukkan tiga link, dua
+ * di antaranya tidak pernah punya jalan keluar ke creator.
+ */
+test("brand bertingkat memunculkan seluruh linknya, komisi terkecil lebih dulu", async ({ page }) => {
   await page.goto(`/deal/${fixtures.multiTier.campaigns[0].slug}`);
-  await expect(page.locator(".affiliate-link-field")).toHaveCount(1);
-  await expect(page.locator(".affiliate-link-field input")).toHaveValue(/e2e-multi-rendah$/);
-  await expect(page.locator("body")).not.toContainText("e2e-multi-tinggi");
-  await expect(page.locator("body")).not.toContainText("e2e-multi-tengah");
+  const fields = page.locator(".affiliate-link-field input");
+  await expect(fields).toHaveCount(3);
+  await expect(fields.first()).toHaveValue(/e2e-multi-rendah$/);
+  const values = await fields.evaluateAll((inputs) => inputs.map((input) => (input as HTMLInputElement).value));
+  expect(values.join(" ")).toContain("e2e-multi-tengah");
+  expect(values.join(" ")).toContain("e2e-multi-tinggi");
 });
 
-test("redirect /go memakai link komisi terkecil", async ({ page }) => {
+test("redirect /go tanpa parameter tetap memakai link komisi terkecil", async ({ page }) => {
   const response = await page.request.get(`/go/${fixtures.multiTier.campaigns[0].slug}`, { maxRedirects: 0 });
   expect(response.status()).toBe(302);
   expect(response.headers().location).toContain("e2e-multi-rendah");
+});
+
+test("redirect /go?l= menunjuk link tertentu, dan id asing JATUH ke link utama alih-alih dijepit", async ({ page }) => {
+  const slug = fixtures.multiTier.campaigns[0].slug;
+  const payload = await page.request.get(`/api/campaigns/${slug}/links`).then((response) => response.json());
+  const high = payload.links.find((link: { url: string }) => link.url.includes("e2e-multi-tinggi"));
+  expect(high?.id).toBeTruthy();
+
+  const targeted = await page.request.get(`/go/${slug}?l=${high.id}`, { maxRedirects: 0 });
+  expect(targeted.status()).toBe(302);
+  expect(targeted.headers().location).toContain("e2e-multi-tinggi");
+
+  /**
+   * Inti dari kenapa parameternya memakai id, bukan indeks: `?variant=` lama
+   * MENJEPIT nilai di luar jangkauan ke link terakhir, sehingga creator bisa
+   * mendarat di tier yang tidak pernah ditampilkan. Id yang tidak dikenal harus
+   * jatuh ke link utama, bukan ke tier mana pun yang kebetulan ada di ujung.
+   */
+  const bogus = await page.request.get(`/go/${slug}?l=tidak-ada-id-seperti-ini`, { maxRedirects: 0 });
+  expect(bogus.status()).toBe(302);
+  expect(bogus.headers().location).toContain("e2e-multi-rendah");
+
+  // Id milik campaign lain juga bukan milik campaign ini: daftarnya sudah
+  // tersaring per campaign, jadi hasilnya link utama, bukan link campaign itu.
+  const otherPayload = await page.request.get(`/api/campaigns/${fixtures.single.campaigns[0].slug}/links`).then((response) => response.json());
+  const foreign = await page.request.get(`/go/${slug}?l=${otherPayload.links[0].id}`, { maxRedirects: 0 });
+  expect(foreign.status()).toBe(302);
+  expect(foreign.headers().location).toContain("e2e-multi-rendah");
 });
 
 test("beranda memuat sampai 12 kartu per platform, bukan 6", async ({ page }) => {

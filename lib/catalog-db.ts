@@ -4,6 +4,7 @@ import { compareCampaigns } from "./catalog.ts";
 import type { Campaign } from "./catalog.ts";
 import { pickPrimaryLink, type TapLink } from "./campaign-links.ts";
 import { minMaxCommission } from "./commission-display.ts";
+import { normalizeLogoUrl } from "./logo-url.ts";
 import type { Platform as PrismaPlatform } from "@prisma/client";
 
 /**
@@ -94,10 +95,20 @@ function toCampaign(row: NonNullable<CampaignRow>): Campaign {
     gmvRank: null,
     updated: row.updatedAt.toISOString(),
     campaign: row.brand.displayName,
-    // The sheet's own Image URL column was empty for 100% of current brands
-    // (confirmed during migration). BrandLogo() local static lookup is the
-    // real, unchanged source BrandMark already falls back to.
-    image: null,
+    /**
+     * Dulu dipaku `null` dengan alasan kolom Image URL di sheet kosong untuk
+     * 100% brand saat migrasi. Alasan itu kedaluwarsa sejak /admin/brand punya
+     * jalur unggahnya sendiri: logo yang diganti admin memang tersimpan di
+     * Brand.logoUrl, tapi tidak pernah dibaca siapa pun, sehingga kartu publik
+     * selamanya menampilkan aset lokal yang dicocokkan lewat NAMA brand
+     * (app/brand-assets.ts). Mengganti logo di CMS tidak mengubah apa pun.
+     *
+     * normalizeLogoUrl, bukan nilai mentahnya: kolom ini input teks bebas, dan
+     * nilai yang tidak bisa dirender next/image harus jatuh ke null di sini —
+     * kalau dibiarkan lewat, ia melempar di tengah render dan menjatuhkan
+     * seluruh katalog.
+     */
+    image: normalizeLogoUrl(row.brand.logoUrl),
     specialLivePrice: row.specialLivePrice,
     expiresAt: toSheetDate(row.validUntil),
     newSku: row.newSku,
@@ -135,6 +146,14 @@ async function readCampaignCatalog(platform: "tiktok" | "shopee"): Promise<Campa
 const CATALOG_CACHE_TTL = Number(process.env.CATALOG_CACHE_TTL ?? 300);
 
 /**
+ * Ditulis sekali di sini lalu diimpor aksi admin yang perlu membatalkannya
+ * (brand, campaign, tier). Sebelumnya string ini hanya ada di opsi
+ * unstable_cache di bawah dan tidak ada satu pun yang membatalkannya — lihat
+ * komentar "Konsekuensinya jujur" di sana.
+ */
+export const CAMPAIGN_CATALOG_TAG = "campaign-catalog";
+
+/**
  * Katalog di-CACHE. Ini pengurangan pembacaan database terbesar di aplikasi.
  *
  * Tanpa cache, satu kunjungan beranda menarik katalog DUA kali (TikTok dan
@@ -148,15 +167,17 @@ const CATALOG_CACHE_TTL = Number(process.env.CATALOG_CACHE_TTL ?? 300);
  * aktif di next.config.ts, dan menyalakannya mengubah semantik caching seluruh
  * aplikasi — perubahan yang jauh lebih besar dari yang dibutuhkan di sini.
  *
- * Konsekuensinya jujur: suntingan admin baru terlihat di permukaan publik
- * setelah paling lama lima menit. CMS admin sendiri membaca tabelnya langsung,
- * jadi operator tetap melihat perubahannya seketika.
+ * Batas lima menit itu dulu berlaku tanpa jalan keluar. Sekarang aksi admin
+ * yang mengubah isi katalog memanggil updateTag(CAMPAIGN_CATALOG_TAG), jadi
+ * TTL ini kembali ke peran aslinya: jaring pengaman untuk perubahan yang
+ * datang dari luar CMS (SQL langsung, cron), bukan penentu kapan suntingan
+ * admin terlihat.
  */
 export async function getCampaignCatalog(platform: "tiktok" | "shopee"): Promise<Campaign[]> {
   if (CATALOG_CACHE_TTL <= 0) return readCampaignCatalog(platform);
-  const cached = unstable_cache(readCampaignCatalog, ["campaign-catalog", platform], {
+  const cached = unstable_cache(readCampaignCatalog, [CAMPAIGN_CATALOG_TAG, platform], {
     revalidate: CATALOG_CACHE_TTL,
-    tags: ["campaign-catalog"],
+    tags: [CAMPAIGN_CATALOG_TAG],
   });
   return cached(platform);
 }
@@ -176,11 +197,21 @@ export async function getCampaignBrandCount(platform: "tiktok" | "shopee"): Prom
   });
 }
 
+/**
+ * `links[i]` dan `tiers[i]` dipasangkan lewat POSISI, bukan foreign key —
+ * tidak ada kolom yang menghubungkan CampaignLink ke CampaignTier. Yang
+ * menjaga pasangannya tetap benar adalah satu-satunya dua penulis yang ada:
+ * saveCampaignTiers() menulis tier dan link dalam satu gelung dengan sortIndex
+ * yang sama, dan editor /admin/campaign/[id] membacanya kembali dengan zip
+ * yang sama. Kalau suatu saat muncul penulis ketiga (SQL langsung, importer
+ * baru), yang harus menyusul adalah kolom FK-nya — bukan komentar ini.
+ */
 export async function getTapLinks(campaignId: string): Promise<TapLink[]> {
   const row = await prisma.campaign.findUnique({ where: { slug: campaignId }, include: campaignInclude });
   if (!row || row.status === "HIDDEN") return [];
   const expiresAt = toSheetDate(row.validUntil);
   return row.links.map((link, index) => ({
+    id: link.id,
     url: link.url,
     brand: row.brand.displayName,
     label: row.tiers[index]?.label || `Campaign ${index + 1}`,

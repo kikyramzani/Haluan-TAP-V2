@@ -3,6 +3,34 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   /**
+   * Batas bawaan body Server Action adalah 1MB, sementara lib/image-upload.ts
+   * menjanjikan 5MB. Akibatnya foto ponsel biasa (2-5MB) ditolak Next SEBELUM
+   * uploadBrandLogo() sempat jalan: yang sampai ke admin adalah error lempar,
+   * bukan pesan "Ukuran file maksimal 5MB", dan cabang TOO_LARGE itu sendiri
+   * tidak pernah tercapai.
+   *
+   * 6mb, bukan 5mb, karena batas ini mengukur body HTTP mentah — multipart
+   * menambahkan boundary dan header per-bagian di atas ukuran filenya sendiri.
+   *
+   * Berlaku untuk SELURUH Server Action, bukan hanya unggah logo. Yang menahan
+   * penyalahgunaannya tetap requireAdmin() plus rate limit 30/60 detik di
+   * uploadBrandLogo().
+   */
+  experimental: { serverActions: { bodySizeLimit: "6mb" } },
+  /**
+   * Logo unggahan mendarat di Vercel Blob sebagai URL https (lib/image-upload.ts).
+   * Tanpa daftar ini next/image MELEMPAR "hostname is not configured" di dalam
+   * Server Component — yang jatuh bukan satu kartu, melainkan seluruh /deals.
+   * Wajib berangkat bersama pembacaan Brand.logoUrl di lib/catalog-db.ts.
+   *
+   * Subdomainnya adalah id store yang diberikan Vercel, jadi dicocokkan dengan
+   * satu tingkat wildcard. Sama dengan BLOB_HOST_SUFFIX di lib/logo-url.ts;
+   * keduanya harus diubah bersama.
+   */
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com", pathname: "/**" }],
+  },
+  /**
    * Produk, Link, dan Kategori pindah ke dalam /admin/campaign sebagai tab.
    * Admin yang sudah menandai halaman lamanya tidak boleh mendarat di 404.
    * Permanen: struktur ini tidak akan dikembalikan.

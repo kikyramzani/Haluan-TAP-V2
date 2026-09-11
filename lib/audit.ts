@@ -13,14 +13,39 @@ export type AuditEvent = {
   createdAt: string;
 };
 
+/**
+ * AuditLog.actorId adalah FOREIGN KEY ke User. Aktor semu — "system:allowlist"
+ * di reconcileAdminRole(), "system:verify" di verifikasi email, dan
+ * "system:cron" di keempat rute cron — bukan id user mana pun, jadi setiap
+ * insert-nya melanggar FK dan dilempar, lalu ditelan try/catch pemanggilnya.
+ *
+ * Akibatnya AuditLog produksi TIDAK memuat satu pun jejak sistem: pencabutan
+ * hak admin yang mematikan sesi orang tidak meninggalkan baris `admin.revoked`
+ * sama sekali, padahal OPERATIONS-RUNBOOK menyuruh operator memakai baris itu
+ * sebagai bukti saat insiden. Ditemukan justru ketika menelusuri kenapa akun
+ * admin yang baru dibuat kehilangan aksesnya.
+ *
+ * Nama aktornya dipindah ke `after` — yang memang sudah dirender utuh sebagai
+ * JSON di /admin/audit — dan actorId dikosongkan supaya barisnya benar-benar
+ * tersimpan. Halaman auditnya sudah menampilkan "Sistem" untuk actorId kosong.
+ * Kolom khusus memang lebih rapi, tapi menuntut migrasi untuk sesuatu yang
+ * harus berlaku hari ini juga.
+ */
+function splitSystemActor(input: { actorId: string; after?: unknown }): { actorId: string | null; after: unknown } {
+  if (!input.actorId.startsWith("system:")) return { actorId: input.actorId, after: input.after };
+  const after = input.after && typeof input.after === "object" ? { ...(input.after as object) } : {};
+  return { actorId: null, after: { ...after, systemActor: input.actorId } };
+}
+
 export async function recordAudit(input: { actorId: string; action: string; targetId: string; before?: unknown; after?: unknown }) {
+  const actor = splitSystemActor(input);
   const event = await prisma.auditLog.create({
     data: {
-      actorId: input.actorId,
+      actorId: actor.actorId,
       action: input.action,
       targetId: input.targetId,
       before: input.before === undefined ? undefined : (input.before as object),
-      after: input.after === undefined ? undefined : (input.after as object),
+      after: actor.after === undefined ? undefined : (actor.after as object),
     },
   });
   return toAuditEvent(event);

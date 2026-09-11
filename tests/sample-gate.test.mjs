@@ -36,6 +36,21 @@ test("campaign yang statusnya bukan ACTIVE ditolak sebagai CAMPAIGN_INACTIVE", (
   assert.deepEqual(result, { allowed: false, reason: "CAMPAIGN_INACTIVE" });
 });
 
+test("kuota terisi TIDAK membuka sample selama hasSample masih false", () => {
+  /**
+   * Justru keluhan nyata dari CMS: admin mengisi kuota 100, tapi katalog tetap
+   * menampilkan "Belum tersedia" dan requestnya ditolak. Urutannya memang
+   * disengaja — hasSample adalah KEBIJAKAN dan diperiksa lebih dulu, kuota
+   * hanya KAPASITAS — jadi alasannya CAMPAIGN_INACTIVE, bukan NO_QUOTA.
+   *
+   * Dipaku di sini supaya tidak ada yang "memperbaikinya" dengan membalik
+   * urutan pemeriksaan: yang kurang dulu adalah field hasSample di form admin,
+   * bukan gerbang ini.
+   */
+  const result = checkSampleGate({ ...base, campaignHasSample: false, sampleQuotaRemaining: 100 });
+  assert.deepEqual(result, { allowed: false, reason: "CAMPAIGN_INACTIVE" });
+});
+
 test("campaign tanpa sample (hasSample false/null) ditolak sebagai CAMPAIGN_INACTIVE", () => {
   assert.deepEqual(checkSampleGate({ ...base, campaignHasSample: false }), { allowed: false, reason: "CAMPAIGN_INACTIVE" });
   assert.deepEqual(checkSampleGate({ ...base, campaignHasSample: null }), { allowed: false, reason: "CAMPAIGN_INACTIVE" });

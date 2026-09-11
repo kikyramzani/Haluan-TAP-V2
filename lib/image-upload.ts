@@ -8,7 +8,7 @@ import { put } from "@vercel/blob";
  * a mislabeled file (e.g. a script renamed to .png) fails sharp's decode and
  * is rejected, not silently passed through.
  */
-export type ImageUploadResult = { ok: true; url: string } | { ok: false; reason: "TOO_LARGE" | "NOT_AN_IMAGE" | "SVG_REJECTED" | "UPLOAD_FAILED" };
+export type ImageUploadResult = { ok: true; url: string } | { ok: false; reason: "TOO_LARGE" | "NOT_AN_IMAGE" | "SVG_REJECTED" | "HEIC_UNSUPPORTED" | "UPLOAD_FAILED" };
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp", "gif", "avif", "tiff"]);
@@ -24,6 +24,22 @@ function looksLikeSvg(buffer: Buffer): boolean {
   return head.includes("<svg");
 }
 
+/**
+ * iPhone menyimpan foto sebagai HEIC, dan libvips bawaan sharp tidak bisa
+ * mendekodenya. Tanpa pemeriksaan ini hasilnya NOT_AN_IMAGE — "File bukan
+ * gambar yang didukung" — yang benar secara teknis tapi membuat admin mengira
+ * fotonya rusak, bukan formatnya yang perlu diubah.
+ *
+ * Dibaca dari kotak ftyp, bukan dari ekstensi: nama berkas tidak menentukan
+ * apa pun di modul ini. Dipanggil HANYA setelah sharp gagal, supaya build yang
+ * kebetulan punya libheif tetap memproses HEIC seperti biasa.
+ */
+function looksLikeHeic(buffer: Buffer): boolean {
+  if (buffer.byteLength < 12) return false;
+  if (buffer.subarray(4, 8).toString("ascii") !== "ftyp") return false;
+  return ["heic", "heix", "hevc", "hevx", "mif1", "msf1"].includes(buffer.subarray(8, 12).toString("ascii"));
+}
+
 export async function processAndUploadLogo(buffer: Buffer, filenameHint: string): Promise<ImageUploadResult> {
   if (buffer.byteLength > MAX_BYTES) return { ok: false, reason: "TOO_LARGE" };
   if (looksLikeSvg(buffer)) return { ok: false, reason: "SVG_REJECTED" };
@@ -32,7 +48,7 @@ export async function processAndUploadLogo(buffer: Buffer, filenameHint: string)
   try {
     format = (await sharp(buffer).metadata()).format;
   } catch {
-    return { ok: false, reason: "NOT_AN_IMAGE" };
+    return { ok: false, reason: looksLikeHeic(buffer) ? "HEIC_UNSUPPORTED" : "NOT_AN_IMAGE" };
   }
   if (!format || !ALLOWED_FORMATS.has(format)) return { ok: false, reason: "NOT_AN_IMAGE" };
 

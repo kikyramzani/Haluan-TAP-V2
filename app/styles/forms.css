@@ -59,6 +59,14 @@
   color: var(--text-subtle);
 }
 
+/* Keterangan yang menunjuk keadaan yang kemungkinan besar tidak disengaja —
+   bukan galat, jadi bukan --danger. Warnanya sendiri bukan satu-satunya
+   penanda: kalimatnya menyebutkan apa yang salah dan apa yang harus diubah. */
+.field-hint-warn {
+  color: var(--warning);
+  font-weight: var(--weight-medium);
+}
+
 .field input,
 .field select,
 .field textarea {

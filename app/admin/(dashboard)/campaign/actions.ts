@@ -183,6 +183,28 @@ export async function saveCampaignTiers(campaignId: string, rows: TierRowInput[]
   // Defense in depth: KETENTUAN_PLATFORM campaigns never persist a commission
   // number even if the client somehow submitted one; PERSENTASE campaigns
   // must keep at least one tier with a real commission value.
+  /**
+   * Batas 0–100 diperiksa DI SINI, bukan hanya di input.
+   *
+   * Field komisinya memang punya min="0" max="100", tetapi editor tier bukan
+   * &lt;form&gt; dan tombol simpannya type="button" — tidak pernah ada event submit,
+   * jadi validasi bawaan peramban tidak pernah jalan. Sebelum ini yang diperiksa
+   * hanya Number.isFinite, sehingga mengetik 500 atau -5 tersimpan apa adanya
+   * dan tayang ke creator sebagai "500%" di kartu brand dan halaman deal.
+   *
+   * Ambangnya disamakan dengan jalur impor CSV (MIN_RATE/MAX_RATE di
+   * lib/commission.ts), supaya satu campaign tidak bisa punya dua aturan
+   * tergantung lewat mana ia dimasukkan.
+   */
+  const invalid = cleaned.find((row) => {
+    if (!isPersentase || !row.commission) return false;
+    const value = Number(row.commission.replace(",", "."));
+    return !Number.isFinite(value) || value <= 0 || value > 100;
+  });
+  if (invalid) {
+    return { error: `Komisi "${invalid.commission}" tidak masuk akal. Isi angka di atas 0 sampai 100.` };
+  }
+
   const commissions: (number | null)[] = cleaned.map((row) => {
     if (!isPersentase) return null;
     if (!row.commission) return null;

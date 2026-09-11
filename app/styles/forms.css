@@ -243,8 +243,11 @@
 
 .affiliate-link-field button {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  /* Tombol salin adalah kontrol paling sering dipakai creator di alur link
+     afiliasi, dan satu-satunya ikon tanpa teks di sana. 40px membuatnya jadi
+     target terkecil di seluruh alur; disamakan dengan lantai 44px aplikasi. */
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-sm);
   background: var(--surface);
   border: 1px solid var(--line);

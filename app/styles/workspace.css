@@ -475,6 +475,51 @@
   gap: var(--space-3);
 }
 
+/**
+ * auto-fit di atas mendarat tepat di TIGA kolom pada 600px, 768px, dan 1024px.
+ * Grid yang berisi empat ubin — /admin, /dashboard, /admin/analitik, dan
+ * pratinjau impor — jadi berbentuk "3+1": satu ubin yatim sendirian di baris
+ * kedua selebar sepertiga. Diukur, bukan diperkirakan: ketiga lebar itu persis
+ * iPad potret, iPad lanskap, dan jendela setengah layar desktop.
+ *
+ * Jumlah ubinnya diketahui, jadi kolomnya ditulis alih-alih ditebak. :has()
+ * membatasi aturan ini pada grid yang memang berisi empat ubin atau lebih,
+ * sehingga ringkasan DUA ubin di /dashboard/performa tetap memakai auto-fit
+ * dan tidak ikut dipaksa menyempit jadi seperempat lebar.
+ */
+@media (min-width: 901px) {
+  .admin-stats:has(> :nth-child(4)),
+  .admin-overview-panels:has(> :nth-child(4)) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Batas bawahnya 381px, bukan 601px: pada 600px tepat, auto-fit masih memuat
+   tiga kolom sehingga bentuk "3+1" itu tetap muncul di satu lebar. Di bawah
+   381px auto-fit sudah jatuh ke satu kolom dengan sendirinya. */
+@media (min-width: 381px) and (max-width: 900px) {
+  .admin-stats:has(> :nth-child(4)),
+  .admin-overview-panels:has(> :nth-child(4)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Label dua baris ("Konversi klik ke sample") membuat angka di sebelahnya
+   berdiri lebih rendah dari tetangganya. Dua baris dipesan sejak awal supaya
+   keempat angka duduk di garis yang sama. */
+.admin-stats span {
+  min-height: calc(2 * 1.45em);
+  /**
+   * Kapitalisasinya ditentukan CSS, bukan diketik di markup. Komponen yang
+   * sama dipakai dengan tiga gaya berbeda — "Brand aktif" (/admin), "Campaign
+   * Aktif" (/dashboard), "TOTAL KLIK" (/admin/analitik) — padahal ketiganya
+   * memakai letter-spacing lebar yang memang dirancang untuk huruf besar.
+   * Diserahkan ke CSS juga lebih baik untuk pembaca layar, yang mengeja
+   * string huruf besar satu per satu kalau ia ditulis begitu di markup.
+   */
+  text-transform: uppercase;
+}
+
 .admin-stats article {
   padding: var(--space-4);
   border: 1px solid var(--line);
@@ -551,7 +596,8 @@
   flex: 1 1 160px;
   min-width: 160px;
   padding: 0 var(--space-3);
-  min-height: 40px;
+  /* Filter adalah kontrol pertama yang disentuh admin di setiap daftar. */
+  min-height: 44px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
   background: var(--surface);
@@ -747,6 +793,32 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: var(--space-3);
+}
+
+/**
+ * `.inline-edit` (admin.css) meminta "field memanjang, tombol secukupnya", tapi
+ * berkas ini dimuat SESUDAH admin.css dan kedua selektornya sama-sama kuat —
+ * jadi `.two-col` diam-diam menang dan tiga form yang memakai keduanya
+ * (gabung brand, buat kategori, ubah nama kategori) merender tombol selebar
+ * fieldnya. Digabung jadi satu selektor supaya niat aslinya yang berlaku.
+ *
+ * Pesan galat/sukses dipaksa satu baris penuh: tanpa ini ia jadi KOLOM KETIGA,
+ * dan seluruh baris bergeser ke samping tepat saat validasi gagal.
+ */
+.two-col.inline-edit {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.inline-edit > .form-error,
+.inline-edit > .form-ok {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  .two-col.inline-edit {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .admin-lifecycle,
@@ -1189,6 +1261,17 @@
 .forgot-link a {
   color: var(--accent);
   font-weight: var(--weight-semibold);
+}
+
+/**
+ * Kelas .forgot-link menempel LANGSUNG pada <button>/<a>-nya, bukan pada
+ * pembungkus, jadi aturan ".forgot-link a" di atas tidak pernah mengenai apa
+ * pun. Tingginya tinggal setinggi barisnya sendiri: 22px, padahal ini jalan
+ * keluar utama dari layar masuk. Dinaikkan lewat padding, bukan min-height,
+ * supaya text-align: center di atas tetap menempatkannya seperti semula.
+ */
+.forgot-link {
+  padding-block: 11px;
 }
 
 @media (max-width: 900px) {
@@ -2066,8 +2149,10 @@ main:has(> .form-panel) {
 
 .auth-form .auth-consent input[type="checkbox"],
 .auth-consent input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+  /* 20px ada di bawah ambang 24px WCAG 2.5.8, dan kotak ini satu-satunya jalan
+     menyetujui syarat sebelum mendaftar — kalau meleset, pendaftaran berhenti. */
+  width: 24px;
+  height: 24px;
   min-height: 0;
   flex-shrink: 0;
   margin: 1px 0 0;

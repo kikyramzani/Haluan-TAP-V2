@@ -100,8 +100,23 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         </div>
         <MobileNav isSignedIn={Boolean(viewer)} />
         <ServiceWorkerRegistrar />
-        <Analytics />
-        <SpeedInsights />
+        {/**
+         * Keduanya hanya berfungsi di atas infrastruktur Vercel: skripnya
+         * dilayani dari /_vercel/insights/script.js, endpoint yang tidak ada di
+         * VPS ini sejak aplikasi pindah pada 3 September. Akibatnya SETIAP
+         * kunjungan halaman mana pun menembak dua permintaan yang berakhir 404
+         * dan menulis galat ke konsol pengunjung — terukur 135 kali dalam satu
+         * sapuan audit — sementara datanya tidak pernah sampai ke mana pun.
+         *
+         * Dirender lagi hanya jika memang berjalan di Vercel, sehingga preview
+         * deployment tetap terpantau tanpa membebani produksi.
+         */}
+        {process.env.VERCEL ? (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        ) : null}
       </body>
     </html>
   );

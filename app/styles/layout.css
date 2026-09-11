@@ -92,6 +92,21 @@
   transition: color var(--duration-fast) var(--ease-out);
 }
 
+/**
+ * Kotak tautannya hanya setinggi 30px. Areanya diperluas ke 44px lewat lapisan
+ * tak terlihat, bukan dengan menaikkan min-height: ::after di bawah adalah
+ * garis bawah animasinya dan dipatok ke `bottom: 0`, jadi menaikkan tinggi
+ * kotak akan menarik garis itu menjauh dari teksnya. Cara ini tidak mengubah
+ * satu piksel pun yang terlihat. Nav ini tampil sampai 900px ke atas, yang
+ * masih wilayah tablet sentuh.
+ */
+.nav-links a::before {
+  content: "";
+  position: absolute;
+  inset-block: -7px;
+  inset-inline: 0;
+}
+
 .nav-links a:hover {
   color: var(--text);
 }
@@ -120,10 +135,14 @@
   flex-shrink: 0;
 }
 
+/* Tinggi teksnya sendiri hanya 22px. Varian "sudah masuk" sudah dinaikkan ke
+   44px di media query di bawah; varian "belum masuk" ("Masuk creator") tidak
+   pernah ikut, padahal ia tautan masuk utama di header desktop. */
 .nav-session {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: 44px;
   font-size: var(--text-sm);
   color: var(--text-muted);
   white-space: nowrap;
@@ -193,6 +212,23 @@
 
   .brand-logo {
     height: 29px;
+  }
+}
+
+/**
+ * 320px (iPhone SE, Android kecil) masih melebar ke samping: diukur di
+ * beranda, wordmark 163px + CTA 133px = 296px sementara .shell hanya menyisakan
+ * 288px, sehingga seluruh halaman publik bisa digeser ke kanan 16px. Ambang
+ * 380px sudah ada di tangga breakpoint proyek ini, jadi tidak ada angka baru
+ * yang dikarang — hanya dua ukuran yang dirapatkan secukupnya agar muat.
+ */
+@media (max-width: 380px) {
+  .brand-logo {
+    height: 24px;
+  }
+
+  .nav-actions .btn {
+    padding-inline: var(--space-3);
   }
 }
 
@@ -345,11 +381,14 @@
  * inline-flex, bukan block: lebar target tetap selebar teksnya, jadi mengetuk
  * ruang kosong di kanan label tidak ikut memicu navigasi.
  */
+/* 24px memenuhi ambang minimum WCAG 2.5.8, tapi bukan lantai 44px yang
+   dipakai kontrol lain di aplikasi ini — dan tautan footer muncul di setiap
+   halaman, jadi ia target terkecil yang paling sering tersentuh. */
 .footer-col a,
 .footer-legal a {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+  min-height: 44px;
 }
 
 .footer-col a:hover {

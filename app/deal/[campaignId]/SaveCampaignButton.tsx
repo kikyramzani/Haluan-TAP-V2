@@ -20,6 +20,7 @@ type Props = {
  */
 export default function SaveCampaignButton({ campaignId, initialSaved, isSignedIn, returnTo }: Props) {
   const [saved, setSaved] = useState(initialSaved);
+  const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
 
   if (!isSignedIn) {
@@ -31,15 +32,35 @@ export default function SaveCampaignButton({ campaignId, initialSaved, isSignedI
   }
 
   function toggle() {
+    setError("");
     startTransition(async () => {
-      const result = await toggleSavedCampaign(campaignId);
-      if ("saved" in result) setSaved(result.saved);
+      try {
+        const result = await toggleSavedCampaign(campaignId);
+        /**
+         * Cabang galat dulu tidak dirender sama sekali: kalau campaign-nya
+         * diarsipkan admin di antara halaman dimuat dan tombol ditekan, aksi
+         * ini mengembalikan { error } dan tombolnya hanya berhenti berputar —
+         * creator tidak pernah tahu simpanannya gagal, dan mengira kliknya
+         * tidak tercatat.
+         */
+        if ("saved" in result) setSaved(result.saved);
+        else if ("error" in result && result.error) setError(result.error);
+      } catch {
+        setError("Gagal menyimpan. Coba lagi sebentar lagi.");
+      }
     });
   }
 
   return (
-    <button type="button" className="btn btn-secondary" onClick={toggle} disabled={pending} aria-pressed={saved}>
-      <Icon name={saved ? "star-fill" : "star"} /> {saved ? "Tersimpan" : "Simpan campaign"}
-    </button>
+    <>
+      <button type="button" className="btn btn-secondary" onClick={toggle} disabled={pending} aria-pressed={saved}>
+        <Icon name={saved ? "star-fill" : "star"} /> {saved ? "Tersimpan" : "Simpan campaign"}
+      </button>
+      {error ? (
+        <p className="form-error" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </>
   );
 }

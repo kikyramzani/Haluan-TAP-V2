@@ -877,7 +877,9 @@
   }
 
   .deal-cta {
-    min-height: 40px;
+    /* Justru di layar sempit tombol ini paling butuh lantai 44px, bukan paling
+       boleh melanggarnya. */
+    min-height: 44px;
     padding: 0 var(--space-2);
     font-size: var(--text-xs);
     white-space: normal;

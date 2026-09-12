@@ -260,6 +260,142 @@
   margin-top: var(--space-2);
 }
 
+/**
+ * KISI FITUR — diadaptasi dari komponen "grid-feature-cards".
+ *
+ * Bentuknya: satu kisi bergaris PUTUS-PUTUS, tanpa kartu terpisah, dengan pola
+ * kisi samar yang memudar ke bawah dari tepi atas tiap sel. Ini kebalikan dari .tile-grid
+ * yang digantikannya (kelas itu sudah dihapus dari base.css bersama pemakai
+ * terakhirnya) — di sana empat kartu berdiri sendiri-sendiri dengan jarak; di
+ * sini mereka satu bidang yang dibagi garis.
+ *
+ * Garisnya dipasang sebagai border-right + border-bottom pada TIAP SEL, lalu
+ * border-top + border-left pada wadahnya. Cara ini tidak pernah menggandakan
+ * garis di pertemuan sel, dan tidak butuh :nth-child yang harus dihitung ulang
+ * setiap jumlah kolomnya berubah.
+ */
+.feature-grid {
+  margin-top: var(--space-6);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  border-top: 1px dashed var(--line-strong);
+  border-left: 1px dashed var(--line-strong);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.feature-cell {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-6);
+  border-right: 1px dashed var(--line-strong);
+  border-bottom: 1px dashed var(--line-strong);
+  min-width: 0;
+}
+
+.feature-cell h3 {
+  /* .feature-pattern-layer diposisikan absolut, jadi ia dilukis DI ATAS setiap
+     keturunan .feature-cell yang tidak diposisikan — termasuk judul ini kalau
+     dibiarkan statis. Alfanya cuma 5-18%, jadi gejalanya halus, tapi teks tidak
+     boleh berada di bawah dekorasi. Sama seperti .feature-icon dan p di bawah. */
+  position: relative;
+  z-index: 1;
+  /* --space-8 (32px), bukan 40px seperti aslinya: tangga spasi proyek ini
+     tidak punya langkah 40, dan §5 BRAND-SYSTEM melarang menciptakan skala
+     kedua. Jarak ikon-ke-judul yang lapang tetap terbaca sama. */
+  margin-top: var(--space-8);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.feature-cell p {
+  position: relative;
+  z-index: 1;
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.feature-icon {
+  position: relative;
+  z-index: 1;
+  display: block;
+  font-size: var(--icon-lg);
+  color: var(--text-muted);
+}
+
+/**
+ * Lapisan pola. Dua peredupan bertumpuk, sama seperti aslinya: satu memudarkan
+ * pola dari atas ke bawah (linear), satu lagi memusatkannya di tepi atas dan
+ * meluruhkannya ke samping (radial farthest-side at top). Keduanya MASK,
+ * bukan isian bergradasi — jadi ia tidak melanggar keputusan "permukaan datar"
+ * yang dicatat di tokens.css; yang dilarang di sana adalah bidang berwarna
+ * bergradasi, bukan peredup.
+ */
+.feature-pattern-layer {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-top: -8px;
+  margin-left: -80px;
+  width: 100%;
+  height: 100%;
+  -webkit-mask-image: linear-gradient(#000, transparent);
+  mask-image: linear-gradient(#000, transparent);
+}
+
+.feature-pattern {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-mask-image: radial-gradient(farthest-side at top, #000, transparent);
+  mask-image: radial-gradient(farthest-side at top, #000, transparent);
+  /* Garis kisinya sengaja lebih kuat dari kotaknya: yang membentuk teksturnya
+     adalah jaringnya, kotak hanya menandai beberapa perpotongan. */
+  fill: color-mix(in srgb, var(--text) 5%, transparent);
+  stroke: color-mix(in srgb, var(--text) 18%, transparent);
+}
+
+.feature-pattern-squares {
+  overflow: visible;
+  fill: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+/**
+ * Muncul perlahan saat tergulir masuk — pengganti motion/react di komponen
+ * aslinya, tanpa menambah dependensi.
+ *
+ * Dikurung @supports SEKALIGUS prefers-reduced-motion: di peramban yang belum
+ * mendukung animation-timeline (Safari, Firefox) tidak ada aturan yang berlaku
+ * sama sekali, jadi selnya terlihat penuh sejak awal. Konten tidak pernah
+ * diparkir di opacity 0 menunggu sesuatu yang mungkin tidak pernah datang.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .feature-cell {
+      animation: feature-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
+
+@keyframes feature-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
 .platform-card {
   padding: var(--space-8);
   border: 1px solid var(--line);

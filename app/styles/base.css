@@ -482,8 +482,11 @@ p {
  * Tiga kelas di bawah adalah generalisasi dari pola yang SUDAH terbukti di
  * tempat lain, bukan sistem baru:
  *   .icon-tile  ← resep .sample-access-icon (workspace.css)
- *   .tile-grid  ← bentuk grid .proof-bar (home.css)
  *   .info-card  ← permukaan + sapuan sudut .deal-card (catalog.css)
+ *
+ * .tile-grid/.tile dulu juga tinggal di sini. Keduanya dilepas bersamaan
+ * dengan pemakai terakhirnya (bagian "Kenapa lewat TAP" di beranda, kini
+ * <FeatureGrid>); tidak ada satu pun selektor lain yang memakainya.
  */
 
 /**
@@ -511,15 +514,6 @@ p {
   width: 36px;
   height: 36px;
   font-size: var(--icon-md);
-}
-
-/* Ambang 150px sama dengan .proof-bar: empat kolom di desktop, dua di ponsel,
-   tanpa media query dan tanpa satu ubin yatim di baris terakhir. */
-.tile-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--space-3);
-  margin-top: var(--space-6);
 }
 
 /**
@@ -588,37 +582,6 @@ p {
 .info-card--filled .icon-tile {
   background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
-}
-
-/* Ubin ringkas di dalam .tile-grid: ikon di atas, label tebal, keterangan kecil. */
-.tile {
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  min-width: 0;
-  transition: border-color var(--duration-fast) var(--ease-out),
-    transform var(--duration-fast) var(--ease-out);
-}
-
-.tile b {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  overflow-wrap: anywhere;
-}
-
-.tile span {
-  font-size: var(--text-xs);
-  color: var(--text-subtle);
-}
-
-/* Hanya ubin yang benar-benar tautan yang bereaksi; ubin statis tidak boleh
-   terlihat bisa diklik. */
-a.tile:hover {
-  border-color: var(--line-strong);
-  transform: translateY(-2px);
 }
 
 /* Aset asli yang menggantikan vektor lewat <ArtSlot>. Batas lebarnya disamakan

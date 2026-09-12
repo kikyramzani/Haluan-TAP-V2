@@ -10,6 +10,33 @@ import HeroVisual from "./components/HeroVisual";
 import NewSkuHighlight from "./components/NewSkuHighlight";
 import Icon from "./components/Icon";
 import ArtSlot from "./components/ArtSlot";
+import FeatureGrid from "./components/FeatureGrid";
+import type { Feature } from "./components/FeatureGrid";
+
+// Di luar komponen supaya array-nya tidak dibangun ulang tiap render, dan
+// supaya naskahnya terbaca sebagai satu daftar, bukan empat blok markup.
+const KENAPA_TAP: readonly Feature[] = [
+  {
+    icon: "percent",
+    title: "Extra commission",
+    description: "Dinegosiasikan langsung dengan brand.",
+  },
+  {
+    icon: "gift",
+    title: "Request sample",
+    description: "Untuk brand yang membukanya.",
+  },
+  {
+    icon: "link-simple",
+    title: "Link etalase",
+    description: "Bisa dibuka tanpa login.",
+  },
+  {
+    icon: "shield-check",
+    title: "Gratis",
+    description: "Tanpa biaya admin atau potongan.",
+  },
+];
 
 // Katalog berubah setiap kali sheet disinkronkan, jadi halaman tidak dibekukan
 // menjadi cuplikan kosong saat build.
@@ -151,28 +178,12 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="tile-grid">
-            <div className="tile">
-              <i className="icon-tile icon-tile-sm"><Icon name="percent" /></i>
-              <b>Extra commission</b>
-              <span>Dinegosiasikan langsung dengan brand.</span>
-            </div>
-            <div className="tile">
-              <i className="icon-tile icon-tile-sm"><Icon name="gift" /></i>
-              <b>Request sample</b>
-              <span>Untuk brand yang membukanya.</span>
-            </div>
-            <div className="tile">
-              <i className="icon-tile icon-tile-sm"><Icon name="link-simple" /></i>
-              <b>Link etalase</b>
-              <span>Bisa dibuka tanpa login.</span>
-            </div>
-            <div className="tile">
-              <i className="icon-tile icon-tile-sm"><Icon name="shield-check" /></i>
-              <b>Gratis</b>
-              <span>Tanpa biaya admin atau potongan.</span>
-            </div>
-          </div>
+          {/*
+            Empat ubin yang sama, dipindah ke <FeatureGrid>: kisi bergaris
+            putus-putus dengan pola samar di sudut tiap sel. Isinya TIDAK
+            berubah satu kata pun — yang berganti hanya rupanya.
+          */}
+          <FeatureGrid features={KENAPA_TAP} />
 
           {/*
             Bobot bertingkat, mengikuti referensi: satu kartu unggulan melebar

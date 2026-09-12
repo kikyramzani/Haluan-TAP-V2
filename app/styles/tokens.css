@@ -77,8 +77,36 @@
     U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/**
+ * Serif editorial, satu bobot saja (400). Dipakai HEMAT — hanya lede pembuka
+ * seksi — jadi satu bobot memang cukup, dan menambah bobot kedua berarti
+ * membayar berkas lagi untuk peran yang tidak ada.
+ *
+ * Di-self-host sama seperti Poppins dan Open Sans: satu-satunya font pihak
+ * ketiga yang boleh dimuat runtime di produk ini adalah tidak ada.
+ */
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("/source-serif-4.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("/source-serif-4-ext.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
   /**
    * Brand core. BRAND-SYSTEM.md §2.1, diekstrak dari Haluan Creator Deck.
@@ -102,33 +130,41 @@
    * maupun AI Health tidak ada satu pun layar yang berlatar putih murni;
    * yang putih justru kartunya.
    *
-   * Konsekuensinya --bg dan --surface tidak boleh lagi bernilai nyaris sama.
-   * Di tema gelap latarnya ink dan permukaannya diangkat; di tema terang
-   * latarnya diberi rona merah muda pucat dan permukaannya putih penuh.
+   * Konsekuensinya --bg dan --surface tidak boleh bernilai nyaris sama.
+   * Latarnya kertas bersemu merah muda, permukaannya putih penuh — dan ini
+   * pula yang membuat TAP sudah setengah jalan ke bahasa kertas yang dituju:
+   * kanvas hangat + kartu putih adalah model yang sama persis.
+   *
+   * Kontras di atas kanvas ini, diukur ulang setelah atmosfer dilepas:
+   * ink 17,96 · --text-muted 7,92 · --text-subtle 5,37. Di --surface-sunken
+   * yang paling ketat --text-subtle masih 5,07. Semuanya lolos AA.
    */
-  --bg: var(--brand-ink);
-  --surface: #131218;
-  --surface-sunken: #060607;
-  --surface-raised: #1b1a23;
-  --line: rgba(255, 255, 255, 0.1);
-  --line-strong: rgba(255, 255, 255, 0.18);
-
-  /* Teks: putih penuh untuk judul, dua tingkat redup untuk sisanya. */
-  --text: #ffffff;
-  --text-muted: rgba(255, 255, 255, 0.74);
-  --text-subtle: rgba(255, 255, 255, 0.58);
-  --text-inverse: var(--brand-ink);
-
+  --bg: #f8f2f6;
+  --surface: #ffffff;
+  --surface-sunken: #f3ebf1;
+  --surface-raised: #ffffff;
+  --line: rgba(9, 10, 10, 0.08);
+  --line-strong: rgba(9, 10, 10, 0.16);
+  /* Teks: ink penuh untuk judul, dua tingkat redup untuk sisanya. Hierarki
+     dibangun dari satu warna pada beberapa tingkat, bukan dari warna baru. */
+  --text: var(--brand-ink);
+  --text-muted: #4a4a55;
+  --text-subtle: #63636e;
+  --text-inverse: #ffffff;
   /**
-   * Cyan membawa elemen interaktif di tema gelap: 9,12 di atas ink.
-   * Di tema terang cyan hanya 2,12 dan tidak pernah membawa teks (§2.5).
+   * Aksen magenta. Cyan brand TIDAK pernah jadi teks di sini — hanya 2,12 di
+   * atas kertas (§2.5). Ia tetap punya tempat sebagai ISIAN ubin berlabel ink,
+   * yang baru diukur saat redesign ini: ink di atas #00bef3 = 9,12, lolos.
+   *
+   * --accent-strong dipakai sebagai teks tombol ghost di atas --accent-soft:
+   * 5,21. --accent sendiri hanya 4,36 di sana dan GAGAL AA, jadi jangan
+   * menukar keduanya karena terlihat lebih hidup.
    */
-  --accent: var(--brand-cyan);
-  --accent-strong: #7fdcf8;
-  --accent-soft: rgba(0, 190, 243, 0.14);
-  --accent-line: rgba(0, 190, 243, 0.3);
-  --accent-contrast: var(--brand-ink);
-
+  --accent: #c90063;
+  --accent-strong: #b3005a;
+  --accent-soft: var(--brand-pink-tint);
+  --accent-line: rgba(201, 0, 99, 0.26);
+  --accent-contrast: #ffffff;
   /**
    * SEMUA isian berwarna membawa label PUTIH. Keputusan produk, dan ia
    * menggantikan aturan "hot pink + ink" di BRAND-SYSTEM.md §6.1.
@@ -150,7 +186,6 @@
   --cta-hover: #c90063;
   --cta-press: #be005e;
   --cta-contrast: #ffffff;
-
   /**
    * Gradasi kata "TAP" pada Logo Haluan TAP.
    *
@@ -167,12 +202,13 @@
    * sebagai satu warna. Ujung violetnya tetap di rentang ungu, tidak masuk ke
    * biru, jadi ia masih warna Haluan.
    *
-   * Pasangan gelap, diukur terhadap --surface #0e0e13 yang lebih ketat
-   * daripada --bg: #ff209d = 5,45 dan #b46ff5 = 5,99. Keduanya lolos AA.
+   * Diukur terhadap kertas #f8f2f6: #c90063 = 5,19 dan #9430c4 = 5,47.
+   *
+   * Ini SATU-SATUNYA gradasi yang tersisa di produk, dan ia bertahan karena ia
+   * logo, bukan permukaan UI — §7 BRAND-SYSTEM melarang logo disentuh.
    */
-  --wordmark-from: #ff209d;
-  --wordmark-to: #b46ff5;
-
+  --wordmark-from: #c90063;
+  --wordmark-to: #9430c4;
   /* Ramp padat kini identik dengan ramp tombol. Namanya dipertahankan karena
      dipakai kontrol rapat (tombol kartu, pil hitungan filter, baris tabel
      admin), dan nama tersendiri menjaga maksudnya tetap terbaca. */
@@ -180,10 +216,9 @@
   --action-hover: var(--cta-hover);
   --action-press: var(--cta-press);
   --action-contrast: var(--cta-contrast);
-
   /**
-   * Focus ring TIDAK diturunkan dari --accent lagi. Di tema terang --accent
-   * kini magenta, dan ring magenta di atas tombol magenta praktis hilang.
+   * Focus ring TIDAK diturunkan dari --accent. --accent adalah magenta, dan
+   * ring magenta di atas tombol magenta praktis hilang.
    *
    * WCAG 1.4.11 menuntut ≥3,0 terhadap komponen DAN latar sekelilingnya
    * sekaligus, dan tidak ada warna brand yang lolos keduanya di atas tombol.
@@ -193,16 +228,14 @@
    * Dipakai sebagai outline dengan outline-offset, bukan box-shadow menempel,
    * supaya ring duduk di latar halaman dan tidak tertelan isian tombol.
    */
-  --focus-ring: #ffffff;
-
+  --focus-ring: var(--brand-ink);
   /* Status. Tidak diubah, semuanya sudah lolos AA (§2.4). */
-  --positive: #5fd3a0;
-  --positive-soft: rgba(95, 211, 160, 0.13);
-  --warning: #e8b45e;
-  --warning-soft: rgba(232, 180, 94, 0.13);
-  --danger: #f0857c;
-  --danger-soft: rgba(240, 133, 124, 0.13);
-
+  --positive: #0d7a52;
+  --positive-soft: #e3f4ec;
+  --warning: #8a5a00;
+  --warning-soft: #fbf1df;
+  --danger: #b3261e;
+  --danger-soft: #fbeae8;
   /**
    * Aksen platform. Tidak diubah (§2.4). Sengaja BUKAN warna asli
    * TikTok/Shopee: pink dan cyan asli TikTok nyaris sama dengan warna aksi
@@ -210,10 +243,10 @@
    * aktif alih-alih penanda platform. Dengan --cta kini magenta pekat #d60069,
    * alasan itu makin kuat.
    */
-  --platform-tiktok: #1fd8d1;
-  --platform-shopee: #f2652f;
+  --platform-tiktok: #0a8f88;
+  --platform-shopee: #ee4d2d;
   /* Isian solid butuh oranye lebih pekat supaya teks putih tetap ≥4,5:1. Satu
-     nilai untuk kedua tema. Isian ini bukan permukaan netral yang ikut
+     satu nilai. Isian ini bukan permukaan netral yang ikut
      berbalik terang/gelap. */
   --platform-shopee-solid: #c2410c;
   /**
@@ -271,23 +304,38 @@
    *   md    kartu saat diangkat, dropdown, popover
    *   lg    lembar, modal — satu-satunya lapisan yang boleh terasa berat
    */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.36);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.45), 0 14px 32px rgba(0, 0, 0, 0.42);
-  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5), 0 26px 56px rgba(0, 0, 0, 0.55);
-
   /**
-   * --gradient-hot kini WHITE-SAFE, mengikuti keputusan "semua label putih".
-   * Perhentian lamanya (#fb007f → #ec008c → #d226c7) memberi putih hanya
-   * 3,88 / 4,25 / 4,34. Gagal AA di SELURUH sapuan. Versi ini hue-nya sama,
-   * luminance-nya turun: putih 5,17 / 6,28 / 7,67, terburuk 5,17.
+   * KARTU TIDAK BERBAYANG LAGI. Pemisahan kartu dari kanvas seluruhnya dipikul
+   * garis rambut --line, persis seperti ruled section di buku catatan.
    *
-   * --gradient-soft tetap berlabel ink (8,92). Ia latar pucat, bukan isian.
+   * Dibaca dari tabel elevasi referensinya sendiri, bukan dihapus membabi
+   * buta: ia melarang bayangan pada KARTU KONTEN, tapi tetap mendaftarkan
+   * bayangan untuk nav sticky dan satu lapisan mengambang. Jadi md dan lg
+   * bertahan — dropdown, CampaignSheet, modal, dan header sticky memang benda
+   * yang melayang DI ATAS halaman, dan tanpa bayangan ia kehilangan pesan itu.
+   */
+  --shadow-sm: none;
+  --shadow-card: none;
+  --shadow-md: 0 2px 4px rgba(9, 10, 10, 0.04), 0 14px 32px rgba(9, 10, 10, 0.08);
+  --shadow-lg: 0 4px 10px rgba(9, 10, 10, 0.05), 0 26px 56px rgba(9, 10, 10, 0.12);
+  /**
+   * DIARSIPKAN — tidak lagi dipakai di permukaan mana pun.
    *
-   * --gradient-hot dipakai di TEPAT SATU permukaan: join banner. §3.4 membatasi
-   * satu Haluan Hot per viewport, dan katalog memuat ~24 kartu sekaligus,
-   * memberi gradasi ke tombol kartu berarti 24 gradasi dalam satu layar. Jadi
-   * tombol memakai isian solid --cta, bukan gradasi.
+   * Bahasa kertas yang dituju memakai isian DATAR sepenuhnya; gradasi adalah
+   * satu-satunya hal yang dilarangnya tanpa pengecualian. Ketiganya dilepas
+   * bersamaan pada 12 September 2026, dan penggantinya sudah ada di palet ini:
+   * --gradient-hot → --surface-magenta (isian datar, perhentian pertamanya
+   * sendiri, putih 5,17), --gradient-wash → --surface polos + garis rambut,
+   * --bg-atmosphere → kanvas --bg polos.
+   *
+   * Nilainya DITINGGAL, bukan dihapus, karena angkanya mahal: perhentian di
+   * bawah ini adalah hasil penurunan luminance agar putih lolos AA di seluruh
+   * sapuan (5,17 / 6,28 / 7,67), menggantikan perhentian lama yang gagal di
+   * ketiganya (3,88 / 4,25 / 4,34). Kalau suatu saat gradasi kembali, mulai
+   * dari sini — jangan menghitung ulang dari #fb007f.
+   *
+   * Yang TIDAK ikut diarsipkan: --wordmark-from/--wordmark-to. Itu gradasi
+   * pada logo, bukan permukaan UI, dan §7 BRAND-SYSTEM melarang logo disentuh.
    */
   --gradient-hot: linear-gradient(135deg, #d60069 0%, #b8007f 50%, #8b1a9e 100%);
   --gradient-soft: linear-gradient(160deg, #fffafd 0%, #ffe1f3 38%, #fec2e5 72%, #f585ec 100%);
@@ -298,38 +346,16 @@
   );
 
   /**
-   * ATMOSFER — lapisan gradasi paling bawah, di belakang seluruh permukaan.
+   * Kanvas kini KERTAS POLOS. Dua sapuan radial magenta/violet yang dulu
+   * duduk di lapisan paling bawah setiap halaman dilepas: referensi kertas
+   * tidak punya atmosfer sama sekali, dan justru kepolosan itu yang membuat
+   * kartu putih di atasnya terbaca terangkat.
    *
-   * Peran "atmosfer" di BRAND-SYSTEM.md §3.4: satu rona brand di atas netral,
-   * amplitudo ≤8% di tema terang dan ≤12% di tema gelap, tidak pernah membawa
-   * teks secara langsung, selalu berada DI BAWAH semua kartu. Ia TIDAK
-   * menghabiskan jatah satu-Haluan-Hot-per-viewport, karena ia bukan bidang.
-   *
-   * Alasannya bisa dilihat: sebelum ini, seluruh 1900px latar beranda adalah
-   * #f8f2f6 rata tanpa satu pun variasi, dan hal yang sama di /deals, /daftar,
-   * dan /request-sample. Kartu putih memang sudah mengambang di atasnya, tapi
-   * yang dilayanginya sendiri adalah bidang mati.
-   *
-   * Dua sapuan yang saling berlawanan sudut — magenta dari kanan atas, violet
-   * dari kiri bawah — supaya halaman punya arah, bukan sekadar noda di tengah.
-   *
-   * Kontras dihitung di TITIK TERKUAT tiap sapuan, bukan di tengahnya:
-   * magenta 8% menghasilkan #f8dfec, dan di sana ink 15,82 · --text-muted 6,98
-   * · --text-subtle 4,73. Ketiganya lolos AA. Jangan menaikkan amplitudonya
-   * tanpa menghitung ulang ketiga angka itu.
+   * Tokennya ditinggal bernilai `none` — bukan dihapus — supaya base.css yang
+   * masih menyebutnya tidak jadi properti tak dikenal, dan supaya jelas ini
+   * keputusan, bukan kelalaian.
    */
-  --bg-atmosphere:
-    radial-gradient(
-      68% 52% at 100% 0%,
-      color-mix(in srgb, var(--brand-magenta) 12%, transparent) 0%,
-      transparent 62%
-    ),
-    radial-gradient(
-      58% 48% at 0% 96%,
-      color-mix(in srgb, var(--brand-violet) 10%, transparent) 0%,
-      transparent 58%
-    );
-
+  --bg-atmosphere: none;
   /* Jarak. Dua langkah setengah ada khusus untuk padding badge dan chip, yang
      terlihat terlalu tinggi bila dipaksa ke kelipatan 4. */
   --space-half: 2px;
@@ -396,9 +422,16 @@
    * memakan ruang teksnya sendiri, dan referensi pun menahannya di sana:
    * kartunya membulat murah hati, field-nya tidak.
    */
-  --radius-control: var(--radius-md);
-  --radius-card: var(--radius-2xl);
-  --radius-panel: var(--radius-3xl);
+  /**
+   * Diturunkan satu tingkat mengikuti referensi kertas: kartu 12px, kontrol
+   * 8px, pil tetap 999px. Sudut 24px membuat kartu terbaca sebagai objek
+   * berat; bahasa yang dituju justru ruled section di buku catatan, bukan
+   * kartu aplikasi. Tangga --radius-* mentah di atas tidak diubah supaya
+   * langkah lain tetap tersedia.
+   */
+  --radius-control: var(--radius-sm);
+  --radius-card: var(--radius-md);
+  --radius-panel: var(--radius-md);
 
   /**
    * Tipografi. Poppins untuk display, Open Sans untuk isi (§4.1).
@@ -413,6 +446,16 @@
    */
   --font-display: Poppins, system-ui, sans-serif;
   --font-body: "Open Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /**
+   * Serif editorial, DIPAKAI HEMAT. Perannya sama persis dengan Lyon Text di
+   * referensi: lede satu paragraf di pembuka seksi, tidak pernah untuk label
+   * UI, navigasi, tombol, atau tabel. Ia memberi suara, bukan hierarki kedua.
+   *
+   * Source Serif 4 (OFL) adalah pengganti yang referensinya sendiri sebut.
+   * Tumpukan cadangannya serif sistem sungguhan, bukan `serif` generik, supaya
+   * kegagalan memuat berkas tetap mendarat di huruf yang punya bentuk.
+   */
+  --font-serif: "Source Serif 4", "Iowan Old Style", Georgia, "Times New Roman", serif;
 
   --text-display: clamp(38px, 5.2vw, 68px);
   --text-h1: clamp(32px, 4.2vw, 52px);
@@ -473,19 +516,25 @@
 
   /* Poppins geometris terasa renggang di ukuran display, dan uppercase-nya
      butuh lebih banyak ruang daripada Archivo. */
-  --tracking-display: -0.03em;
+  /* Dirapatkan satu langkah dari -0.03em. Poppins geometris terasa renggang
+     di ukuran display, dan §4.2 BRAND-SYSTEM sendiri menyuruh merapatkannya
+     sebagai kompensasi hilangnya Agrandir Wide. */
+  --tracking-display: -0.035em;
   --tracking-tight: -0.015em;
   --tracking-wide: 0.08em;
 
   /* Gerak */
   --duration-fast: 150ms;
-  --duration-normal: 250ms;
+  /* 200ms: angka yang referensi sebut untuk hover dan transisi. */
+  --duration-normal: 200ms;
   --duration-slow: 350ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
   --shell-width: 1180px;
   --header-height: 64px;
+
+  --accent-cool-text: #046b87;
 }
 
 /**
@@ -520,112 +569,3 @@
  * Cyan tidak pernah membawa teks di sini (2,12 di atas paper). Hanya bidang
  * dan garis. Aksen teks pindah ke magenta gelap #c90063 (5,59).
  */
-:root[data-theme="light"] {
-  color-scheme: light;
-
-  /**
-   * LATAR BERNUANSA, KARTU PUTIH.
-   *
-   * Sebelumnya --bg #fcfcfc dan --surface #ffffff — beda tiga poin, praktis
-   * satu warna. Kartu karenanya hanya bisa dibedakan lewat garis 1px, dan
-   * seluruh halaman terbaca sebagai satu bidang putih datar.
-   *
-   * #f8f2f6 adalah kertas yang sama dengan sedikit rona --brand-pink-tint di
-   * dalamnya. Cukup untuk membuat putih terbaca sebagai "diangkat", masih
-   * cukup netral untuk tidak terlihat seperti halaman berwarna.
-   *
-   * Kontras terhadap latar baru ini justru NAIK, bukan turun, karena latarnya
-   * sedikit lebih gelap dari sebelumnya: ink 17,96 (dulu 18,7 — keduanya jauh
-   * di atas ambang), --text-subtle #63636e 5,30, dan di --surface-sunken yang
-   * paling ketat --text-subtle masih 5,01. Ketiganya lolos AA.
-   *
-   * --surface-sunken kini lebih PEKAT dari latar, bukan lebih pucat. Dengan
-   * kartu yang mengambang, "tenggelam" harus berarti masuk ke dalam halaman;
-   * #f9f9f9 yang lama justru lebih terang dari latar barunya.
-   */
-  --bg: #f8f2f6;
-  --surface: #ffffff;
-  --surface-sunken: #f3ebf1;
-  --surface-raised: #ffffff;
-  /* Garis melemah karena bayangan kini yang memikul pemisahan. Ia jadi
-     penegas tepi, bukan lagi satu-satunya penanda bahwa ini benda terpisah. */
-  --line: rgba(9, 10, 10, 0.08);
-  --line-strong: rgba(9, 10, 10, 0.16);
-
-  --text: var(--brand-ink);
-  --text-muted: #4a4a55;
-  /* Harus lolos 4,5 di ketiga permukaan terang, termasuk sunken #f9f9f9. */
-  --text-subtle: #63636e;
-  --text-inverse: #ffffff;
-
-  --accent: #c90063;
-  --accent-strong: #b3005a;
-  --accent-soft: var(--brand-pink-tint);
-  --accent-line: rgba(201, 0, 99, 0.26);
-  --accent-contrast: #ffffff;
-
-  /* Kalau tema terang butuh aksen dingin yang membawa teks, ini nilainya
-     (5,92 di atas paper). Cyan brand tidak bisa dipakai untuk itu (§2.5). */
-  --accent-cool-text: #046b87;
-
-  /* Tombol utama identik di kedua tema: kontras label diukur terhadap isian
-     tombol, bukan terhadap latar halaman, jadi nilainya tidak berubah. */
-  --cta: #d60069;
-  --cta-hover: #c90063;
-  --cta-press: #be005e;
-  --cta-contrast: #ffffff;
-
-  /* Pasangan terang, diukur terhadap paper #fcfcfc: #c90063 = 5,59 dan
-     #9430c4 = 5,88. Lihat catatan lengkapnya di blok tema gelap. */
-  --wordmark-from: #c90063;
-  --wordmark-to: #9430c4;
-
-  --action: var(--cta);
-  --action-hover: var(--cta-hover);
-  --action-press: var(--cta-press);
-  --action-contrast: var(--cta-contrast);
-
-  /* Ink: 3,84 terhadap tombol #d60069 dan 19,32 terhadap paper. Keduanya di
-     atas ambang 3,0 yang WCAG 1.4.11 tuntut untuk komponen DAN latarnya. */
-  --focus-ring: var(--brand-ink);
-
-  --positive: #0d7a52;
-  --positive-soft: #e3f4ec;
-  --warning: #8a5a00;
-  --warning-soft: #fbf1df;
-  --danger: #b3261e;
-  --danger-soft: #fbeae8;
-
-  --platform-tiktok: #0a8f88;
-  --platform-shopee: #ee4d2d;
-
-  /**
-   * Bayangan tema terang: SANGAT pucat, tapi lebar.
-   *
-   * Ini pasangan wajib dari latar bernuananya. Bayangan gelap pekat di atas
-   * latar terang terbaca sebagai kotoran; yang membuat kartu referensi terasa
-   * mengambang justru sebaran lebar dengan opasitas di bawah 10%.
-   *
-   * Warnanya diturunkan dari ink, bukan hitam murni, supaya bayangannya tidak
-   * terasa lebih dingin dari halaman yang menaunginya.
-   */
-  --shadow-sm: 0 1px 2px rgba(9, 10, 10, 0.04);
-  --shadow-card: 0 1px 2px rgba(9, 10, 10, 0.04), 0 6px 18px rgba(9, 10, 10, 0.05);
-  --shadow-md: 0 2px 4px rgba(9, 10, 10, 0.04), 0 14px 32px rgba(9, 10, 10, 0.08);
-  --shadow-lg: 0 4px 10px rgba(9, 10, 10, 0.05), 0 26px 56px rgba(9, 10, 10, 0.12);
-
-  /* Amplitudo tema terang DIPOTONG ke batas §3.4 (≤8%). Nilai tema gelap di
-     atas (12% dan 10%) memang boleh lebih kuat karena mata jauh lebih toleran
-     terhadap rona di atas ink daripada di atas kertas. */
-  --bg-atmosphere:
-    radial-gradient(
-      68% 52% at 100% 0%,
-      color-mix(in srgb, var(--brand-magenta) 8%, transparent) 0%,
-      transparent 62%
-    ),
-    radial-gradient(
-      58% 48% at 0% 96%,
-      color-mix(in srgb, var(--brand-violet) 7%, transparent) 0%,
-      transparent 58%
-    );
-}

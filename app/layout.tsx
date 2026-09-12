@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./styles/tokens.css";
@@ -11,7 +10,6 @@ import "./styles/sheet.css";
 import "./styles/forms.css";
 import "./styles/admin.css";
 import "./styles/workspace.css";
-import ThemeToggle from "./ThemeToggle";
 import MobileNav from "./MobileNav";
 import ServiceWorkerRegistrar from "./ServiceWorkerRegistrar";
 import { getCurrentUser } from "../lib/auth";
@@ -50,17 +48,9 @@ export const viewport: Viewport = {
   // aksesibilitas, tapi tanpa batas atas kontrol standalone jadi mudah tergeser.
   maximumScale: 5,
   /**
-   * Satu nilai, bukan pasangan media.
-   *
-   * Pasangan prefers-color-scheme yang lama salah membaca aplikasinya sendiri:
-   * <html data-theme="light"> adalah bawaan, dan skrip di <head> hanya
-   * memulihkan pilihan yang PERNAH disimpan creator — preferensi sistem tidak
-   * pernah menyalakan tema gelap dengan sendirinya. Jadi pengguna bersistem
-   * gelap yang belum pernah menyentuh toggle mendapat chrome browser #090a0a
-   * di atas halaman yang benar-benar terang.
-   *
-   * ThemeToggle memperbarui <meta name="theme-color"> saat temanya diganti,
-   * jadi chrome-nya tetap mengikuti tampilan yang sebenarnya.
+   * Satu nilai, dan sekarang ia satu-satunya yang mungkin: aplikasi ini hanya
+   * punya satu tema sejak 12 September 2026. Tidak ada lagi toggle yang bisa
+   * membuat chrome browser berselisih dengan halamannya.
    *
    * Paper dari BRAND-SYSTEM.md §2.1, dikutip literal karena viewport metadata
    * dirender di server dan tidak bisa membaca token CSS.
@@ -69,7 +59,6 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
   // Tab bawah berbeda untuk yang sudah dan belum masuk. Dibaca di server supaya
   // tidak ada kedip "belum masuk" di setiap perpindahan halaman; getCurrentUser
   // pulang null sebelum menyentuh database kalau tidak ada cookie, jadi
@@ -77,24 +66,14 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const viewer = await getCurrentUser().catch(() => null);
 
   return (
-    // Terang adalah bawaan. Skrip di bawah hanya memulihkan pilihan yang
-    // pernah disimpan creator, dijalankan sebelum paint supaya tidak ada
-    // kedip tema.
-    <html lang="id" data-theme="light" suppressHydrationWarning>
-      <head>
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html:
-              "try{var t=localStorage.getItem('tap-theme');if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}}catch(e){}",
-          }}
-        />
-      </head>
+    // Satu tema, jadi tidak ada atribut data-theme dan tidak ada skrip
+    // pra-paint yang memulihkannya: keduanya hanya ada untuk mencegah kedip
+    // saat tema bisa berbeda dari bawaan, dan kondisi itu sudah tidak ada.
+    <html lang="id">
       <body>
         <a className="skip-link" href="#main-content">
           Lewati ke konten utama
         </a>
-        <ThemeToggle />
         <div id="main-content" tabIndex={-1}>
           {children}
         </div>

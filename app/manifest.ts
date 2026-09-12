@@ -34,11 +34,9 @@ export default function manifest(): MetadataRoute.Manifest {
     /**
      * Paper brand (#fcfcfc), bukan putih murni. Lihat BRAND-SYSTEM.md §2.1.
      *
-     * Satu nilai saja, dan memang harus terang: manifest bersifat statis dan
-     * tidak bisa menyatakan sepasang tema, sementara aplikasi ini default-nya
-     * terang (<html data-theme="light">) dan hanya menjadi gelap kalau creator
-     * memilihnya sendiri. Untuk chrome browser yang mengikuti pilihan itu,
-     * lihat syncChromeColor() di app/ThemeToggle.tsx.
+     * Satu nilai saja, dan sejak 12 September 2026 itu satu-satunya yang ada:
+     * aplikasi ini hanya punya tema terang, jadi manifest yang statis tidak
+     * lagi berselisih dengan apa pun.
      */
     background_color: "#fcfcfc",
     theme_color: "#fcfcfc",

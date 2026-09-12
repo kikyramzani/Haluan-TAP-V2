@@ -437,36 +437,7 @@ p {
   border-color: color-mix(in srgb, var(--warning) 26%, transparent);
 }
 
-.theme-toggle {
-  position: fixed;
-  right: var(--space-4);
-  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
-  /* Di bawah .mobile-nav (55), bukan di atasnya. Kalau perhitungan jaraknya
-     pernah meleset lagi, tombol ini masuk ke balik bar, bukan menutupinya. */
-  z-index: 54;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-pill);
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--shadow-md);
-  display: grid;
-  place-items: center;
-  font-size: var(--text-body);
-  transition: transform var(--duration-fast) var(--ease-out);
-}
 
-.theme-toggle:hover {
-  transform: translateY(-2px);
-}
-
-@media (max-width: 900px) {
-  .theme-toggle {
-    /* Satu sumber tinggi bar, termasuk safe area. Sebelumnya 72px datar, yang
-       di iPhone berponi hanya menyisakan ~38px terhadap bar 56px. */
-    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-3));
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   html {

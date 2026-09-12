@@ -14,6 +14,11 @@
 /coverage
 /playwright-report
 /test-results
+# Bukti audit UI, dihasilkan ulang kapan saja dan tidak pernah di-commit.
+# Selain itu gerbang rilis menuntut `git status --untracked-files=all` KOSONG
+# di kedua ujung (scripts/release-gate.mjs), jadi direktori tak-ter-track ini
+# memerahkan gerbang sebelum satu tes pun berjalan.
+/screenshots
 
 # next.js
 tsconfig.tsbuildinfo

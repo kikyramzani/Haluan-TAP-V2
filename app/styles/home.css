@@ -621,7 +621,7 @@
      atasnya 5,17. Gradasi dilepas dari seluruh permukaan; lihat catatan arsip
      di tokens.css. */
   background: var(--surface-magenta);
-  color: #ffffff;
+  color: var(--on-fill);
 }
 
 .join-banner .btn-primary:hover {
@@ -641,7 +641,7 @@
      membungkus bersama dan mengikuti text-align induknya. */
   margin-top: var(--space-4);
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.74);
+  color: var(--on-ink-muted);
 }
 
 .join-trust .tap-icon {

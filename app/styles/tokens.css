@@ -122,6 +122,28 @@
   --text-muted: #4a4a55;
   --text-subtle: #63636e;
   --text-inverse: #ffffff;
+
+  /**
+   * Label di atas BIDANG BERWARNA, sebagai pasangan yang selalu bergerak
+   * bersama: warna teksnya dan tint ubin ikon di dalamnya.
+   *
+   * Dipisahkan dari --text-inverse karena perannya berbeda. --text-inverse
+   * berarti "teks di atas ink" dan nilainya tidak akan pernah berubah.
+   * --on-fill berarti "teks di atas isian brand", dan isian itu akan berganti
+   * dari magenta ke biru Shotbase — di mana putih GAGAL AA (2,05-3,58) dan ink
+   * lulus. Jadi pasangan ini memang harus bisa dibalik, sedangkan yang satunya
+   * tidak.
+   *
+   * Nilainya di sini persis sama dengan literal yang digantikannya, jadi commit
+   * yang memperkenalkannya tidak mengubah satu piksel pun. Komponen yang
+   * isiannya terang menimpanya secara lokal, sama seperti varian .band.
+   */
+  --on-fill: #ffffff;
+  --on-fill-tint: rgba(255, 255, 255, 0.18);
+
+  /* Teks redup di atas ink. Dipakai .join-trust, yang sebelumnya menulis
+     rgba putih 0,74 langsung di tempat. */
+  --on-ink-muted: rgba(255, 255, 255, 0.74);
   /**
    * Aksen magenta. Cyan brand TIDAK pernah jadi teks di sini — hanya 2,12 di
    * atas kertas (§2.5). Ia tetap punya tempat sebagai ISIAN ubin berlabel ink,

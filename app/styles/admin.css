@@ -278,7 +278,7 @@ td.table-actions > * + * {
 .danger.is-armed {
   background: var(--danger);
   border-color: var(--danger);
-  color: #ffffff;
+  color: var(--on-fill);
 }
 
 .confirm-pair {

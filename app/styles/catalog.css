@@ -1044,8 +1044,8 @@
 
 /**
  * PlatformMark dirender inline sebagai <svg fill="currentColor">, bukan <img>,
- * justru supaya `color: #fff` pada kartu aktif di bawah benar-benar sampai ke
- * tandanya. Warna dari CSS tidak bisa menembus batas dokumen sebuah <img>.
+ * justru supaya `color: var(--on-fill)` pada kartu aktif di bawah benar-benar
+ * sampai ke tandanya. Warna dari CSS tidak bisa menembus batas dokumen <img>.
  *
  * Aturannya sendiri yang tadinya hilang: .platform-icon img di home.css punya
  * ukuran, .platform-card-icon tidak pernah punya sama sekali.
@@ -1113,16 +1113,16 @@
 /* Keadaan aktif: isian solid platform, seluruh label putih. */
 .platform-card[aria-current="page"] {
   border-color: transparent;
-  color: #ffffff;
+  color: var(--on-fill);
 }
 
 .platform-card[aria-current="page"] span {
-  color: #ffffff;
+  color: var(--on-fill);
 }
 
 .platform-card[aria-current="page"] .platform-card-icon {
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
+  background: var(--on-fill-tint);
+  color: var(--on-fill);
 }
 
 /**
@@ -1309,7 +1309,7 @@
   /* Isian datar, perhentian pertama gradasi yang dulu di sini (putih 5,17). */
   background: var(--surface-magenta);
   border-color: transparent;
-  color: #ffffff;
+  color: var(--on-fill);
 }
 
 /**
@@ -1325,7 +1325,7 @@
  * kontras yang diturunkan sampai di bawah ambang.
  */
 .deal-detail-metrics .metric-tile:first-child dt {
-  color: #ffffff;
+  color: var(--on-fill);
 }
 
 .deal-detail-metrics .metric-tile:first-child dd {

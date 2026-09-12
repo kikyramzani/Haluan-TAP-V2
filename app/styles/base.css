@@ -230,10 +230,23 @@ p {
   border: 0;
 }
 
+/**
+ * Disembunyikan lewat transform, BUKAN lewat `top: -100px`.
+ *
+ * Keduanya menyembunyikan sama baiknya, tapi `top` adalah properti terikat
+ * tata letak: menganimasikannya memaksa layout + paint tiap frame, sementara
+ * transform berjalan di compositor. Ini satu-satunya transisi di repo yang
+ * masih menyentuh properti semacam itu.
+ *
+ * -100% memindahkan tautan setinggi dirinya sendiri, lalu --space-4 lagi
+ * menutup jarak dari tepi atas — jadi ia betul-betul keluar viewport berapa pun
+ * tingginya, tanpa angka ajaib seperti 100px yang menebak tinggi elemen.
+ */
 .skip-link {
   position: absolute;
   left: var(--space-4);
-  top: -100px;
+  top: var(--space-4);
+  transform: translateY(calc(-100% - var(--space-4)));
   z-index: 100;
   padding: var(--space-3) var(--space-4);
   background: var(--surface);
@@ -241,11 +254,20 @@ p {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   font-weight: var(--weight-semibold);
-  transition: top var(--duration-fast) var(--ease-out);
+  transition: transform var(--duration-fast) var(--ease-out);
 }
 
 .skip-link:focus {
-  top: var(--space-4);
+  transform: translateY(0);
+}
+
+/* Gerak dimatikan kalau pengguna memintanya; tautannya tetap muncul, hanya
+   tanpa animasi. Tanpa ini, aturan di atas adalah satu-satunya gerak di
+   halaman yang tidak menghormati preferensi itu. */
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
 }
 
 /* Tombol */
@@ -562,7 +584,7 @@ p {
 .info-card--filled {
   background: var(--surface-magenta);
   border-color: transparent;
-  color: #ffffff;
+  color: var(--on-fill);
 }
 
 .info-card--deep {
@@ -575,7 +597,7 @@ p {
 
 .info-card--filled h3,
 .info-card--filled p {
-  color: #ffffff;
+  color: var(--on-fill);
 }
 
 /**
@@ -584,8 +606,8 @@ p {
  * di tema terang. Tidak satu pun terbaca di atas magenta.
  */
 .info-card--filled .icon-tile {
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
+  background: var(--on-fill-tint);
+  color: var(--on-fill);
 }
 
 /* Aset asli yang menggantikan vektor lewat <ArtSlot>. Batas lebarnya disamakan

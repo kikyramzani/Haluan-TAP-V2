@@ -105,32 +105,26 @@ const ADMIN_ROUTES = [
   "/admin/analitik",
 ];
 
-for (const theme of ["dark", "light"] as const) {
-  test(`dashboard creator bersih di semua rute, tema ${theme}`, async ({ page }) => {
-    const email = `e2e-a11y-creator-${theme}-${Date.now()}@tap.test`;
-    emailsToClean.push(email);
-    await page.addInitScript((value) => window.localStorage.setItem("tap-theme", value), theme);
+test("dashboard creator bersih di semua rute", async ({ page }) => {
+  const email = `e2e-a11y-creator-${Date.now()}@tap.test`;
+  emailsToClean.push(email);
 
-    await register(page, { name: "Axe Creator", email, phone: theme === "dark" ? "081234500101" : "081234500102" });
-    await completeOnboarding(page);
+  await register(page, { name: "Axe Creator", email, phone: "081234500101" });
+  await completeOnboarding(page);
 
-    for (const route of DASHBOARD_ROUTES) {
-      await page.goto(route);
-      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-      const found = await violations(page);
-      expect(found, `pelanggaran pada ${route}`).toEqual([]);
-    }
-  });
+  for (const route of DASHBOARD_ROUTES) {
+    await page.goto(route);
+    const found = await violations(page);
+    expect(found, `pelanggaran pada ${route}`).toEqual([]);
+  }
+});
 
-  test(`admin workspace bersih di rute utama, tema ${theme}`, async ({ page }) => {
-    await page.addInitScript((value) => window.localStorage.setItem("tap-theme", value), theme);
-    await login(page, { email: ADMIN_EMAIL });
+test("admin workspace bersih di rute utama", async ({ page }) => {
+  await login(page, { email: ADMIN_EMAIL });
 
-    for (const route of ADMIN_ROUTES) {
-      await page.goto(route);
-      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-      const found = await violations(page);
-      expect(found, `pelanggaran pada ${route}`).toEqual([]);
-    }
-  });
-}
+  for (const route of ADMIN_ROUTES) {
+    await page.goto(route);
+    const found = await violations(page);
+    expect(found, `pelanggaran pada ${route}`).toEqual([]);
+  }
+});

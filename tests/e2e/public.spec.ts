@@ -65,13 +65,6 @@ test("katalog publik mobile-first, bisa dicari, dan header keamanannya utuh", as
   const response = await page.goto("/deals");
   expect(response?.status()).toBe(200);
 
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.getByRole("button", { name: "Gunakan tema gelap" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.getByRole("button", { name: "Gunakan tema terang" }).click();
-
   await expect(page.getByRole("heading", { name: "Semua deal. Satu tempat." })).toBeVisible();
   await expect(page.locator(".deal-card").first()).toBeVisible();
 

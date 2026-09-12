@@ -192,6 +192,23 @@ Dari tabel itu lahir empat aturan yang tidak boleh dilanggar:
 
 ## 3. Gradasi
 
+> **DIARSIPKAN — 12 September 2026.** Gradasi tidak lagi dipakai di permukaan mana pun.
+>
+> TAP pindah ke bahasa visual "kertas hangat" (lihat `DESIGN.md`), yang isian datarnya
+> menyeluruh dan melarang gradasi tanpa pengecualian. Ketiga resep di bawah dilepas
+> bersamaan, dengan pengganti yang sudah ada di palet §2: `--gradient-hot` →
+> `--surface-magenta` (perhentian pertamanya sendiri, putih 5,17), `--gradient-wash` →
+> `--surface` polos berikut garis rambut, dan lapisan atmosfer → kanvas `--bg` polos.
+>
+> Resepnya **tidak dihapus** dari dokumen ini maupun dari `tokens.css`, karena angkanya
+> mahal: perhentian di bawah adalah hasil penurunan luminance sampai putih lolos AA di
+> seluruh sapuan. Kalau gradasi suatu saat kembali, mulai dari sini.
+>
+> Satu pengecualian yang tetap hidup: **gradasi wordmark** (§7). Itu logo, bukan
+> permukaan UI, dan §7 melarang logo disentuh.
+>
+> Aturan peran di §3.4 tetap berlaku sebagai penjaga seandainya gradasi dipulihkan.
+
 Dua resep. Keduanya berlabel **ink**, dan itu perbedaan paling penting dari gradasi yang ada di kode sekarang.
 
 ### 3.1 Haluan Hot
@@ -291,6 +308,13 @@ Yang **dilarang**:
 | H3 | Poppins | 600 | `-0.015em` |
 | Eyebrow / label section | Poppins | 600, uppercase | `0.08em` |
 | Body, lead | Open Sans | 400 | 0 |
+| Lede pembuka seksi | Source Serif 4 | 400 | 0 |
+
+**Serif editorial (ditambahkan 12 September 2026).** `--font-serif: "Source Serif 4"` (OFL,
+self-host, satu bobot). Perannya dipinjam utuh dari referensi `DESIGN.md`: satu paragraf
+pembuka untuk memberi suara, **tidak pernah** untuk label UI, navigasi, tombol, tabel, atau
+apa pun yang bisa diketuk. Ia aksen, bukan hierarki kedua. Poppins + Open Sans tetap
+memikul seluruh sisanya — keputusan §4.1 tidak berubah.
 | Label UI, tombol, chip | Open Sans | 600 | 0 |
 | Tabel, angka data | Open Sans | 400 / 600 | 0, `font-variant-numeric: tabular-nums` |
 | Caption, helper | Open Sans | 400 | 0 |
@@ -362,6 +386,23 @@ Catatan yang perlu dipegang saat menata ulang: **178 dari 221 rujukan ukuran hur
 ## 5. Spasi, radius, elevasi, gerak
 
 **Brand tidak mengubah geometri.** Yang berubah karena brand hanyalah warna dan huruf. Seluruh nilai di bawah diambil apa adanya dari `app/styles/tokens.css` dan dikunci di sini supaya tidak ada yang menciptakan skala kedua.
+
+> **DIPERBARUI — 12 September 2026,** mengikuti perpindahan ke bahasa "kertas hangat":
+>
+> - **Radius** turun satu tingkat lewat token peran: `--radius-card` 24 → **12**,
+>   `--radius-panel` 28 → **12**, `--radius-control` 12 → **8**. Tangga `--radius-*`
+>   mentah tidak berubah. Alasan lama ("dua langkah teratas praktis mati") tidak lagi
+>   berlaku: yang dituju sekarang justru ruled section di buku catatan, bukan kartu
+>   aplikasi yang membulat murah hati.
+> - **Bayangan kartu dilepas.** `--shadow-sm` dan `--shadow-card` bernilai `none`;
+>   pemisahan kartu dari kanvas seluruhnya dipikul garis rambut `--line`. `--shadow-md`
+>   dan `--shadow-lg` **bertahan** untuk lapisan yang benar-benar melayang — dropdown,
+>   sheet, modal, header sticky — karena tabel elevasi referensinya sendiri tetap
+>   mendaftarkan bayangan untuk nav dan lapisan mengambang.
+> - **Gerak**: `--duration-normal` 250ms → **200ms**.
+> - **Tema gelap dihapus.** Aplikasi hanya punya tema terang; `ThemeToggle`, skrip
+>   pra-paint, dan seluruh blok token gelap dilepas. Nilai warna terang di §2 **tidak
+>   berubah sama sekali** — itu bagian yang tetap Haluan.
 
 **Spasi** — kelipatan 4, dengan dua langkah setengah khusus padding badge dan chip:
 

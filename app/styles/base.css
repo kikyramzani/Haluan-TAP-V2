@@ -43,29 +43,6 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/**
- * Lapisan atmosfer. Lihat --bg-atmosphere di tokens.css dan peran "atmosfer"
- * di BRAND-SYSTEM.md §3.4.
- *
- * position: fixed, bukan lapisan background pada body: sapuannya harus terikat
- * VIEWPORT, bukan dokumen. Beranda setinggi ~19.000px akan mengecilkan radial
- * gradient jadi noda tak terlihat kalau ia diukur terhadap tinggi dokumen.
- *
- * `background-attachment: fixed` bisa memberi efek yang sama dengan satu baris,
- * tapi ia punya riwayat jank dan perilaku tak konsisten di Safari iOS — dan
- * ponsel justru permukaan utama produk ini.
- *
- * pointer-events: none supaya ia tidak pernah mencegat satu pun ketukan.
- */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--bg-atmosphere);
-}
-
 /* Modal dan drawer mengunci scroll latar. */
 body:has(.sheet-backdrop[data-open="true"]) {
   overflow: hidden;
@@ -307,15 +284,23 @@ p {
   background: var(--cta-press);
 }
 
+/**
+ * Tombol kedua bergaya "ghost" referensi: isian tint, teks aksen, TANPA garis.
+ * Ia satu tingkat di bawah tombol terisi tanpa jadi kotak berkontur lain.
+ *
+ * Teksnya --accent-strong, bukan --accent: di atas --accent-soft, --accent
+ * hanya 4,36 dan GAGAL AA. --accent-strong 5,21.
+ */
 .btn-secondary {
-  background: var(--surface);
-  color: var(--text);
-  border-color: var(--line-strong);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  border-color: transparent;
 }
 
 .btn-secondary:hover {
-  border-color: var(--text-subtle);
-  background: var(--surface-sunken);
+  background: color-mix(in srgb, var(--accent-soft) 76%, var(--accent));
+  border-color: transparent;
+  color: var(--accent-strong);
 }
 
 .btn-ghost {
@@ -532,7 +517,7 @@ p {
  * .deal-card.
  */
 .info-card {
-  background: var(--gradient-wash), var(--surface);
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   padding: var(--space-6);

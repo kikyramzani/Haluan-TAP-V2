@@ -31,7 +31,6 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-sm);
 }
 
 .form-card h1 {
@@ -114,7 +113,6 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
 }
 
 .panel h2 {
@@ -329,7 +327,7 @@
   padding: var(--space-6);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: var(--gradient-wash), var(--surface);
+  background: var(--surface);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--space-6);

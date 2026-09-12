@@ -47,8 +47,11 @@ export default async function HomePage() {
         <section className="hero shell">
           <div className="hero-inner">
             <p className="eyebrow">Haluan creator advantage</p>
+            {/* <em> membungkus SATU kata, bukan frasa: ia dirender sebagai pill
+                berwarna di balik kata itu, dan pill yang membentang dua baris
+                pecah jadi dua potongan. Kalimatnya sendiri tidak berubah. */}
             <h1>
-              Rate lebih tinggi. <em>Khusus creator Haluan.</em>
+              Rate lebih <em>tinggi.</em> Khusus creator Haluan.
             </h1>
             <p>
               Kami negosiasikan extra commission langsung dengan brand. Kamu tinggal pilih deal, buat konten, dan

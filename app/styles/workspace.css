@@ -436,7 +436,6 @@
   color: var(--text);
   transition: border-color var(--duration-fast) var(--ease-out),
     background var(--duration-fast) var(--ease-out);
-  box-shadow: var(--shadow-card);
 }
 
 .quick-action-icon {
@@ -1071,7 +1070,6 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
 }
 
 /**
@@ -1147,7 +1145,6 @@
 .profil-tab-nav button.active {
   background: var(--surface);
   color: var(--text);
-  box-shadow: var(--shadow-sm);
 }
 
 /**
@@ -1534,7 +1531,6 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   background: var(--surface);
-  box-shadow: var(--shadow-card);
 }
 
 /**
@@ -2193,7 +2189,6 @@ main:has(> .form-panel) {
   border-radius: var(--radius-card);
   background: var(--surface);
   margin-bottom: var(--space-6);
-  box-shadow: var(--shadow-card);
 }
 
 .push-toggle b {

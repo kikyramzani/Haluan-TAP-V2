@@ -380,14 +380,13 @@
      kartu lainnya tidak diposisikan. Sebuah ::before yang diposisikan akan
      tergambar DI ATAS nama brand dan angka komisi. Kartu berakhir memakai
      shorthand `background` lagi di bawah, jadi sapuannya hilang otomatis. */
-  background: var(--gradient-wash), var(--surface);
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   padding: var(--space-6);
   /* Bayangan sejak DIAM, bukan hanya saat hover. Kartu yang baru mendapat
      kedalaman ketika disentuh tidak pernah terbaca mengambang di ponsel, dan
      ponsel adalah tempat katalog ini paling banyak dibuka. */
-  box-shadow: var(--shadow-card);
   transition: transform var(--duration-normal) var(--ease-out),
     border-color var(--duration-normal) var(--ease-out),
     box-shadow var(--duration-normal) var(--ease-out);
@@ -1026,7 +1025,6 @@
   min-width: 0;
   transition: border-color var(--duration-fast) var(--ease-out),
     transform var(--duration-fast) var(--ease-out);
-  box-shadow: var(--shadow-card);
 }
 
 .platform-card:hover {
@@ -1285,7 +1283,6 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-card);
     background: var(--surface);
-    box-shadow: var(--shadow-card);
   }
 
   .deal-detail-fineprint {
@@ -1309,13 +1306,26 @@
  * dan tiga bidang bergradasi berdampingan persis yang §3.4 larang.
  */
 .deal-detail-metrics .metric-tile:first-child {
-  background: var(--gradient-hot);
+  /* Isian datar, perhentian pertama gradasi yang dulu di sini (putih 5,17). */
+  background: var(--surface-magenta);
   border-color: transparent;
   color: #ffffff;
 }
 
+/**
+ * Putih PENUH, bukan 82%.
+ *
+ * Alpha 82% di atas isian ini hanya 3,75 — gagal AA. Selama ubinnya bergradasi,
+ * axe tidak bisa menghitung kontras di atasnya sama sekali dan melaporkannya
+ * "incomplete", jadi kegagalan ini sudah ada sejak lama tapi tidak pernah
+ * terlihat; mendatarkan isiannya membuat alat ukurnya bisa bekerja dan
+ * langsung menemukannya.
+ *
+ * Label tetap lebih redup dari angkanya lewat UKURAN dan bobot, bukan lewat
+ * kontras yang diturunkan sampai di bawah ambang.
+ */
 .deal-detail-metrics .metric-tile:first-child dt {
-  color: rgba(255, 255, 255, 0.82);
+  color: #ffffff;
 }
 
 .deal-detail-metrics .metric-tile:first-child dd {

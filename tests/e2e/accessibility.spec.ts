@@ -35,10 +35,8 @@ const STATIC_ROUTES = [
   "/terms",
 ];
 
-async function auditRoute(page: Page, theme: "dark" | "light", route: string) {
-  await page.addInitScript((value) => window.localStorage.setItem("tap-theme", value), theme);
+async function auditRoute(page: Page, route: string) {
   await page.goto(route);
-  await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
   if (route.startsWith("/deals")) await expect(page.locator(".deal-card").first()).toBeVisible();
   if (route.startsWith("/deal/")) await expect(page.locator(".affiliate-link-field")).toBeVisible();
   const results = await new AxeBuilder({ page }).analyze();
@@ -53,20 +51,18 @@ async function auditRoute(page: Page, theme: "dark" | "light", route: string) {
   expect(violations).toEqual([]);
 }
 
-// Both themes, because a palette that only passes in the state a test happens to
-// start in is a palette that has been checked once and shipped twice. The light
-// theme is a first-class surface: it is one toggle away for every visitor.
-for (const theme of ["dark", "light"] as const) {
-  for (const route of STATIC_ROUTES) {
-    test(`${route} has no serious accessibility violations in ${theme} theme`, async ({ page }) => {
-      await auditRoute(page, theme, route);
-    });
-  }
-
-  // The deal-page route depends on a seeded slug, so it cannot live in
-  // STATIC_ROUTES (that array is built before beforeAll has run). `fixtures`
-  // is read inside the test body instead, which only executes afterward.
-  test(`deal page has no serious accessibility violations in ${theme} theme`, async ({ page }) => {
-    await auditRoute(page, theme, `/deal/${fixtures.single.campaigns[0].slug}`);
+// Satu tema. Aplikasi ini hanya punya tema terang sejak 12 September 2026;
+// tombol tema dan seluruh blok token gelap dilepas bersamaan, jadi mengaudit
+// "dark" berarti mengaudit keadaan yang tidak bisa dicapai siapa pun.
+for (const route of STATIC_ROUTES) {
+  test(`${route} has no serious accessibility violations`, async ({ page }) => {
+    await auditRoute(page, route);
   });
 }
+
+// The deal-page route depends on a seeded slug, so it cannot live in
+// STATIC_ROUTES (that array is built before beforeAll has run). `fixtures`
+// is read inside the test body instead, which only executes afterward.
+test("deal page has no serious accessibility violations", async ({ page }) => {
+  await auditRoute(page, `/deal/${fixtures.single.campaigns[0].slug}`);
+});

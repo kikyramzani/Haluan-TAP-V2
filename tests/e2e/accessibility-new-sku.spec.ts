@@ -50,27 +50,21 @@ async function violations(page: Page) {
     }));
 }
 
-for (const theme of ["dark", "light"] as const) {
-  test(`beranda dengan baris SKU baru bersih di tema ${theme}`, async ({ page }) => {
-    await page.addInitScript((value) => window.localStorage.setItem("tap-theme", value), theme);
-    await page.goto("/");
-    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-    await expect(page.locator("#new-sku")).toBeVisible();
+test("beranda dengan baris SKU baru bersih", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("#new-sku")).toBeVisible();
 
-    expect(await violations(page)).toEqual([]);
-  });
+  expect(await violations(page)).toEqual([]);
+});
 
-  test(`badge SKU baru pada kartu brand bersih di tema ${theme}`, async ({ page }) => {
-    await page.addInitScript((value) => window.localStorage.setItem("tap-theme", value), theme);
-    await page.goto("/deals");
-    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+test("badge SKU baru pada kartu brand bersih", async ({ page }) => {
+  await page.goto("/deals");
 
-    const search = page.getByLabel("Cari brand atau campaign");
-    await search.fill(fixtures.newSku.displayName);
-    const card = page.locator(".deal-card").filter({ hasText: fixtures.newSku.displayName });
-    await expect(card).toHaveCount(1);
-    await expect(card.locator(".badge-new-sku")).toBeVisible();
+  const search = page.getByLabel("Cari brand atau campaign");
+  await search.fill(fixtures.newSku.displayName);
+  const card = page.locator(".deal-card").filter({ hasText: fixtures.newSku.displayName });
+  await expect(card).toHaveCount(1);
+  await expect(card.locator(".badge-new-sku")).toBeVisible();
 
-    expect(await violations(page)).toEqual([]);
-  });
-}
+  expect(await violations(page)).toEqual([]);
+});

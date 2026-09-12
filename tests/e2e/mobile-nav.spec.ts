@@ -1,13 +1,15 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * Tiga penjagaan yang persis akan menangkap bug-bug yang ditemukan audit
- * mobile sebelum perombakan ini:
+ * Dua penjagaan yang persis akan menangkap bug-bug yang ditemukan audit mobile
+ * sebelum perombakan ini:
  *
- * 1. ThemeToggle dulu z-index 60 (di ATAS bar yang 55) dan offset mobile-nya
- *    tidak menyertakan safe-area, jadi di iPhone berponi tombolnya menimpa bar.
- * 2. Sasaran sentuh tab tidak pernah diukur.
- * 3. Konten paling bawah bisa terjebak di balik bar yang melayang.
+ * 1. Sasaran sentuh tab tidak pernah diukur.
+ * 2. Konten paling bawah bisa terjebak di balik bar yang melayang.
+ *
+ * Penjagaan ketiga — tombol tema tidak menimpa bar — ikut dilepas bersama
+ * tombolnya pada 12 September 2026, saat aplikasi jadi satu tema. Ia menguji
+ * elemen yang tidak ada lagi, bukan perilaku yang berhenti dijaga.
  *
  * Hanya berjalan di lebar mobile. Barnya memang display:none di atas 900px.
  */
@@ -16,14 +18,6 @@ test.beforeEach(async ({ page }, testInfo) => {
   test.skip((testInfo.project.use.viewport?.width ?? 0) > 900, "Bar bawah hanya tampil di bawah 900px");
   await page.goto("/deals");
   await expect(page.locator(".mobile-nav")).toBeVisible();
-});
-
-test("tombol tema tidak menimpa navigasi bawah", async ({ page }) => {
-  const nav = await page.locator(".mobile-nav").boundingBox();
-  const toggle = await page.locator(".theme-toggle").boundingBox();
-  expect(nav).not.toBeNull();
-  expect(toggle).not.toBeNull();
-  expect(toggle!.y + toggle!.height).toBeLessThanOrEqual(nav!.y);
 });
 
 test("setiap tab memenuhi sasaran sentuh minimum", async ({ page }) => {

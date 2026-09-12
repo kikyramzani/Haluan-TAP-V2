@@ -22,7 +22,7 @@ type Props = {
   className?: string;
 };
 
-/** Stroke 2px konsisten, sudut membulat. Sejalan dengan geometri Poppins. */
+/** Stroke 2px konsisten, sudut membulat. Sejalan dengan huruf display. */
 const stroke = {
   fill: "none",
   stroke: "currentColor",

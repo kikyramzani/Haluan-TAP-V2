@@ -63,14 +63,16 @@
   -webkit-box-decoration-break: clone;
 }
 
-/* Lede hero memakai serif editorial — peran yang sama dengan Lyon Text di
-   referensi: memberi suara pada satu paragraf pembuka, bukan hierarki kedua. */
+/* Lede hero kembali ke huruf isi. Serif editorial adalah perangkat referensi
+   Notion; Shotbase tidak punya peran itu sama sekali — frontmatter-nya hanya
+   mendaftar dua keluarga, keduanya sans. 1,5 dan -0.3px (= -0.019em) diambil
+   dari peran body-lg. */
 .hero p {
   margin-top: var(--space-6);
   max-width: 52ch;
-  font-family: var(--font-serif);
   font-size: clamp(17px, 1.2vw, 20px);
-  line-height: 1.56;
+  line-height: 1.5;
+  letter-spacing: -0.019em;
   color: var(--text-muted);
 }
 

@@ -119,7 +119,9 @@
  *
  * 24px mati sebelumnya. Ubin ini duduk di grid dua kolom di dalam lembar yang
  * selebar layar: pada ponsel 390px tiap ubin ~165px, dikurangi padding jadi
- * ~133px ruang teks. "Rp 1.234.567" pada Poppins semibold 24px butuh ~154px.
+ * ~133px ruang teks. "Rp 1.234.567" pada huruf display semibold 24px butuh
+ * ~154px. (Diukur di Poppins; Schibsted Grotesk sedikit lebih sempit, jadi
+ * batas itu tetap aman setelah hurufnya diganti.)
  * Nilai rupiah tujuh digit — yang justru paling ingin dilihat creator — meluber
  * keluar ubinnya.
  *

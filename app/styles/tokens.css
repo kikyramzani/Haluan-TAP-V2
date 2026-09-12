@@ -4,8 +4,9 @@
  * Urutan kebenaran: BRAND-SYSTEM.md → berkas ini → STITCH-DESIGN-SPEC.md §2.
  * Kalau ketiganya berbeda, dokumen brand yang menang.
  *
- * Gelap tetap tema bawaan. Terang bukan pembalikan warna: kontras, bayangan,
- * dan kekuatan aksennya ditulis ulang supaya keduanya terasa disengaja.
+ * SATU tema terang. Blok gelap dihapus 12 September 2026 beserta ThemeToggle
+ * dan skrip pra-paint-nya; tidak ada [data-theme] di mana pun lagi. Kalimat di
+ * sini dulu menjanjikan sebaliknya.
  *
  * Warna brand core di §2.1 dipakai sebagai SUMBER, dan token semantik di
  * bawahnya menunjuk ke sana lewat var(). Sebelumnya --brand* dideklarasikan
@@ -13,82 +14,32 @@
  * "palet mati"); menyambungkannya begini mencegah hal itu terulang.
  */
 
-/* Poppins tidak variable di Google Fonts, jadi tiap bobot berkas sendiri.
-   latin dan latin-ext dipisah dengan unicode-range: latin-ext hanya terunduh
-   kalau memang ada karakternya, jadi jalur kritisnya tetap dua berkas. */
-@font-face {
-  font-family: Poppins;
-  src: url("/poppins-600.woff2") format("woff2");
-  font-weight: 600;
-  font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: Poppins;
-  src: url("/poppins-600-ext.woff2") format("woff2");
-  font-weight: 600;
-  font-display: swap;
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
-    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
-    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-
-@font-face {
-  font-family: Poppins;
-  src: url("/poppins-700.woff2") format("woff2");
-  font-weight: 700;
-  font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: Poppins;
-  src: url("/poppins-700-ext.woff2") format("woff2");
-  font-weight: 700;
-  font-display: swap;
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
-    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
-    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-
-/* Open Sans memang variable (wght 300–800), jadi satu berkas menutup 400–600. */
-@font-face {
-  font-family: "Open Sans";
-  src: url("/open-sans.woff2") format("woff2");
-  font-weight: 400 600;
-  font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: "Open Sans";
-  src: url("/open-sans-ext.woff2") format("woff2");
-  font-weight: 400 600;
-  font-display: swap;
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
-    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
-    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-
 /**
- * Serif editorial, satu bobot saja (400). Dipakai HEMAT — hanya lede pembuka
- * seksi — jadi satu bobot memang cukup, dan menambah bobot kedua berarti
- * membayar berkas lagi untuk peran yang tidak ada.
+ * Dua keluarga, keduanya VARIABEL — satu berkas menutup 400-700, jadi empat
+ * berkas ini menggantikan delapan berkas statis sebelumnya (Poppins 600/700,
+ * Open Sans, Source Serif 4) dan justru lebih kecil: 125 KB lawan 189 KB.
  *
- * Di-self-host sama seperti Poppins dan Open Sans: satu-satunya font pihak
- * ketiga yang boleh dimuat runtime di produk ini adalah tidak ada.
+ * Rentang bobotnya ditulis apa adanya dari tabel fvar tiap berkas: Schibsted
+ * Grotesk 400-900, Google Sans 400-700. Keduanya juga membawa fitur `tnum`,
+ * yang dituntut 18 tempat lewat font-variant-numeric: tabular-nums.
+ *
+ * latin dan latin-ext tetap dipisah lewat unicode-range seperti sebelumnya:
+ * latin-ext hanya terunduh kalau memang ada karakternya, jadi jalur kritisnya
+ * satu berkas per keluarga.
+ *
+ * Schibsted Grotesk (OFL 1.1, Bakken & Baeck) menggantikan Poppins sebagai
+ * huruf display. Ia berdiri di tempat TWK Everett pada referensi Shotbase,
+ * yang tidak bisa dipakai: Everett adalah font retail komersial dari Weltkern.
+ * Grotesque bertensi ini jauh lebih dekat ke Everett daripada Poppins yang
+ * geometris-melingkar.
+ *
+ * Google Sans (OFL sejak Desember 2025) adalah huruf isi yang MEMANG dipakai
+ * referensinya, jadi yang ini bukan pengganti melainkan aslinya.
  */
 @font-face {
-  font-family: "Source Serif 4";
-  src: url("/source-serif-4.woff2") format("woff2");
-  font-weight: 400;
+  font-family: "Schibsted Grotesk";
+  src: url("/schibsted-grotesk.woff2") format("woff2");
+  font-weight: 400 900;
   font-display: swap;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
@@ -96,9 +47,29 @@
 }
 
 @font-face {
-  font-family: "Source Serif 4";
-  src: url("/source-serif-4-ext.woff2") format("woff2");
-  font-weight: 400;
+  font-family: "Schibsted Grotesk";
+  src: url("/schibsted-grotesk-ext.woff2") format("woff2");
+  font-weight: 400 900;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Google Sans";
+  src: url("/google-sans.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Google Sans";
+  src: url("/google-sans-ext.woff2") format("woff2");
+  font-weight: 400 700;
   font-display: swap;
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
     U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
@@ -434,33 +405,29 @@
   --radius-panel: var(--radius-md);
 
   /**
-   * Tipografi. Poppins untuk display, Open Sans untuk isi (§4.1).
+   * Tipografi. Schibsted Grotesk untuk display, Google Sans untuk isi.
    *
-   * Display deck sebenarnya Agrandir Wide Heavy. Karakter "lebar" itu hilang
-   * dan tidak bisa dikembalikan; yang boleh dilakukan cuma menaikkan bobot ke
-   * 700 dan merapatkan tracking (§4.2). scaleX() dan font-stretch dilarang.
-   *
-   * Open Sans sengaja mendahului font sistem meski itu membatalkan penghematan
-   * unduhan di iOS/macOS (~20–30 KB): SF Pro terlihat jelas berbeda, dan
+   * Google Sans sengaja mendahului font sistem meski itu membatalkan
+   * penghematan unduhan di iOS/macOS: SF Pro terlihat jelas berbeda, dan
    * konsistensi huruf adalah inti dari brand system ini (§4.5).
    */
-  --font-display: Poppins, system-ui, sans-serif;
-  --font-body: "Open Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-display: "Schibsted Grotesk", system-ui, sans-serif;
+  --font-body: "Google Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   /**
-   * Serif editorial, DIPAKAI HEMAT. Perannya sama persis dengan Lyon Text di
-   * referensi: lede satu paragraf di pembuka seksi, tidak pernah untuk label
-   * UI, navigasi, tombol, atau tabel. Ia memberi suara, bukan hierarki kedua.
+   * Tangga display diambil dari FRONTMATTER referensi Shotbase (display-lg 56,
+   * display-md 48, heading-lg 34, heading-sm 24), bukan dari tabel §3-nya.
+   * Keduanya bertabrakan langsung — §3 menulis body 12px dan tracking 0px
+   * sementara frontmatter menulis body 16px dan tracking -1.4px — dan yang
+   * menyandang `tokensMeasured: true` adalah frontmatter. Tabel §3 adalah
+   * ringkasan scraper yang salah.
    *
-   * Source Serif 4 (OFL) adalah pengganti yang referensinya sendiri sebut.
-   * Tumpukan cadangannya serif sistem sungguhan, bukan `serif` generik, supaya
-   * kegagalan memuat berkas tetap mendarat di huruf yang punya bentuk.
+   * Batas bawah clamp mengikuti tabel breakpoint referensi: heading 40px di
+   * 375-768px, naik ke 52px di 1024, 56px di 1280+.
    */
-  --font-serif: "Source Serif 4", "Iowan Old Style", Georgia, "Times New Roman", serif;
-
-  --text-display: clamp(38px, 5.2vw, 68px);
-  --text-h1: clamp(32px, 4.2vw, 52px);
-  --text-h2: clamp(25px, 2.6vw, 34px);
-  --text-h3: clamp(19px, 1.5vw, 22px);
+  --text-display: clamp(40px, 4.4vw, 56px);
+  --text-h1: clamp(34px, 3.6vw, 48px);
+  --text-h2: clamp(26px, 2.4vw, 34px);
+  --text-h3: clamp(20px, 1.4vw, 24px);
 
   /**
    * Angka utama. Puncak tangga yang selama ini tidak ada.
@@ -504,22 +471,30 @@
   --text-control: 16px;
 
   /**
-   * Bobot kelipatan 100. Poppins di Google Fonts TIDAK variable, jadi 550/650/
-   * 750 yang dipakai sebelumnya akan dibulatkan browser dengan hasil yang
-   * berbeda antar mesin (§4.4). Open Sans variable, tapi skalanya disamakan
-   * supaya tidak ada dua sistem bobot berdampingan.
+   * Bobot kelipatan 100. Kedua keluarga kini VARIABEL 400-700, jadi nilai
+   * antara sebenarnya sah — tapi skalanya tetap dikunci ke kelipatan 100 supaya
+   * tidak ada dua sistem bobot berdampingan.
+   *
+   * --weight-display turun 700 -> 500. Bukan pelemahan: referensi Shotbase
+   * memakai TWK Everett *Medium* untuk display-lg/display-md dan §3-nya
+   * mencatat "sistem ini bertumpu pada bobot 400; Medium disediakan untuk
+   * brand mark dan penekanan khusus". Bobot 700 dulu ada untuk mengompensasi
+   * lebar Agrandir Wide yang tidak bisa ditiru Poppins — kompensasi yang tidak
+   * relevan lagi sejak displaynya bukan Poppins.
    */
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
-  --weight-display: 700;
+  --weight-display: 500;
 
-  /* Poppins geometris terasa renggang di ukuran display, dan uppercase-nya
-     butuh lebih banyak ruang daripada Archivo. */
-  /* Dirapatkan satu langkah dari -0.03em. Poppins geometris terasa renggang
-     di ukuran display, dan §4.2 BRAND-SYSTEM sendiri menyuruh merapatkannya
-     sebagai kompensasi hilangnya Agrandir Wide. */
-  --tracking-display: -0.035em;
+  /**
+   * Tracking display dari frontmatter referensi, dikonversi px -> em supaya
+   * ikut menyesuaikan saat clamp() mengecil: -1.4px pada 56px = -0.025em.
+   * (Tabel §3 menulis "semua peran memakai tracking 0px" — itu bertabrakan
+   * dengan frontmatter-nya sendiri yang mendaftar -1.4px, -1.96px, -0.68px,
+   * -0.3px. Yang terukur menang.)
+   */
+  --tracking-display: -0.025em;
   --tracking-tight: -0.015em;
   --tracking-wide: 0.08em;
 

@@ -82,8 +82,12 @@ svg {
 }
 
 /**
- * h1 memakai bobot display 700 dan tracking display. §4.2 menuntut display
- * selalu 700 untuk mengompensasi lebar Agrandir yang tidak bisa ditiru Poppins.
+ * h1 memakai bobot display dan tracking display.
+ *
+ * Bobotnya kini 500, bukan 700. Angka 700 dulu ada sebagai kompensasi lebar
+ * Agrandir Wide yang tidak bisa ditiru Poppins (§4.2) — kompensasi yang gugur
+ * sejak huruf displaynya bukan Poppins lagi. Referensi Shotbase memakai Medium
+ * untuk display, dan Schibsted Grotesk punya tensi yang cukup di bobot itu.
  */
 h1 {
   font-family: var(--font-display);
@@ -94,17 +98,17 @@ h1 {
 }
 
 /**
- * h2 dan h3 IKUT memakai Poppins; hanya h4 yang tetap di font isi.
+ * h2 dan h3 IKUT memakai huruf display; hanya h4 yang tetap di font isi.
  *
  * Aturan lama membatasi font display ke h1 saja, dan itu benar di masa Archivo:
  * di layar ponsel dengan 5+ heading bertumpuk (hero, proof-bar, SKU baru, kepala
  * katalog, FAQ), ketebalan geometris Archivo berulang dan saling bersaing.
+ * Keputusan untuk melebarkannya ke h2/h3 diuji di 390px pada bagian "Tiga
+ * langkah" yang punya satu h2 dan tiga h3 berurutan, dan bertahan.
  *
- * BRAND-SYSTEM.md §4.3 menandai ini [VERIFY] dan menduga Poppins 600 cukup ramah
- * untuk tumpukan itu. Dibandingkan langsung di layar 390px pada bagian "Tiga
- * langkah". Yang punya satu h2 dan tiga h3 berurutan - dugaan itu benar:
- * Poppins 600 tidak menebal seperti Archivo, dan headingnya justru terbaca lebih
- * jelas sebagai suara brand alih-alih teks isi yang dibesarkan.
+ * Schibsted Grotesk lebih aman lagi untuk tumpukan itu daripada Poppins: ia
+ * grotesque, bukan geometris-melingkar, jadi ia tidak menumpuk jadi deretan
+ * bidang bundar saat beberapa heading berurutan.
  *
  * h4 tidak ikut: ia dipakai sebagai label di dalam kartu dan tabel, bukan sebagai
  * judul bagian, jadi tempatnya memang di font isi.
